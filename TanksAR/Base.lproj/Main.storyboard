@@ -68,17 +68,83 @@
         <scene sceneID="tXr-a1-R10">
             <objects>
                 <viewController title="GameScreen" id="BV1-FR-VrT" customClass="GameViewController" customModule="TanksAR" customModuleProvider="target" sceneMemberID="viewController">
-                    <arscnView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="BrB-h1-WRS">
+                    <view key="view" contentMode="scaleToFill" id="GEX-Hw-PMz">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    </arscnView>
+                        <subviews>
+                            <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rD7-ry-WZM">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="EB7-Gj-L76" appends="YES" id="PhW-K1-6Yf"/>
+                                </connections>
+                            </arscnView>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="y2t-hR-zum">
+                                <rect key="frame" x="0.0" y="561" width="375" height="106"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Circle" translatesAutoresizingMaskIntoConstraints="NO" id="hsh-uP-Atj">
+                                        <rect key="frame" x="0.0" y="0.0" width="126" height="106"/>
+                                        <gestureRecognizers/>
+                                        <connections>
+                                            <outletCollection property="gestureRecognizers" destination="EB7-Gj-L76" appends="YES" id="slQ-8z-Wye"/>
+                                        </connections>
+                                    </imageView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rqa-bG-wWn">
+                                        <rect key="frame" x="172.5" y="38" width="30" height="30"/>
+                                        <gestureRecognizers/>
+                                        <state key="normal" title="Fire"/>
+                                        <connections>
+                                            <outletCollection property="gestureRecognizers" destination="EB7-Gj-L76" appends="YES" id="OJp-ZS-C3f"/>
+                                        </connections>
+                                    </button>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Circle" translatesAutoresizingMaskIntoConstraints="NO" id="uvY-Lf-P1o">
+                                        <rect key="frame" x="249" y="0.0" width="126" height="106"/>
+                                        <gestureRecognizers/>
+                                        <connections>
+                                            <outletCollection property="gestureRecognizers" destination="EB7-Gj-L76" appends="YES" id="ZU4-gD-bTX"/>
+                                        </connections>
+                                    </imageView>
+                                </subviews>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YBO-zh-2lA">
+                                <rect key="frame" x="315" y="40" width="40" height="40"/>
+                                <accessibility key="accessibilityConfiguration" label="Exit Game">
+                                    <accessibilityTraits key="traits" image="YES"/>
+                                </accessibility>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="40" id="Cqi-2g-mY6"/>
+                                    <constraint firstAttribute="height" constant="40" id="UOB-GL-cy4"/>
+                                </constraints>
+                                <state key="normal" image="X"/>
+                                <connections>
+                                    <segue destination="FxJ-NK-Vbj" kind="unwind" unwindAction="unwindToMainMenuWithUnwindSegue:" id="tqN-KP-VWX"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="rD7-ry-WZM" firstAttribute="top" secondItem="GEX-Hw-PMz" secondAttribute="top" id="C9f-08-Ydg"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="y2t-hR-zum" secondAttribute="trailing" id="Dli-GS-oFx"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="YBO-zh-2lA" secondAttribute="trailing" constant="20" id="N1R-HY-1WE"/>
+                            <constraint firstItem="YBO-zh-2lA" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="SjF-cp-u0Z"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="y2t-hR-zum" secondAttribute="bottom" id="ZqD-O9-5Fg"/>
+                            <constraint firstItem="y2t-hR-zum" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="gIy-6g-k3L"/>
+                            <constraint firstItem="rD7-ry-WZM" firstAttribute="bottom" secondItem="Z0Y-yR-u5V" secondAttribute="bottom" id="iuZ-hH-2hL"/>
+                            <constraint firstItem="rD7-ry-WZM" firstAttribute="trailing" secondItem="Z0Y-yR-u5V" secondAttribute="trailing" id="qQm-OX-dIS"/>
+                            <constraint firstItem="rD7-ry-WZM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="xJs-TJ-zrJ"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="Z0Y-yR-u5V"/>
+                    </view>
                     <connections>
-                        <outlet property="sceneView" destination="BrB-h1-WRS" id="5nT-qQ-ynl"/>
+                        <outlet property="sceneView" destination="rD7-ry-WZM" id="MY9-Cc-IRd"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
+                <exit id="FxJ-NK-Vbj" userLabel="Exit" sceneMemberID="exit"/>
+                <rotationGestureRecognizer id="EB7-Gj-L76"/>
+                <rotationGestureRecognizer id="4jT-Nr-SYp"/>
             </objects>
-            <point key="canvasLocation" x="135" y="62"/>
+            <point key="canvasLocation" x="133.59999999999999" y="61.619190404797607"/>
         </scene>
         <!--Instructions-->
         <scene sceneID="OBn-gq-pag">
@@ -221,4 +287,8 @@
             <point key="canvasLocation" x="-878" y="1031"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Circle" width="126" height="106"/>
+        <image name="X" width="111" height="110"/>
+    </resources>
 </document>
