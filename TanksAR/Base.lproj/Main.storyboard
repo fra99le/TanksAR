@@ -76,7 +76,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <gestureRecognizers/>
                                 <connections>
-                                    <outletCollection property="gestureRecognizers" destination="EB7-Gj-L76" appends="YES" id="PhW-K1-6Yf"/>
+                                    <outletCollection property="gestureRecognizers" destination="NvL-x5-eHp" appends="YES" id="ZtK-JS-eZj"/>
                                 </connections>
                             </arscnView>
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="y2t-hR-zum">
@@ -85,24 +85,15 @@
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Circle" translatesAutoresizingMaskIntoConstraints="NO" id="hsh-uP-Atj">
                                         <rect key="frame" x="0.0" y="0.0" width="126" height="106"/>
                                         <gestureRecognizers/>
-                                        <connections>
-                                            <outletCollection property="gestureRecognizers" destination="EB7-Gj-L76" appends="YES" id="slQ-8z-Wye"/>
-                                        </connections>
                                     </imageView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rqa-bG-wWn">
                                         <rect key="frame" x="172.5" y="38" width="30" height="30"/>
                                         <gestureRecognizers/>
                                         <state key="normal" title="Fire"/>
-                                        <connections>
-                                            <outletCollection property="gestureRecognizers" destination="EB7-Gj-L76" appends="YES" id="OJp-ZS-C3f"/>
-                                        </connections>
                                     </button>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Circle" translatesAutoresizingMaskIntoConstraints="NO" id="uvY-Lf-P1o">
                                         <rect key="frame" x="249" y="0.0" width="126" height="106"/>
                                         <gestureRecognizers/>
-                                        <connections>
-                                            <outletCollection property="gestureRecognizers" destination="EB7-Gj-L76" appends="YES" id="ZU4-gD-bTX"/>
-                                        </connections>
                                     </imageView>
                                 </subviews>
                             </stackView>
@@ -120,10 +111,21 @@
                                     <segue destination="FxJ-NK-Vbj" kind="unwind" unwindAction="unwindToMainMenuWithUnwindSegue:" id="tqN-KP-VWX"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap to select board location." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QIh-1p-M8Z">
+                                <rect key="frame" x="87.5" y="60" width="200" height="41"/>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="0.24647887323943662" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="zgi-jz-9Yr"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="YBO-zh-2lA" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="0q8-ZV-c52"/>
+                            <constraint firstItem="QIh-1p-M8Z" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="40" id="6NT-Ok-ViS"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="top" secondItem="GEX-Hw-PMz" secondAttribute="top" id="C9f-08-Ydg"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="y2t-hR-zum" secondAttribute="trailing" id="Dli-GS-oFx"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="y2t-hR-zum" secondAttribute="bottom" id="ZqD-O9-5Fg"/>
@@ -132,17 +134,25 @@
                             <constraint firstItem="YBO-zh-2lA" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="20" id="jXm-4I-tiD"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="trailing" secondItem="Z0Y-yR-u5V" secondAttribute="trailing" id="qQm-OX-dIS"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="xJs-TJ-zrJ"/>
+                            <constraint firstItem="QIh-1p-M8Z" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="xeW-UG-pu3"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Z0Y-yR-u5V"/>
                     </view>
                     <connections>
+                        <outlet property="placeBoardGesture" destination="NvL-x5-eHp" id="T9y-nK-hH1"/>
                         <outlet property="sceneView" destination="rD7-ry-WZM" id="MY9-Cc-IRd"/>
+                        <outlet property="tapToSelectLabel" destination="QIh-1p-M8Z" id="CIX-dN-J2b"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
                 <exit id="FxJ-NK-Vbj" userLabel="Exit" sceneMemberID="exit"/>
                 <rotationGestureRecognizer id="EB7-Gj-L76"/>
                 <rotationGestureRecognizer id="4jT-Nr-SYp"/>
+                <tapGestureRecognizer id="NvL-x5-eHp">
+                    <connections>
+                        <action selector="screenTapped:" destination="BV1-FR-VrT" id="uMH-Mh-b8x"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="133.59999999999999" y="61.619190404797607"/>
         </scene>
