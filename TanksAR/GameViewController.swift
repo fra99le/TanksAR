@@ -17,6 +17,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     var boardPlaced = false
     var boardSize: Float = 1.0
     var candidatePlanes: [SCNNode] = []
+    var board: SCNNode? = nil
     @IBOutlet var tapToSelectLabel: UILabel!
     
     override func viewDidLoad() {
@@ -175,6 +176,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         node.opacity = 1.0
         
         sceneView.scene.rootNode.addChildNode(node)
+        board = node
         
         // disable selection of a board location
         boardPlaced = true
