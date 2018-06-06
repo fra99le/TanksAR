@@ -107,7 +107,7 @@
                                 </subviews>
                             </stackView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YBO-zh-2lA">
-                                <rect key="frame" x="315" y="40" width="40" height="40"/>
+                                <rect key="frame" x="20" y="40" width="40" height="40"/>
                                 <accessibility key="accessibilityConfiguration" label="Exit Game">
                                     <accessibilityTraits key="traits" image="YES"/>
                                 </accessibility>
@@ -123,13 +123,13 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="YBO-zh-2lA" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="0q8-ZV-c52"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="top" secondItem="GEX-Hw-PMz" secondAttribute="top" id="C9f-08-Ydg"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="y2t-hR-zum" secondAttribute="trailing" id="Dli-GS-oFx"/>
-                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="YBO-zh-2lA" secondAttribute="trailing" constant="20" id="N1R-HY-1WE"/>
-                            <constraint firstItem="YBO-zh-2lA" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="SjF-cp-u0Z"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="y2t-hR-zum" secondAttribute="bottom" id="ZqD-O9-5Fg"/>
                             <constraint firstItem="y2t-hR-zum" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="gIy-6g-k3L"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="bottom" secondItem="Z0Y-yR-u5V" secondAttribute="bottom" id="iuZ-hH-2hL"/>
+                            <constraint firstItem="YBO-zh-2lA" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="20" id="jXm-4I-tiD"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="trailing" secondItem="Z0Y-yR-u5V" secondAttribute="trailing" id="qQm-OX-dIS"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="xJs-TJ-zrJ"/>
                         </constraints>
