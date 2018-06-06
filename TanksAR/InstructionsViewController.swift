@@ -14,6 +14,8 @@ class InstructionsViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        
+        // should load a text file to display in the text area
     }
 
     override func didReceiveMemoryWarning() {
