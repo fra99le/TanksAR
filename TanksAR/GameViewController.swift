@@ -15,6 +15,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet var sceneView: ARSCNView!
     
     var boardPlaced = false
+    var boardSize: Float = 1.0
+    var candidatePlanes: [SCNNode] = []
     @IBOutlet var tapToSelectLabel: UILabel!
     
     override func viewDidLoad() {
@@ -105,6 +107,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         
         let floor = createFloor(planeAnchor)
         node.addChildNode(floor)
+        candidatePlanes.append(floor)
     }
 
     func createFloor(_ planeAnchor: ARPlaneAnchor) -> SCNNode {
@@ -128,8 +131,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         
         for result in hitTestResult {
             if !boardPlaced {
-                if let resultPlane =  result.anchor as? ARPlaneAnchor {
-                    placeBoard(resultPlane)
+                if (result.anchor as? ARPlaneAnchor) != nil {
+                    placeBoard(result)
                     break
                 }
             } else {
@@ -139,26 +142,32 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func clearAllPlanes() {
-        for child in sceneView.scene.rootNode.childNodes {
-            if (child.geometry as? SCNPlane) != nil {
-                child.removeFromParentNode()
-            }
+        for plane in candidatePlanes {
+            plane.removeFromParentNode()
         }
+        candidatePlanes.removeAll()
     }
     
-    func placeBoard(_ atLocation: ARPlaneAnchor) {
+    func placeBoard(_ atLocationOf: ARHitTestResult) {
+        guard let withExtentOf = atLocationOf.anchor as? ARPlaneAnchor else { return }
+        
         // remove all candidate planes
         clearAllPlanes()
         
-        print("Placing board at \(atLocation)")
+        print("Placing board at \(withExtentOf)")
+        print("plane extents are \(withExtentOf.extent.x),\(withExtentOf.extent.z).")
+
         let node = SCNNode()
         
-        //let boardPosition = atLocation.center
-        node.position = SCNVector3(atLocation.center)
-        
-        print("plane extents are \(atLocation.extent.x),\(atLocation.extent.z).")
-        let size = min(atLocation.extent.x,atLocation.extent.z)
-        let geometry = SCNPlane(width: CGFloat(size), height: CGFloat(size))
+        // set location of board
+        let planePosition = atLocationOf.worldTransform.columns.3
+        node.position = SCNVector3(planePosition.x, planePosition.y, planePosition.z)
+
+        // set size of board
+        boardSize = min(withExtentOf.extent.x,withExtentOf.extent.z)
+        let geometry = SCNPlane(width: CGFloat(boardSize), height: CGFloat(boardSize))
+
+        // make it green
         geometry.firstMaterial?.diffuse.contents = UIColor.green
         node.geometry = geometry
         
@@ -167,13 +176,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         
         sceneView.scene.rootNode.addChildNode(node)
         
-        // update state
+        // disable selection of a board location
         boardPlaced = true
         placeBoardGesture.isEnabled = false
         tapToSelectLabel.isHidden = true
     }
 
     func unplaceBoard() {
+        // enable selection of a board location
         boardPlaced = false
         placeBoardGesture.isEnabled = true
         tapToSelectLabel.isHidden = false
