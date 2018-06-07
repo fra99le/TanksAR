@@ -31,10 +31,10 @@ class ImageBuf {
         let offset = x + y*width
         
         let pixel = pixels[offset]
-        let r = CGFloat(pixel.r) / CGFloat(255.0)
-        let g = CGFloat(pixel.g) / CGFloat(255.0)
-        let b = CGFloat(pixel.b) / CGFloat(255.0)
-        let a = CGFloat(pixel.a) / CGFloat(255.0)
+        let r = pixel.r
+        let g = pixel.g
+        let b = pixel.b
+        let a = pixel.a
         
         return (r, g, b, a)
     }
@@ -111,7 +111,8 @@ class ImageBuf {
         
         // apply diamond-square algorithm
         doDiamondSquare()
-        
+
+        /*
         // find min/max values
         let (red: r, green: _, blue: _, alpha: _) = getPixel(x: 0, y: 0)
         var minValue = r
@@ -138,6 +139,7 @@ class ImageBuf {
                 }
             }
         }
+ */
     }
     
 }

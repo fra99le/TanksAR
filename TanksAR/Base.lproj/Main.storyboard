@@ -95,9 +95,14 @@
                                         <gestureRecognizers/>
                                     </imageView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rqa-bG-wWn">
-                                        <rect key="frame" x="172.5" y="38" width="30" height="30"/>
+                                        <rect key="frame" x="163.5" y="29" width="48" height="48"/>
+                                        <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.24657534246575341" colorSpace="custom" customColorSpace="sRGB"/>
                                         <gestureRecognizers/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="30"/>
                                         <state key="normal" title="Fire"/>
+                                        <connections>
+                                            <action selector="fireButtonPressed:" destination="BV1-FR-VrT" eventType="touchUpInside" id="aic-Ea-ukb"/>
+                                        </connections>
                                     </button>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Circle" translatesAutoresizingMaskIntoConstraints="NO" id="uvY-Lf-P1o">
                                         <rect key="frame" x="249" y="0.0" width="126" height="106"/>
@@ -119,8 +124,8 @@
                                     <segue destination="FxJ-NK-Vbj" kind="unwind" unwindAction="unwindToMainMenuWithUnwindSegue:" id="tqN-KP-VWX"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap to select board location." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QIh-1p-M8Z">
-                                <rect key="frame" x="87.5" y="60" width="200" height="41"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap to select horizontal surface to use for board location." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QIh-1p-M8Z">
+                                <rect key="frame" x="87.5" y="60" width="200" height="61"/>
                                 <color key="backgroundColor" white="0.66666666666666663" alpha="0.24647887323943662" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="200" id="zgi-jz-9Yr"/>
@@ -147,6 +152,9 @@
                         <viewLayoutGuide key="safeArea" id="Z0Y-yR-u5V"/>
                     </view>
                     <connections>
+                        <outlet property="altitudeKnob" destination="hsh-uP-Atj" id="xOO-zJ-4xd"/>
+                        <outlet property="azimuthKnob" destination="uvY-Lf-P1o" id="7WC-8I-vQu"/>
+                        <outlet property="fireButton" destination="Rqa-bG-wWn" id="9ul-PN-kLT"/>
                         <outlet property="placeBoardGesture" destination="NvL-x5-eHp" id="T9y-nK-hH1"/>
                         <outlet property="sceneView" destination="rD7-ry-WZM" id="MY9-Cc-IRd"/>
                         <outlet property="tapToSelectLabel" destination="QIh-1p-M8Z" id="CIX-dN-J2b"/>
@@ -154,15 +162,24 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
                 <exit id="FxJ-NK-Vbj" userLabel="Exit" sceneMemberID="exit"/>
-                <rotationGestureRecognizer id="EB7-Gj-L76"/>
-                <rotationGestureRecognizer id="4jT-Nr-SYp"/>
+                <rotationGestureRecognizer id="EB7-Gj-L76" userLabel="Altitude Knob">
+                    <connections>
+                        <action selector="altitudeChanged:" destination="BV1-FR-VrT" id="uG1-VC-Vhp"/>
+                    </connections>
+                </rotationGestureRecognizer>
+                <rotationGestureRecognizer id="4jT-Nr-SYp" userLabel="Azimuth Knob">
+                    <connections>
+                        <action selector="azimuthChanged:" destination="BV1-FR-VrT" id="dFF-jp-2pt"/>
+                        <outlet property="delegate" destination="uvY-Lf-P1o" id="Ah5-kI-R38"/>
+                    </connections>
+                </rotationGestureRecognizer>
                 <tapGestureRecognizer id="NvL-x5-eHp">
                     <connections>
                         <action selector="screenTapped:" destination="BV1-FR-VrT" id="uMH-Mh-b8x"/>
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="133.59999999999999" y="61.619190404797607"/>
+            <point key="canvasLocation" x="263" y="62"/>
         </scene>
         <!--Instructions-->
         <scene sceneID="OBn-gq-pag">

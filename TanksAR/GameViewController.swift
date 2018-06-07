@@ -18,9 +18,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     var boardSize: Float = 1.0
     var candidatePlanes: [SCNNode] = []
     var board: SCNNode? = nil
-    @IBOutlet var tapToSelectLabel: UILabel!
     var gameModel = GameModel()
-    
+
+    @IBOutlet var tapToSelectLabel: UILabel!
+    @IBOutlet var fireButton: UIButton!
+    @IBOutlet var altitudeKnob: UIImageView!
+    @IBOutlet var azimuthKnob: UIImageView!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -184,13 +188,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         
         sceneView.scene.rootNode.addChildNode(node)
         board = node
-        gameModel.startGame(numPlayers: 4)
+        gameModel.startGame(numPlayers: 40)
         addTanks()
         
         // disable selection of a board location
         boardPlaced = true
         placeBoardGesture.isEnabled = false
         tapToSelectLabel.isHidden = true
+        fireButton.isEnabled = true
+        fireButton.isHidden = false
     }
 
     func unplaceBoard() {
@@ -198,18 +204,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         boardPlaced = false
         placeBoardGesture.isEnabled = true
         tapToSelectLabel.isHidden = false
+        fireButton.isEnabled = false
+        fireButton.isHidden = true
     }
     
     func addTanks() {
-        print("Adding tanks...")
         for player in gameModel.board.players {
-            print("For player \(player.name)")
             let tankScene = SCNScene(named: "art.scnassets/Tank.scn")
             guard let tankNode = tankScene?.rootNode.childNode(withName: "Tank", recursively: false) else { continue }
-print("Got tankNode")
             
             guard let tank = player.tank else { continue }
-            print("Got tank")
             tankNode.position = SCNVector3(tank.lon, tank.elev, tank.lat)
             tankNode.scale = SCNVector3(50,50,50)
             tankNode.eulerAngles.x = Float.pi / 2
@@ -221,5 +225,18 @@ print("Got tankNode")
     
     func drawBoard() {
         
+    }
+    
+    // MARK: UI elements
+    @IBAction func altitudeChanged(_ sender: UIRotationGestureRecognizer) {
+        print("altitude knob changed")
+    }
+
+    @IBAction func azimuthChanged(_ sender: UIRotationGestureRecognizer) {
+        print("azimuth knob changed")
+    }
+
+    @IBAction func fireButtonPressed(_ sender: UIButton) {
+        print("Fire button pressed")
     }
 }
