@@ -107,4 +107,19 @@ class GameModel {
             }
         }
     }
+    
+    func getTank(forPlayer: Int) -> Tank {
+        return board.players[forPlayer].tank
+    }
+    
+    func setTankAim(azimuth: Float, altitude: Float) {
+        board.players[board.currentPlayer].tank.azimuth = azimuth
+        board.players[board.currentPlayer].tank.altitude = altitude
+    }
+    
+    func fire() {
+        print("Fire isn't fully implemented, yet!")
+        board.currentPlayer = (board.currentPlayer + 1) % board.players.count
+        print("Player \(board.currentPlayer) now active.")
+    }
 }

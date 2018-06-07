@@ -19,7 +19,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     var candidatePlanes: [SCNNode] = []
     var board: SCNNode? = nil
     var gameModel = GameModel()
-
+    var tankNodes: [SCNNode] = []
+    
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
     @IBOutlet var altitudeKnob: UIImageView!
@@ -152,7 +153,36 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var screenDraggingGesture: UIPanGestureRecognizer!
     @IBAction func screenDragged(_ sender: UIGestureRecognizer) {
-        print("Screen dragged.")
+        guard let gesture = sender as? UIPanGestureRecognizer else { return }
+        guard tankNodes.count > 0 else { return }
+        
+        print("Screen dragged \(gesture).")
+        print("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
+        // determine player
+        let player = gameModel.board.currentPlayer
+        let tankNode = tankNodes[player]
+        
+        // get tank aiming values from model
+        let tank = gameModel.getTank(forPlayer: player)
+        let currAzimuth = tank.azimuth
+        let currAltitude = tank.altitude
+        print("currAzimuth: \(currAzimuth), currAltitude: \(currAltitude)")
+
+        // update values
+        let translation = gesture.translation(in: nil)
+        let newAzimuth = currAzimuth + Float(translation.x)
+        let newAltitude = currAltitude - Float(translation.y)
+
+        // find/adjust tank model's aiming
+        guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { return }
+        guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { return }
+        turretNode.eulerAngles.y = newAzimuth / (2*Float.pi)
+        hingeNode.eulerAngles.x = newAltitude / (2*Float.pi)
+        print("newAzimuth: \(newAzimuth), newAltitude: \(newAltitude)")
+        
+        if gesture.state == .ended {
+            gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
+        }
     }
 
     
@@ -235,6 +265,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
 
             print("Adding tank at \(tankNode.position)")
             board?.addChildNode(tankNode)
+            tankNodes.append(tankNode)
         }
     }
     
@@ -270,15 +301,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     }
     
     // MARK: UI elements
-    @IBAction func altitudeChanged(_ sender: UIRotationGestureRecognizer) {
-        print("altitude knob changed")
-    }
-
-    @IBAction func azimuthChanged(_ sender: UIRotationGestureRecognizer) {
-        print("azimuth knob changed")
-    }
-
     @IBAction func fireButtonPressed(_ sender: UIButton) {
         print("Fire button pressed")
+        gameModel.fire()
     }
 }
