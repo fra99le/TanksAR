@@ -56,8 +56,8 @@ class GameModel {
         board.surface.setSize(width: board.boardSize, height: board.boardSize)
         board.bedrock.setSize(width: board.boardSize, height: board.boardSize)
         
-        board.surface.fillUsingDiamondSquare(withMinimum: 50, andMaximum: 200)
-        board.bedrock.fillUsingDiamondSquare(withMinimum: 5, andMaximum: 40)
+        board.surface.fillUsingDiamondSquare(withMinimum: 50.0/255.0, andMaximum: 200.0/255.0)
+        board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 40.0/255.0)
     }
     
     func startGame(numPlayers: Int) {
@@ -67,9 +67,9 @@ class GameModel {
         placeTanks()
     }
     
-    func getElevation(longitude: Int, latitude: Int) -> Int {
+    func getElevation(longitude: Int, latitude: Int) -> Float {
         let (red: r, green: _, blue: _, alpha: _) = board.surface.getPixel(x: longitude, y: latitude)
-        let elevation = Int(r*255)
+        let elevation = Float(r*255)
         print("Elevation at \(longitude),\(latitude) is \(elevation).")
         return elevation
     }
@@ -102,7 +102,7 @@ class GameModel {
                 let yDiff = latitude - j
                 let dist = sqrt(Double(xDiff*xDiff + yDiff*yDiff))
                 if( dist < Double(withRadius)) {
-                    board.surface.setPixel(x: i, y: j, r: Double(elevation), g: 0, b: 0, a: 1.0)
+                    board.surface.setPixel(x: i, y: j, r: Double(elevation/255.0), g: 0, b: 0, a: 1.0)
                 }
             }
         }
