@@ -15,8 +15,8 @@ struct Tank {
     var lon: Float
     var lat: Float
     var elev: Float
-    var azimuth: Float
-    var altitude: Float
+    var azimuth: Float // in degrees
+    var altitude: Float // in degrees
     var velocity: Float
 }
 
@@ -114,7 +114,7 @@ class GameModel {
     
     func setTankAim(azimuth: Float, altitude: Float) {
         board.players[board.currentPlayer].tank.azimuth = azimuth
-        board.players[board.currentPlayer].tank.altitude = altitude
+        board.players[board.currentPlayer].tank.altitude = min(0,max(altitude,180))
     }
     
     func fire() {
