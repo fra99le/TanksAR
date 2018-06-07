@@ -19,6 +19,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     var candidatePlanes: [SCNNode] = []
     var board: SCNNode? = nil
     @IBOutlet var tapToSelectLabel: UILabel!
+    var gameModel = GameModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,6 +29,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
+        
+        // create the game board
+        gameModel.generateBoard()
         
         sceneView.autoenablesDefaultLighting = true
     }
@@ -165,8 +169,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         node.position = SCNVector3(planePosition.x, planePosition.y, planePosition.z)
 
         // set size of board
-        boardSize = min(withExtentOf.extent.x,withExtentOf.extent.z)
-        let geometry = SCNPlane(width: CGFloat(boardSize), height: CGFloat(boardSize))
+        let boardSize = min(withExtentOf.extent.x,withExtentOf.extent.z)
+        let scaleFactor = Float(boardSize) / Float(gameModel.board.boardSize)
+        let geometry = SCNPlane(width: CGFloat(gameModel.board.boardSize),
+                                height: CGFloat(gameModel.board.boardSize))
+        node.scale = SCNVector3(scaleFactor,scaleFactor,scaleFactor)
 
         // make it green
         geometry.firstMaterial?.diffuse.contents = UIColor.green
@@ -177,6 +184,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         
         sceneView.scene.rootNode.addChildNode(node)
         board = node
+        gameModel.startGame(numPlayers: 4)
+        addTanks()
         
         // disable selection of a board location
         boardPlaced = true
@@ -189,5 +198,28 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         boardPlaced = false
         placeBoardGesture.isEnabled = true
         tapToSelectLabel.isHidden = false
+    }
+    
+    func addTanks() {
+        print("Adding tanks...")
+        for player in gameModel.board.players {
+            print("For player \(player.name)")
+            let tankScene = SCNScene(named: "art.scnassets/Tank.scn")
+            guard let tankNode = tankScene?.rootNode.childNode(withName: "Tank", recursively: false) else { continue }
+print("Got tankNode")
+            
+            guard let tank = player.tank else { continue }
+            print("Got tank")
+            tankNode.position = SCNVector3(tank.lon, tank.elev, tank.lat)
+            tankNode.scale = SCNVector3(50,50,50)
+            tankNode.eulerAngles.x = Float.pi / 2
+
+            print("Adding tank at \(tankNode.position)")
+            board?.addChildNode(tankNode)
+        }
+    }
+    
+    func drawBoard() {
+        
     }
 }
