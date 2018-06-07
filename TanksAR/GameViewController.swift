@@ -240,24 +240,25 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     
     func addBoard() {
         // use cubes until I can sort out actual Meshes.
-        let numPerSide = 100
+        let numPerSide = 50
         
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         
         for i in 0..<numPerSide {
             for j in 0..<numPerSide {
                 // determine location of segment
-                let xPos = CGFloat(i)*edgeSize
-                let zPos = CGFloat(j)*edgeSize
+                let xPos = CGFloat(i)*edgeSize + edgeSize/2
+                let zPos = CGFloat(j)*edgeSize + edgeSize/2
                 let elevation = gameModel.getElevation(longitude: Int(xPos), latitude: Int(zPos))
                 let yPos = CGFloat(elevation/2)
+                let ySize = CGFloat(elevation)
 
                 // create a cube
                 let blockNode = SCNNode()
-                let geometry = SCNBox(width: edgeSize, height: yPos, length: edgeSize, chamferRadius: 0)
-                blockNode.position = SCNVector3(xPos-edgeSize/2-CGFloat(gameModel.board.boardSize/2),
+                let geometry = SCNBox(width: edgeSize, height: ySize, length: edgeSize, chamferRadius: 0)
+                blockNode.position = SCNVector3(xPos-CGFloat(gameModel.board.boardSize/2),
                                                 yPos,
-                                                zPos-edgeSize/2-CGFloat(gameModel.board.boardSize/2))
+                                                zPos-CGFloat(gameModel.board.boardSize/2))
 
                 geometry.firstMaterial?.diffuse.contents = UIColor.green
                 blockNode.geometry = geometry
