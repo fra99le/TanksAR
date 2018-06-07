@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5314E47C20C8BFA00070481A /* ImageBuf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5314E47B20C8BFA00070481A /* ImageBuf.swift */; };
+		5314E47D20C8C4B20070481A /* ImageBuf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5314E47B20C8BFA00070481A /* ImageBuf.swift */; };
+		5314E47E20C8C4B20070481A /* ImageBuf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5314E47B20C8BFA00070481A /* ImageBuf.swift */; };
+		5314E47F20C8CC970070481A /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
+		5314E48020C8CC980070481A /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		53EEDB6820C83C3E00B8B71D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6720C83C3E00B8B71D /* AppDelegate.swift */; };
 		53EEDB6A20C83C3F00B8B71D /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 53EEDB6920C83C3F00B8B71D /* art.scnassets */; };
 		53EEDB6C20C83C3F00B8B71D /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
@@ -41,6 +46,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5314E47B20C8BFA00070481A /* ImageBuf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBuf.swift; sourceTree = "<group>"; };
 		53EEDB6420C83C3E00B8B71D /* TanksAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TanksAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		53EEDB6720C83C3E00B8B71D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		53EEDB6920C83C3F00B8B71D /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -117,6 +123,7 @@
 				53EEDB9B20C8421900B8B71D /* ScoresViewController.swift */,
 				53EEDB6D20C83C3F00B8B71D /* Main.storyboard */,
 				53EEDB9D20C84A3E00B8B71D /* GameModel.swift */,
+				5314E47B20C8BFA00070481A /* ImageBuf.swift */,
 				53EEDB7020C83C4600B8B71D /* Assets.xcassets */,
 				53EEDB7220C83C4700B8B71D /* LaunchScreen.storyboard */,
 				53EEDB7520C83C4700B8B71D /* Info.plist */,
@@ -274,6 +281,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5314E47C20C8BFA00070481A /* ImageBuf.swift in Sources */,
 				53EEDB6C20C83C3F00B8B71D /* GameViewController.swift in Sources */,
 				53EEDB9C20C8421900B8B71D /* ScoresViewController.swift in Sources */,
 				53EEDB9820C841EE00B8B71D /* MenuViewController.swift in Sources */,
@@ -287,8 +295,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5314E47F20C8CC970070481A /* GameViewController.swift in Sources */,
 				53EEDB7F20C83C4700B8B71D /* TanksARTests.swift in Sources */,
 				53EEDB9F20C84A3E00B8B71D /* GameModel.swift in Sources */,
+				5314E47D20C8C4B20070481A /* ImageBuf.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,8 +306,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5314E48020C8CC980070481A /* GameViewController.swift in Sources */,
 				53EEDB8A20C83C4700B8B71D /* TanksARUITests.swift in Sources */,
 				53EEDBA020C84A3E00B8B71D /* GameModel.swift in Sources */,
+				5314E47E20C8C4B20070481A /* ImageBuf.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
