@@ -114,12 +114,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         guard !boardPlaced else { return }
         guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
         
-        let floor = createFloor(planeAnchor)
+        let floor = candidatePlane(planeAnchor)
         node.addChildNode(floor)
         candidatePlanes.append(floor)
     }
 
-    func createFloor(_ planeAnchor: ARPlaneAnchor) -> SCNNode {
+    func candidatePlane(_ planeAnchor: ARPlaneAnchor) -> SCNNode {
         let node = SCNNode()
         
         print("plane extents are \(planeAnchor.extent.x),\(planeAnchor.extent.z).")
@@ -172,29 +172,29 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         print("Placing board at \(withExtentOf)")
         print("plane extents are \(withExtentOf.extent.x),\(withExtentOf.extent.z).")
 
-        let node = SCNNode()
-        
-        // set location of board
-        let planePosition = atLocationOf.worldTransform.columns.3
-        node.position = SCNVector3(planePosition.x, planePosition.y, planePosition.z)
+        let scaleNode = SCNNode()
+        let boardBaseNode = SCNNode()
 
-        // set size of board
+        // set scale factor for scaling node
+        let planePosition = atLocationOf.worldTransform.columns.3
+        scaleNode.position = SCNVector3(planePosition.x, planePosition.y, planePosition.z)
         let boardSize = min(withExtentOf.extent.x,withExtentOf.extent.z)
         let scaleFactor = Float(boardSize) / Float(gameModel.board.boardSize)
+        scaleNode.scale = SCNVector3(scaleFactor,scaleFactor,scaleFactor)
+        board = scaleNode
+        sceneView.scene.rootNode.addChildNode(scaleNode)
+
+        // set size, orientation, and color of board base
         let geometry = SCNPlane(width: CGFloat(gameModel.board.boardSize),
                                 height: CGFloat(gameModel.board.boardSize))
-        node.scale = SCNVector3(scaleFactor,scaleFactor,scaleFactor)
-
-        // make it green
         geometry.firstMaterial?.diffuse.contents = UIColor.green
-        node.geometry = geometry
-        
-        node.eulerAngles.x = -Float.pi / 2
-        node.opacity = 1.0
-        
-        sceneView.scene.rootNode.addChildNode(node)
-        board = node
-        gameModel.startGame(numPlayers: 40)
+        boardBaseNode.geometry = geometry
+        boardBaseNode.eulerAngles.x = -Float.pi / 2
+        boardBaseNode.opacity = 1.0
+        board?.addChildNode(boardBaseNode)
+
+        gameModel.startGame(numPlayers: 2)
+        addBoard()
         addTanks()
         
         // disable selection of a board location
@@ -212,6 +212,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         tapToSelectLabel.isHidden = false
         fireButton.isEnabled = false
         fireButton.isHidden = true
+        
+        // remove board and tanks
+        if let nodes = board?.childNodes {
+            for node in  nodes {
+                node.removeFromParentNode()
+            }
+        }
     }
     
     func addTanks() {
@@ -220,17 +227,45 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
             guard let tankNode = tankScene?.rootNode.childNode(withName: "Tank", recursively: false) else { continue }
             
             guard let tank = player.tank else { continue }
-            tankNode.position = SCNVector3(tank.lon, tank.elev, tank.lat)
-            tankNode.scale = SCNVector3(50,50,50)
-            tankNode.eulerAngles.x = Float.pi / 2
+            tankNode.position = SCNVector3(tank.lon-Float(gameModel.board.boardSize/2),
+                                           tank.elev,
+                                           tank.lat-Float(gameModel.board.boardSize/2))
+            tankNode.scale = SCNVector3(30,30,30)
+            //tankNode.eulerAngles.x = Float.pi / 2
 
             print("Adding tank at \(tankNode.position)")
             board?.addChildNode(tankNode)
         }
     }
     
-    func drawBoard() {
+    func addBoard() {
+        // use cubes until I can sort out actual Meshes.
+        let numPerSide = 100
         
+        let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
+        
+        for i in 0..<numPerSide {
+            for j in 0..<numPerSide {
+                // determine location of segment
+                let xPos = CGFloat(i)*edgeSize
+                let zPos = CGFloat(j)*edgeSize
+                let elevation = gameModel.getElevation(longitude: Int(xPos), latitude: Int(zPos))
+                let yPos = CGFloat(elevation/2)
+
+                // create a cube
+                let blockNode = SCNNode()
+                let geometry = SCNBox(width: edgeSize, height: yPos, length: edgeSize, chamferRadius: 0)
+                blockNode.position = SCNVector3(xPos-edgeSize/2-CGFloat(gameModel.board.boardSize/2),
+                                                yPos,
+                                                zPos-edgeSize/2-CGFloat(gameModel.board.boardSize/2))
+
+                geometry.firstMaterial?.diffuse.contents = UIColor.green
+                blockNode.geometry = geometry
+
+                // add to board
+                board?.addChildNode(blockNode)
+            }
+        }
     }
     
     // MARK: UI elements
