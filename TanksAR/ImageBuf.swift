@@ -105,14 +105,13 @@ class ImageBuf {
         
     }
     
-    func fillUsingDiamondSquare(withMinimum: Int, andMaximum: Int) {
+    func fillUsingDiamondSquare(withMinimum: Float, andMaximum: Float) {
         guard isPowerOfTwo(width-1) else { return }
         guard isPowerOfTwo(height-1) else { return }
         
         // apply diamond-square algorithm
         doDiamondSquare()
 
-        /*
         // find min/max values
         let (red: r, green: _, blue: _, alpha: _) = getPixel(x: 0, y: 0)
         var minValue = r
@@ -127,8 +126,8 @@ class ImageBuf {
 
         // normalize to min/max values
         if maxValue-minValue >= 1 &&
-            minValue<CGFloat(withMinimum)/CGFloat(255.0) &&
-            maxValue>CGFloat(andMaximum)/CGFloat(255.0) {
+            minValue<CGFloat(withMinimum) &&
+            maxValue>CGFloat(andMaximum) {
             for j in 0..<height {
                 for i in 0..<width {
                     let (red: r, green: _, blue: _, alpha: _) = getPixel(x: i, y: j)
@@ -139,7 +138,6 @@ class ImageBuf {
                 }
             }
         }
- */
     }
     
 }
