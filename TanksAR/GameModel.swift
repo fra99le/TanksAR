@@ -81,7 +81,7 @@ class GameModel {
 
             let tankElevation = getElevation(longitude: Int(x), latitude: Int(y))
             board.players[i].tank = Tank(lon: Float(x), lat: Float(y), elev: Float(tankElevation),
-                                         azimuth: 0, altitude: Float(Double.pi/4), velocity: 10)
+                                         azimuth: 0, altitude: Float(Double.pi/4), velocity: 100)
         
             // flatten area around tanks
             let tank = board.players[i].tank!

@@ -304,5 +304,33 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     @IBAction func fireButtonPressed(_ sender: UIButton) {
         print("Fire button pressed")
         gameModel.fire()
+        launchProjectile()
+    }
+    
+    func launchProjectile() {
+        guard let muzzleNode = tankNodes[gameModel.board.currentPlayer].childNode(withName: "muzzle", recursively: true) else { return }
+
+        let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
+        
+        let shell = SCNNode(geometry: SCNSphere(radius: 10))
+        shell.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+        shell.position = muzzleNode.position
+        
+        let physicsShape = SCNPhysicsShape(node: shell,
+                                           options: [SCNPhysicsShape.Option.collisionMargin: 0.01])
+        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: physicsShape)
+        shell.physicsBody = physicsBody
+        
+        let power = tank.velocity
+        let azi = tank.azimuth
+        let alt = tank.altitude
+        let xVel = power * cos(azi) * cos(alt)
+        let yVel = power * sin(alt)
+        let zVel = power * sin(azi) * cos(alt)
+        print("velocity: \(xVel),\(yVel),\(zVel)")
+        let force = SCNVector3(xVel, yVel, zVel)
+        shell.physicsBody?.applyForce(force, asImpulse: true)
+        
+        board?.addChildNode(shell)
     }
 }
