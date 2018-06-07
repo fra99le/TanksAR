@@ -85,31 +85,9 @@
                                 <gestureRecognizers/>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="NvL-x5-eHp" appends="YES" id="ZtK-JS-eZj"/>
+                                    <outletCollection property="gestureRecognizers" destination="MI9-nU-qrH" appends="YES" id="9Sq-pE-l5s"/>
                                 </connections>
                             </arscnView>
-                            <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="y2t-hR-zum">
-                                <rect key="frame" x="0.0" y="561" width="375" height="106"/>
-                                <subviews>
-                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Circle" translatesAutoresizingMaskIntoConstraints="NO" id="hsh-uP-Atj">
-                                        <rect key="frame" x="0.0" y="0.0" width="126" height="106"/>
-                                        <gestureRecognizers/>
-                                    </imageView>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rqa-bG-wWn">
-                                        <rect key="frame" x="163.5" y="29" width="48" height="48"/>
-                                        <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.24657534246575341" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <gestureRecognizers/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="30"/>
-                                        <state key="normal" title="Fire"/>
-                                        <connections>
-                                            <action selector="fireButtonPressed:" destination="BV1-FR-VrT" eventType="touchUpInside" id="aic-Ea-ukb"/>
-                                        </connections>
-                                    </button>
-                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Circle" translatesAutoresizingMaskIntoConstraints="NO" id="uvY-Lf-P1o">
-                                        <rect key="frame" x="249" y="0.0" width="126" height="106"/>
-                                        <gestureRecognizers/>
-                                    </imageView>
-                                </subviews>
-                            </stackView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YBO-zh-2lA">
                                 <rect key="frame" x="20" y="40" width="40" height="40"/>
                                 <accessibility key="accessibilityConfiguration" label="Exit Game">
@@ -134,15 +112,24 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rqa-bG-wWn">
+                                <rect key="frame" x="163" y="599" width="48" height="48"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.24657534246575341" colorSpace="custom" customColorSpace="sRGB"/>
+                                <gestureRecognizers/>
+                                <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                                <state key="normal" title="Fire"/>
+                                <connections>
+                                    <action selector="fireButtonPressed:" destination="BV1-FR-VrT" eventType="touchUpInside" id="aic-Ea-ukb"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="YBO-zh-2lA" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="0q8-ZV-c52"/>
                             <constraint firstItem="QIh-1p-M8Z" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="40" id="6NT-Ok-ViS"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="top" secondItem="GEX-Hw-PMz" secondAttribute="top" id="C9f-08-Ydg"/>
-                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="y2t-hR-zum" secondAttribute="trailing" id="Dli-GS-oFx"/>
-                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="y2t-hR-zum" secondAttribute="bottom" id="ZqD-O9-5Fg"/>
-                            <constraint firstItem="y2t-hR-zum" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="gIy-6g-k3L"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Rqa-bG-wWn" secondAttribute="bottom" constant="20" id="bzU-jY-qDN"/>
+                            <constraint firstItem="Rqa-bG-wWn" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="cjR-RF-DNz"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="bottom" secondItem="Z0Y-yR-u5V" secondAttribute="bottom" id="iuZ-hH-2hL"/>
                             <constraint firstItem="YBO-zh-2lA" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="20" id="jXm-4I-tiD"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="trailing" secondItem="Z0Y-yR-u5V" secondAttribute="trailing" id="qQm-OX-dIS"/>
@@ -152,34 +139,27 @@
                         <viewLayoutGuide key="safeArea" id="Z0Y-yR-u5V"/>
                     </view>
                     <connections>
-                        <outlet property="altitudeKnob" destination="hsh-uP-Atj" id="xOO-zJ-4xd"/>
-                        <outlet property="azimuthKnob" destination="uvY-Lf-P1o" id="7WC-8I-vQu"/>
                         <outlet property="fireButton" destination="Rqa-bG-wWn" id="9ul-PN-kLT"/>
                         <outlet property="placeBoardGesture" destination="NvL-x5-eHp" id="T9y-nK-hH1"/>
                         <outlet property="sceneView" destination="rD7-ry-WZM" id="MY9-Cc-IRd"/>
+                        <outlet property="screenDraggingGesture" destination="MI9-nU-qrH" id="ZqZ-JY-4a2"/>
                         <outlet property="tapToSelectLabel" destination="QIh-1p-M8Z" id="CIX-dN-J2b"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
                 <exit id="FxJ-NK-Vbj" userLabel="Exit" sceneMemberID="exit"/>
-                <rotationGestureRecognizer id="EB7-Gj-L76" userLabel="Altitude Knob">
-                    <connections>
-                        <action selector="altitudeChanged:" destination="BV1-FR-VrT" id="uG1-VC-Vhp"/>
-                    </connections>
-                </rotationGestureRecognizer>
-                <rotationGestureRecognizer id="4jT-Nr-SYp" userLabel="Azimuth Knob">
-                    <connections>
-                        <action selector="azimuthChanged:" destination="BV1-FR-VrT" id="dFF-jp-2pt"/>
-                        <outlet property="delegate" destination="uvY-Lf-P1o" id="Ah5-kI-R38"/>
-                    </connections>
-                </rotationGestureRecognizer>
                 <tapGestureRecognizer id="NvL-x5-eHp">
                     <connections>
                         <action selector="screenTapped:" destination="BV1-FR-VrT" id="uMH-Mh-b8x"/>
                     </connections>
                 </tapGestureRecognizer>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="MI9-nU-qrH">
+                    <connections>
+                        <action selector="screenDragged:" destination="BV1-FR-VrT" id="O4C-8x-pwk"/>
+                    </connections>
+                </panGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="263" y="62"/>
+            <point key="canvasLocation" x="261.60000000000002" y="61.619190404797607"/>
         </scene>
         <!--Instructions-->
         <scene sceneID="OBn-gq-pag">
@@ -323,7 +303,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Circle" width="126" height="106"/>
         <image name="X" width="111" height="110"/>
     </resources>
 </document>

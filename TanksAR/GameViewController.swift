@@ -149,6 +149,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
             }
         }
     }
+
+    @IBOutlet var screenDraggingGesture: UIPanGestureRecognizer!
+    @IBAction func screenDragged(_ sender: UIGestureRecognizer) {
+        print("Screen dragged.")
+    }
+
     
     func clearAllPlanes() {
         for plane in candidatePlanes {
