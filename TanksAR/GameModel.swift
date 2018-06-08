@@ -127,7 +127,17 @@ class GameModel {
     }
     
     func setTankAim(azimuth: Float, altitude: Float) {
-        board.players[board.currentPlayer].tank.azimuth = azimuth
+        var cleanAzimuth = azimuth
+        if azimuth > 360 {
+            let remove = Float(floor(cleanAzimuth/360)*360)
+            cleanAzimuth -= remove
+        } else if azimuth < 0 {
+            cleanAzimuth = -cleanAzimuth
+            let remove = Float(floor((cleanAzimuth)/360)*360)
+            cleanAzimuth -= remove
+            cleanAzimuth = 360 - cleanAzimuth
+        }
+        board.players[board.currentPlayer].tank.azimuth = cleanAzimuth
         board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
     }
     
