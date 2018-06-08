@@ -114,7 +114,7 @@ class GameModel {
     
     func setTankAim(azimuth: Float, altitude: Float) {
         board.players[board.currentPlayer].tank.azimuth = azimuth
-        board.players[board.currentPlayer].tank.altitude = min(0,max(altitude,180))
+        board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
     }
     
     func fire() {

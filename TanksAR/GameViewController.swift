@@ -176,8 +176,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         // find/adjust tank model's aiming
         guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { return }
         guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { return }
-        turretNode.eulerAngles.y = newAzimuth / (2*Float.pi)
-        hingeNode.eulerAngles.x = newAltitude / (2*Float.pi)
+        turretNode.eulerAngles.y = newAzimuth * (Float.pi/180)
+        hingeNode.eulerAngles.x = newAltitude * (Float.pi/180)
         print("newAzimuth: \(newAzimuth), newAltitude: \(newAltitude)")
         
         if gesture.state == .ended {
@@ -233,6 +233,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         tapToSelectLabel.isHidden = true
         fireButton.isEnabled = true
         fireButton.isHidden = false
+        screenDraggingGesture.isEnabled = true
     }
 
     func unplaceBoard() {
@@ -242,6 +243,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         tapToSelectLabel.isHidden = false
         fireButton.isEnabled = false
         fireButton.isHidden = true
+        screenDraggingGesture.isEnabled = false
         
         // remove board and tanks
         if let nodes = board?.childNodes {
@@ -308,26 +310,37 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func launchProjectile() {
-        guard let muzzleNode = tankNodes[gameModel.board.currentPlayer].childNode(withName: "muzzle", recursively: true) else { return }
-
+        print("in launchProjectile for player \(gameModel.board.currentPlayer)")
+        let tankNode = tankNodes[gameModel.board.currentPlayer]
+        print("Got tank node \(tankNode) for player \(gameModel.board.currentPlayer)")
+        guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true) else { return }
+        print("found muzzleNode")
+        
         let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
         
-        let shell = SCNNode(geometry: SCNSphere(radius: 10))
+        // create shell
+        let shell = SCNNode(geometry: SCNSphere(radius: 25))
         shell.geometry?.firstMaterial?.diffuse.contents = UIColor.red
-        shell.position = muzzleNode.position
         
+        // position shell at end of muzzle in board's coordinates
+        shell.position = muzzleNode.convertPosition(muzzleNode.position, to: board)
+        
+        // enable physics for shell
         let physicsShape = SCNPhysicsShape(node: shell,
                                            options: [SCNPhysicsShape.Option.collisionMargin: 0.01])
         let physicsBody = SCNPhysicsBody(type: .dynamic, shape: physicsShape)
         shell.physicsBody = physicsBody
         
         let power = tank.velocity
-        let azi = tank.azimuth
-        let alt = tank.altitude
+        let azi = tank.azimuth * Float.pi/180
+        let alt = tank.altitude * Float.pi/180
         let xVel = power * cos(azi) * cos(alt)
         let yVel = power * sin(alt)
         let zVel = power * sin(azi) * cos(alt)
+        print("tank angles: \(tank.azimuth),\(tank.altitude)")
+        print("angles in radians: \(azi),\(alt)")
         print("velocity: \(xVel),\(yVel),\(zVel)")
+        print("position: \(shell.position)")
         let force = SCNVector3(xVel, yVel, zVel)
         shell.physicsBody?.applyForce(force, asImpulse: true)
         
