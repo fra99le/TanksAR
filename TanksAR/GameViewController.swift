@@ -318,11 +318,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         // get muzzle velocity
         let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
         let power = tank.velocity
-        let azi = tank.azimuth * Float.pi/180
-        let alt = tank.altitude * Float.pi/180
-        let xVel = power * cos(azi) * cos(alt)
+        let azi = tank.azimuth * (Float.pi/180)
+        let alt = tank.altitude * (Float.pi/180)
+        let xVel = -power * sin(azi) * cos(alt)
         let yVel = power * sin(alt)
-        let zVel = power * sin(azi) * cos(alt)
+        let zVel = -power * cos(azi) * cos(alt)
         print("tank angles: \(tank.azimuth),\(tank.altitude)")
         print("angles in radians: \(azi),\(alt)")
         print("velocity: \(xVel),\(yVel),\(zVel)")
