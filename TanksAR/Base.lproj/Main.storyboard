@@ -122,16 +122,36 @@
                                     <action selector="fireButtonPressed:" destination="BV1-FR-VrT" eventType="touchUpInside" id="aic-Ea-ukb"/>
                                 </connections>
                             </button>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="15" minValue="0.0" maxValue="30" translatesAutoresizingMaskIntoConstraints="NO" id="dTU-l8-x8U">
+                                <rect key="frame" x="110" y="40" width="154" height="31"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="150" id="3t4-Uu-Sd1"/>
+                                </constraints>
+                                <connections>
+                                    <action selector="powerChanged:" destination="BV1-FR-VrT" eventType="valueChanged" id="RjX-eR-dcZ"/>
+                                </connections>
+                            </slider>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Power" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vhx-eP-M1c" userLabel="Power Label">
+                                <rect key="frame" x="163.5" y="78" width="48" height="21"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.24657534246575341" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="YBO-zh-2lA" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="0q8-ZV-c52"/>
+                            <constraint firstItem="Vhx-eP-M1c" firstAttribute="top" secondItem="dTU-l8-x8U" secondAttribute="bottom" constant="8" id="5hh-vd-wkK"/>
                             <constraint firstItem="QIh-1p-M8Z" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="40" id="6NT-Ok-ViS"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="top" secondItem="GEX-Hw-PMz" secondAttribute="top" id="C9f-08-Ydg"/>
+                            <constraint firstItem="dTU-l8-x8U" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="CRC-q8-09j"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Rqa-bG-wWn" secondAttribute="bottom" constant="20" id="bzU-jY-qDN"/>
                             <constraint firstItem="Rqa-bG-wWn" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="cjR-RF-DNz"/>
+                            <constraint firstItem="dTU-l8-x8U" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="dzb-hW-aEZ"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="bottom" secondItem="Z0Y-yR-u5V" secondAttribute="bottom" id="iuZ-hH-2hL"/>
                             <constraint firstItem="YBO-zh-2lA" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="20" id="jXm-4I-tiD"/>
+                            <constraint firstItem="Vhx-eP-M1c" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="p8b-BE-ajp"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="trailing" secondItem="Z0Y-yR-u5V" secondAttribute="trailing" id="qQm-OX-dIS"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="xJs-TJ-zrJ"/>
                             <constraint firstItem="QIh-1p-M8Z" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="xeW-UG-pu3"/>
@@ -141,6 +161,8 @@
                     <connections>
                         <outlet property="fireButton" destination="Rqa-bG-wWn" id="9ul-PN-kLT"/>
                         <outlet property="placeBoardGesture" destination="NvL-x5-eHp" id="T9y-nK-hH1"/>
+                        <outlet property="powerLabel" destination="Vhx-eP-M1c" id="wCr-8P-Tg3"/>
+                        <outlet property="powerSlider" destination="dTU-l8-x8U" id="8DV-HN-nHY"/>
                         <outlet property="sceneView" destination="rD7-ry-WZM" id="MY9-Cc-IRd"/>
                         <outlet property="screenDraggingGesture" destination="MI9-nU-qrH" id="ZqZ-JY-4a2"/>
                         <outlet property="tapToSelectLabel" destination="QIh-1p-M8Z" id="CIX-dN-J2b"/>

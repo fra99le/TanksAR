@@ -140,7 +140,13 @@ class GameModel {
         board.players[board.currentPlayer].tank.azimuth = cleanAzimuth
         board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
     }
-    
+
+    func setTankPower(power: Float) {
+        guard power >= 0 else { return }
+
+        board.players[board.currentPlayer].tank.velocity = power
+    }
+
     func fire(muzzlePosition: SCNVector3, muzzleVelocity: SCNVector3) -> FireResult {
         print("Fire isn't fully implemented, yet!")
         board.currentPlayer = (board.currentPlayer + 1) % board.players.count

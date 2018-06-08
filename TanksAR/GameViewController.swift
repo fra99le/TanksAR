@@ -24,8 +24,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
-    @IBOutlet var altitudeKnob: UIImageView!
-    @IBOutlet var azimuthKnob: UIImageView!
+    @IBOutlet var powerSlider: UISlider!
+    @IBOutlet var powerLabel: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,7 +53,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
 
         // cause board placement to occur when view reappears
         unplaceBoard()
-
+        updateUI()
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -186,6 +187,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         }
     }
 
+    @IBAction func powerChanged(_ sender: UISlider) {
+        gameModel.setTankPower(power: sender.value)
+        print("set tank power to \(sender.value)")
+    }
     
     func clearAllPlanes() {
         for plane in candidatePlanes {
@@ -235,6 +240,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         fireButton.isEnabled = true
         fireButton.isHidden = false
         screenDraggingGesture.isEnabled = true
+        powerLabel.isHidden = false
+        powerSlider.isHidden = false
     }
 
     func unplaceBoard() {
@@ -245,6 +252,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         fireButton.isEnabled = false
         fireButton.isHidden = true
         screenDraggingGesture.isEnabled = false
+        powerLabel.isHidden = true
+        powerSlider.isHidden = true
         
         // remove board and tanks
         if let nodes = board?.childNodes {
@@ -307,6 +316,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     @IBAction func fireButtonPressed(_ sender: UIButton) {
         print("Fire button pressed")
         launchProjectile()
+        updateUI()
     }
     
     func launchProjectile() {
@@ -364,4 +374,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         board?.addChildNode(trajNode!)
     }
     
+    func updateUI() {
+        guard boardPlaced else { return }
+
+        // make sure power slider matches player
+        let currentPower = gameModel.board.players[gameModel.board.currentPlayer].tank.velocity
+        powerSlider.setValue(currentPower, animated: false)
+        
+        // update all tanke turrets
+
+    }
 }
