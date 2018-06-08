@@ -10,6 +10,7 @@
 
 import Foundation
 import UIKit
+import SceneKit
 
 struct Tank {
     var lon: Float
@@ -31,6 +32,9 @@ struct GameBoard {
     var surface: ImageBuf = ImageBuf()
     var bedrock: ImageBuf = ImageBuf()
     
+    // vector to encode windspeed
+    var wind: SCNVector3 = SCNVector3(0, 0, 0)
+    
     // player
     var players: [Player] = []
     var currentPlayer: Int = 0
@@ -39,6 +43,11 @@ struct GameBoard {
 struct HighScore {
     var name: String = "Unknown"
     var score: Int64 = 0
+}
+
+struct FireResult {
+    var trajectory: [SCNVector3] = []
+    // need data to update map
 }
 
 // Note: For the model x,y are surface image coordinates, and z is elevation
@@ -68,9 +77,14 @@ class GameModel {
     }
     
     func getElevation(longitude: Int, latitude: Int) -> Float {
+        guard longitude >= 0 else { return -1 }
+        guard longitude < board.boardSize else { return -1 }
+        guard latitude >= 0 else { return -1 }
+        guard latitude < board.boardSize else { return -1 }
+
         let (red: r, green: _, blue: _, alpha: _) = board.surface.getPixel(x: longitude, y: latitude)
         let elevation = Float(r*255)
-        print("Elevation at \(longitude),\(latitude) is \(elevation).")
+        //print("Elevation at \(longitude),\(latitude) is \(elevation).")
         return elevation
     }
     
@@ -81,7 +95,7 @@ class GameModel {
 
             let tankElevation = getElevation(longitude: Int(x), latitude: Int(y))
             board.players[i].tank = Tank(lon: Float(x), lat: Float(y), elev: Float(tankElevation),
-                                         azimuth: 0, altitude: Float(Double.pi/4), velocity: 100)
+                                         azimuth: 0, altitude: Float(Double.pi/4), velocity: 10)
         
             // flatten area around tanks
             let tank = board.players[i].tank!
@@ -117,9 +131,49 @@ class GameModel {
         board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
     }
     
-    func fire() {
+    func fire(muzzlePosition: SCNVector3, muzzleVelocity: SCNVector3) -> FireResult {
         print("Fire isn't fully implemented, yet!")
         board.currentPlayer = (board.currentPlayer + 1) % board.players.count
         print("Player \(board.currentPlayer) now active.")
+
+        let timeStep = Float(1)/Float(10)
+        let gravity = Float(9.80665)
+        
+        // compute trajectory
+        var trajectory: [SCNVector3] = []
+        var airborn = true
+        var position = muzzlePosition
+        var velocity = muzzleVelocity
+
+        var iterCount = 0
+        while airborn {
+            //print("computing trajectory: pos=\(position), vel=\(velocity)")
+            // record position
+            trajectory.append(position)
+            
+            // update position
+            position.x += velocity.x * timeStep
+            position.y += velocity.y * timeStep
+            position.z += velocity.z * timeStep
+
+            // update velocity
+            velocity.z -= 0.5 * gravity * (timeStep*timeStep)
+            
+            // check for impact
+            let distAboveLand = position.z - getElevation(longitude: Int(position.x), latitude: Int(position.y))
+            if position.y<0 || distAboveLand<0 {
+                airborn = false
+            }
+            if iterCount > 10000 {
+                break
+            }
+            iterCount += 1
+            
+            // deal with impact
+        }
+        
+        let result: FireResult = FireResult(trajectory: trajectory)
+        
+        return result
     }
 }

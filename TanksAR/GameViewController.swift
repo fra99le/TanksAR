@@ -20,6 +20,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     var board: SCNNode? = nil
     var gameModel = GameModel()
     var tankNodes: [SCNNode] = []
+    var trajNode: SCNNode? = nil
     
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
@@ -305,32 +306,17 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     // MARK: UI elements
     @IBAction func fireButtonPressed(_ sender: UIButton) {
         print("Fire button pressed")
-        gameModel.fire()
         launchProjectile()
     }
     
     func launchProjectile() {
-        print("in launchProjectile for player \(gameModel.board.currentPlayer)")
+        // get location of muzzle
         let tankNode = tankNodes[gameModel.board.currentPlayer]
-        print("Got tank node \(tankNode) for player \(gameModel.board.currentPlayer)")
         guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true) else { return }
-        print("found muzzleNode")
+        let position = muzzleNode.convertPosition(muzzleNode.position, to: board)
         
+        // get muzzle velocity
         let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
-        
-        // create shell
-        let shell = SCNNode(geometry: SCNSphere(radius: 25))
-        shell.geometry?.firstMaterial?.diffuse.contents = UIColor.red
-        
-        // position shell at end of muzzle in board's coordinates
-        shell.position = muzzleNode.convertPosition(muzzleNode.position, to: board)
-        
-        // enable physics for shell
-        let physicsShape = SCNPhysicsShape(node: shell,
-                                           options: [SCNPhysicsShape.Option.collisionMargin: 0.01])
-        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: physicsShape)
-        shell.physicsBody = physicsBody
-        
         let power = tank.velocity
         let azi = tank.azimuth * Float.pi/180
         let alt = tank.altitude * Float.pi/180
@@ -340,10 +326,42 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         print("tank angles: \(tank.azimuth),\(tank.altitude)")
         print("angles in radians: \(azi),\(alt)")
         print("velocity: \(xVel),\(yVel),\(zVel)")
-        print("position: \(shell.position)")
-        let force = SCNVector3(xVel, yVel, zVel)
-        shell.physicsBody?.applyForce(force, asImpulse: true)
+        print("position: \(position)")
+        let velocity = SCNVector3(xVel, yVel, zVel)
         
-        board?.addChildNode(shell)
+        // convert to model coordinate space
+        var muzzlePosition = position
+        var muzzleVelocity = velocity
+        muzzlePosition.x = position.x + Float(gameModel.board.boardSize/2)
+        muzzlePosition.y = position.z + Float(gameModel.board.boardSize/2)
+        muzzlePosition.z = position.y
+        muzzleVelocity.x = velocity.x
+        muzzleVelocity.y = velocity.z
+        muzzleVelocity.z = velocity.y
+        print("view pos: \(position)")
+        print("view vel: \(velocity)")
+        print("model pos: \(muzzlePosition)")
+        print("model vel: \(muzzleVelocity)")
+
+        let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
+        
+        // show trajectory
+        if let oldTraj = trajNode {
+            oldTraj.removeFromParentNode()
+            trajNode = nil
+        }
+        trajNode = SCNNode()
+        for position in fireResult.trajectory {
+            let posNode = SCNNode(geometry: SCNSphere(radius: 10))
+            posNode.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
+            // convert back to view coordinates
+            posNode.position.x = position.x - Float(gameModel.board.boardSize/2)
+            posNode.position.y = position.z
+            posNode.position.z = position.y - Float(gameModel.board.boardSize/2)
+            trajNode?.addChildNode(posNode)
+            //print("trajectory position: \(position)")
+        }
+        board?.addChildNode(trajNode!)
     }
+    
 }
