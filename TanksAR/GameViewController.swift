@@ -20,8 +20,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     var board: SCNNode? = nil
     var gameModel = GameModel()
     var tankNodes: [SCNNode] = []
-    var trajNode: SCNNode? = nil
-    
+    var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
+    var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
+    let timeScaling = 10
+
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
     @IBOutlet var powerSlider: UISlider!
@@ -354,24 +356,134 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         print("model vel: \(muzzleVelocity)")
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
-        
-        // show trajectory
-        if let oldTraj = trajNode {
-            oldTraj.removeFromParentNode()
-            trajNode = nil
+
+        // time for use in animations
+        var currTime = CFTimeInterval(0)
+
+        // create shell object
+        if let oldShell = shellNode {
+            oldShell.removeFromParentNode()
         }
-        trajNode = SCNNode()
-        for position in fireResult.trajectory {
-            let posNode = SCNNode(geometry: SCNSphere(radius: 10))
-            posNode.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
+        shellNode = SCNNode(geometry: SCNSphere(radius: 10))
+        if let shell = shellNode,
+            let firstPosition = fireResult.trajectory.first {
+            shell.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
             // convert back to view coordinates
-            posNode.position.x = position.x - Float(gameModel.board.boardSize/2)
-            posNode.position.y = position.z
-            posNode.position.z = position.y - Float(gameModel.board.boardSize/2)
-            trajNode?.addChildNode(posNode)
-            //print("trajectory position: \(position)")
+            shell.position.x = firstPosition.x - Float(gameModel.board.boardSize/2)
+            shell.position.y = firstPosition.z
+            shell.position.z = firstPosition.y - Float(gameModel.board.boardSize/2)
+            shell.opacity = 0.0
+            board?.addChildNode(shellNode!)
+
+            // see: https://stackoverflow.com/questions/11737658/how-to-chain-different-caanimation-in-an-ios-application
+            var animations: [CABasicAnimation] = []
+
+            // make shell appear
+            let animation0 = CABasicAnimation(keyPath: "opacity")
+            animation0.fromValue = 0
+            animation0.toValue = 1
+            animation0.beginTime = 0
+            animation0.duration = 0
+            animations.append(animation0)
+
+            var prevPosition = firstPosition
+            let timeStep = CFTimeInterval(fireResult.timeStep / Float(timeScaling))
+            for currPosition in fireResult.trajectory {
+                //print("trajectory position: \(currPosition) at time \(currTime)")
+                // convert currPostion to AR space
+                var arPosition = currPosition
+                arPosition.x = currPosition.x - Float(gameModel.board.boardSize/2)
+                arPosition.y = currPosition.z
+                arPosition.z = currPosition.y - Float(gameModel.board.boardSize/2)
+                
+                // add animations for shell here
+                let animation = CABasicAnimation(keyPath: "position")
+                animation.fromValue = prevPosition
+                animation.toValue = arPosition
+                animation.beginTime = currTime
+                animation.duration = timeStep
+                animations.append(animation)
+
+                prevPosition = arPosition
+                currTime += timeStep
+            }
+            
+            // make shell disappear
+            let animation3 = CABasicAnimation(keyPath: "opacity")
+            animation3.fromValue = 1
+            animation3.toValue = 0
+            animation3.beginTime = currTime
+            animation3.duration = 0
+            animations.append(animation3)
+
+            let group = CAAnimationGroup()
+            group.beginTime = 0
+            group.duration = currTime
+            group.repeatCount = 1
+            group.isRemovedOnCompletion = true
+            group.animations = animations
+            shell.addAnimation(group, forKey: "balistics")
         }
-        board?.addChildNode(trajNode!)
+        
+        // animate explosion
+        if let oldExplosion = explosionNode {
+            oldExplosion.removeFromParentNode()
+        }
+        explosionNode = SCNNode(geometry: SCNSphere(radius: 1))
+        if let explosion = explosionNode,
+            let position = fireResult.trajectory.last {
+            explosion.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
+            // convert back to view coordinates
+            explosion.position.x = position.x - Float(gameModel.board.boardSize/2)
+            explosion.position.y = position.z
+            explosion.position.z = position.y - Float(gameModel.board.boardSize/2)
+            explosion.opacity = 0
+            board?.addChildNode(explosion)
+            
+            var animations: [CABasicAnimation] = []
+            
+            // make explosion disappear
+            let animation0 = CABasicAnimation(keyPath: "opacity")
+            animation0.fromValue = 0
+            animation0.toValue = 1
+            animation0.beginTime = currTime
+            animation0.duration = 0
+            animations.append(animation0)
+
+            // add expansion animation
+            let animation1 = CABasicAnimation(keyPath: "geometry.radius")
+            animation1.fromValue = 1
+            animation1.toValue = fireResult.explosionRadius
+            animation1.beginTime = currTime
+            animation1.duration = CFTimeInterval(1.0)
+            animations.append(animation1)
+            currTime += 1.0
+
+            // add collapse animation
+            let animation2 = CABasicAnimation(keyPath: "geometry.radius")
+            animation2.fromValue = fireResult.explosionRadius
+            animation2.toValue = 0
+            animation2.beginTime = currTime
+            animation2.duration = CFTimeInterval(1.0)
+            animations.append(animation2)
+            currTime += 1.0
+            
+            // make explosion disappear
+            let animation3 = CABasicAnimation(keyPath: "opacity")
+            animation3.fromValue = 1
+            animation3.toValue = 0
+            animation3.beginTime = currTime
+            animation3.duration = 0
+            animations.append(animation3)
+
+            let group = CAAnimationGroup()
+            group.beginTime = 0
+            group.duration = currTime
+            group.repeatCount = 1
+            group.isRemovedOnCompletion = true
+            group.animations = animations
+            explosion.addAnimation(group, forKey: "explosion")
+        }
     }
     
     func updateUI() {

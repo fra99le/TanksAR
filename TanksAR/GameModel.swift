@@ -46,7 +46,10 @@ struct HighScore {
 }
 
 struct FireResult {
+    var timeStep: Float = 1
     var trajectory: [SCNVector3] = []
+    var explosionRadius: Float = 100
+    
     // need data to update map
 }
 
@@ -188,8 +191,31 @@ class GameModel {
             // deal with impact
         }
         
-        let result: FireResult = FireResult(trajectory: trajectory)
+        let result: FireResult = FireResult(timeStep: timeStep,
+                                            trajectory: trajectory,
+                                            explosionRadius: 100)
         
         return result
+    }
+    
+    func fluidFill(startX: Int, startY: Int, totalVolume: Float) {
+        var remainingVolume = totalVolume
+        
+        // need a priority queue of edge pixels ordered by height
+        while remainingVolume > 0 {
+            // get lowest pixel from queue
+            
+            // check neighboring pixels
+
+            // if one is lower that current, replace queue with it
+
+            // else (i.e. all are higher)
+                // increase level to lowest edge pixel
+                // add its neighbors to neighbor queue
+                // compute volume used in level raise
+                let volumeAdded = Float(1)
+                // update volume left
+                remainingVolume -= volumeAdded
+        }
     }
 }
