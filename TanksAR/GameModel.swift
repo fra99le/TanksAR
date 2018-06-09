@@ -13,9 +13,7 @@ import UIKit
 import SceneKit
 
 struct Tank {
-    var lon: Float
-    var lat: Float
-    var elev: Float
+    var position: SCNVector3
     var azimuth: Float // in degrees
     var altitude: Float // in degrees
     var velocity: Float
@@ -142,12 +140,12 @@ class GameModel {
             let y = drand48() * Double(board.surface.height-withMargin*2) + Double(withMargin)
 
             let tankElevation = getElevation(longitude: Int(x), latitude: Int(y))
-            board.players[i].tank = Tank(lon: Float(x), lat: Float(y), elev: Float(tankElevation),
+            board.players[i].tank = Tank(position: SCNVector3(x: Float(x), y: Float(y), z: Float(tankElevation)),
                                          azimuth: 0, altitude: Float(Double.pi/4), velocity: 10)
         
             // flatten area around tanks
             let tank = board.players[i].tank!
-            flattenAreaAt(longitude: Int(tank.lon), latitude: Int(tank.lat), withRadius: 100)
+            flattenAreaAt(longitude: Int(tank.position.x), latitude: Int(tank.position.y), withRadius: 100)
         }
     }
     
