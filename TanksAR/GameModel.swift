@@ -51,6 +51,11 @@ struct FireResult {
     var explosionRadius: Float = 100
     
     // need data to update map
+    var mapUpdate: ImageBuf
+}
+
+enum ElevationMode {
+    case top, middle, bottom
 }
 
 // Note: For the model x,y are surface image coordinates, and z is elevation
@@ -78,17 +83,53 @@ class GameModel {
         
         placeTanks()
     }
+
+    func getElevation(longitude: Int, latitude: Int, forMode: ElevationMode = .top) -> Float {
+        return getElevation(fromMap: board.surface, longitude: longitude, latitude: latitude, forMode: forMode)
+    }
     
-    func getElevation(longitude: Int, latitude: Int) -> Float {
+    func getElevation(fromMap: ImageBuf, longitude: Int, latitude: Int, forMode: ElevationMode = .top) -> Float {
         guard longitude >= 0 else { return -1 }
         guard longitude < board.boardSize else { return -1 }
         guard latitude >= 0 else { return -1 }
         guard latitude < board.boardSize else { return -1 }
 
-        let (red: r, green: _, blue: _, alpha: _) = board.surface.getPixel(x: longitude, y: latitude)
-        let elevation = Float(r*255)
+        let (red: r, green: g, blue: b, alpha: _) = fromMap.getPixel(x: longitude, y: latitude)
+        var elevation = Float(r*255)
+        switch forMode {
+        case .top:
+            elevation = Float(r * 255)
+        case .middle:
+            elevation = Float(g * 255)
+        case .bottom:
+            elevation = Float(b * 255)
+        }
         //print("Elevation at \(longitude),\(latitude) is \(elevation).")
         return elevation
+    }
+
+    func setElevation(longitude: Int, latitude: Int, to: Float, forMode: ElevationMode = .top) {
+        setElevation(forMap: board.surface, longitude: longitude, latitude: latitude, to: to, forMode: forMode)
+    }
+    
+    func setElevation(forMap: ImageBuf, longitude: Int, latitude: Int, to: Float, forMode: ElevationMode = .top) {
+        guard longitude >= 0 else { return }
+        guard longitude < board.boardSize else { return }
+        guard latitude >= 0 else { return }
+        guard latitude < board.boardSize else { return }
+        
+        let newElevation = max(0,to)
+        var (red: r, green: g, blue: b, alpha: a) = forMap.getPixel(x: longitude, y: latitude)
+        switch forMode {
+        case .top:
+            r = CGFloat(newElevation / 255)
+        case .middle:
+            g = CGFloat(newElevation / 255)
+        case .bottom:
+            b = CGFloat(newElevation / 255)
+        }
+        board.surface.setPixel(x: longitude, y: latitude, r: r, g: g, b: b, a: a)
+        //print("Elevation at \(longitude),\(latitude) is now \(r*255),\(g*255),\(b*255).")
     }
     
     func placeTanks(withMargin: Int = 50, minDist: Int = 10) {
@@ -188,14 +229,66 @@ class GameModel {
             }
             iterCount += 1
             
-            // deal with impact
         }
+        
+        // deal with impact
+        let impactPosition = position
+        let blastRadius = Float(100)
+        
+        // update board with new values
+        let updates = applyExplosion(at: impactPosition, withRadius: blastRadius)
         
         let result: FireResult = FireResult(timeStep: timeStep,
                                             trajectory: trajectory,
-                                            explosionRadius: 100)
+                                            explosionRadius: blastRadius,
+                                            mapUpdate: updates)
         
         return result
+    }
+    
+    func applyExplosion(at: SCNVector3, withRadius: Float) -> ImageBuf {
+        let changeBuf = ImageBuf()
+        changeBuf.copy(board.surface)
+        
+        for j in Int(at.y-withRadius)...Int(at.y+withRadius) {
+            for i in Int(at.x-withRadius)...Int(at.x+withRadius) {
+                let xDiff = at.x - Float(i)
+                let yDiff = at.y - Float(j)
+                
+                let horizDist = sqrt(xDiff*xDiff + yDiff*yDiff)
+                guard withRadius >= horizDist else { continue }
+                
+                // get z component of sphere at i,j
+                // a^2 = c^2 - b^2
+                // c = withRadius
+                // b = horizDist
+                let vertSize = sqrt(withRadius*withRadius - horizDist*horizDist)
+                
+                let currElevation = getElevation(longitude: i, latitude: j)
+                let top = currElevation
+                let mid = at.z + vertSize
+                let lower = at.z - vertSize
+                
+                if top  > mid {
+                    // column extends above explosion
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: top, forMode: .top)
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: mid, forMode: .middle)
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: lower, forMode: .bottom)
+                } else {
+                    // no upper section as this point
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: 0, forMode: .top)
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: 0, forMode: .middle)
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: lower, forMode: .bottom)
+                }
+                
+                // update actual map
+                let newElevation = lower + max(0,top-mid)
+                setElevation(longitude: i, latitude: j, to: newElevation)
+            }
+
+        }
+        
+        return changeBuf
     }
     
     func fluidFill(startX: Int, startY: Int, totalVolume: Float) {

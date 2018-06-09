@@ -50,6 +50,17 @@ class ImageBuf {
         pixels[offset] = pixel
     }
     
+    func copy(_ source: ImageBuf) {
+        setSize(width: source.width, height: source.width)
+        
+        for j in 0..<height {
+            for i in 0..<width {
+                let (red: r, green: g, blue: b, alpha: a) = source.getPixel(x: i, y: j)
+                setPixel(x: i, y: j, r: r, g: g, b: b, a: a)
+            }
+        }
+    }
+    
     func isPowerOfTwo(_ number: Int) -> Bool {
         return (number&(number-1)) == 0
     }

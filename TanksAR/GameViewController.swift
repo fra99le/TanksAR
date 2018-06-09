@@ -23,7 +23,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     let timeScaling = 10
-
+    var boardBlocks: [[SCNNode]] = []
+    
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
     @IBOutlet var powerSlider: UISlider!
@@ -289,6 +290,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         
+        // keep references to each block
+        boardBlocks = Array(repeating: Array(repeating: SCNNode(), count: numPerSide), count: numPerSide)
+        
         for i in 0..<numPerSide {
             for j in 0..<numPerSide {
                 // determine location of segment
@@ -300,6 +304,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
 
                 // create a cube
                 let blockNode = SCNNode()
+                boardBlocks[i][j] = blockNode
+                //print("block at \(i),\(j) is \(blockNode)")
                 let geometry = SCNBox(width: edgeSize, height: ySize, length: edgeSize, chamferRadius: 0)
                 blockNode.position = SCNVector3(xPos-CGFloat(gameModel.board.boardSize/2),
                                                 yPos,
