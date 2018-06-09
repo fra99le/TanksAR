@@ -55,7 +55,7 @@ struct FireResult {
 }
 
 enum ElevationMode {
-    case top, middle, bottom
+    case top, middle, bottom, old
 }
 
 // Note: For the model x,y are surface image coordinates, and z is elevation
@@ -90,11 +90,11 @@ class GameModel {
     
     func getElevation(fromMap: ImageBuf, longitude: Int, latitude: Int, forMode: ElevationMode = .top) -> Float {
         guard longitude >= 0 else { return -1 }
-        guard longitude < board.boardSize else { return -1 }
+        guard longitude < fromMap.width else { return -1 }
         guard latitude >= 0 else { return -1 }
-        guard latitude < board.boardSize else { return -1 }
+        guard latitude < fromMap.height else { return -1 }
 
-        let (red: r, green: g, blue: b, alpha: _) = fromMap.getPixel(x: longitude, y: latitude)
+        let (red: r, green: g, blue: b, alpha: a) = fromMap.getPixel(x: longitude, y: latitude)
         var elevation = Float(r*255)
         switch forMode {
         case .top:
@@ -103,6 +103,8 @@ class GameModel {
             elevation = Float(g * 255)
         case .bottom:
             elevation = Float(b * 255)
+        case .old:
+            elevation = Float(a * 255)
         }
         //print("Elevation at \(longitude),\(latitude) is \(elevation).")
         return elevation
@@ -114,9 +116,9 @@ class GameModel {
     
     func setElevation(forMap: ImageBuf, longitude: Int, latitude: Int, to: Float, forMode: ElevationMode = .top) {
         guard longitude >= 0 else { return }
-        guard longitude < board.boardSize else { return }
+        guard longitude < forMap.width else { return }
         guard latitude >= 0 else { return }
-        guard latitude < board.boardSize else { return }
+        guard latitude < forMap.height else { return }
         
         let newElevation = max(0,to)
         var (red: r, green: g, blue: b, alpha: a) = forMap.getPixel(x: longitude, y: latitude)
@@ -127,9 +129,11 @@ class GameModel {
             g = CGFloat(newElevation / 255)
         case .bottom:
             b = CGFloat(newElevation / 255)
+        case .old:
+            a = CGFloat(newElevation / 255)
         }
-        board.surface.setPixel(x: longitude, y: latitude, r: r, g: g, b: b, a: a)
-        //print("Elevation at \(longitude),\(latitude) is now \(r*255),\(g*255),\(b*255).")
+        forMap.setPixel(x: longitude, y: latitude, r: r, g: g, b: b, a: a)
+        //print("Elevation at \(longitude),\(latitude) is now \(r*255),\(g*255),\(b*255),\(a*255).")
     }
     
     func placeTanks(withMargin: Int = 50, minDist: Int = 10) {
@@ -249,7 +253,16 @@ class GameModel {
     func applyExplosion(at: SCNVector3, withRadius: Float) -> ImageBuf {
         let changeBuf = ImageBuf()
         changeBuf.copy(board.surface)
+
+        // record old height in alpha channel
+        for j in 0..<changeBuf.height {
+            for i in 0..<changeBuf.width {
+                let currElevation = getElevation(longitude: i, latitude: j)
+                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: currElevation, forMode: .old)
+            }
+        }
         
+        // update things in the radius of the explosion
         for j in Int(at.y-withRadius)...Int(at.y+withRadius) {
             for i in Int(at.x-withRadius)...Int(at.x+withRadius) {
                 let xDiff = at.x - Float(i)
