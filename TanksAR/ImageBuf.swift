@@ -51,14 +51,13 @@ class ImageBuf {
     }
     
     func copy(_ source: ImageBuf) {
+        //NSLog("image copy start")
         setSize(width: source.width, height: source.width)
-        
-        for j in 0..<height {
-            for i in 0..<width {
-                let (red: r, green: g, blue: b, alpha: a) = source.getPixel(x: i, y: j)
-                setPixel(x: i, y: j, r: r, g: g, b: b, a: a)
-            }
+    
+        for i in 0..<source.pixels.count {
+                pixels[i] = source.pixels[i]
         }
+        //NSLog("image copy end")
     }
     
     func isPowerOfTwo(_ number: Int) -> Bool {
