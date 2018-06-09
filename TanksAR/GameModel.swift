@@ -256,17 +256,12 @@ class GameModel {
     }
     
     func applyExplosion(at: SCNVector3, withRadius: Float) -> ImageBuf {
+        NSLog("applyExplosion started")
         let changeBuf = ImageBuf()
         changeBuf.copy(board.surface)
 
-        // record old height in alpha channel
-        for j in 0..<changeBuf.height {
-            for i in 0..<changeBuf.width {
-                let currElevation = getElevation(longitude: i, latitude: j)
-                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: currElevation, forMode: .old)
-            }
-        }
-        
+        NSLog("applyExplosion starting explosion computation")
+
         // update things in the radius of the explosion
         for j in Int(at.y-withRadius)...Int(at.y+withRadius) {
             for i in Int(at.x-withRadius)...Int(at.x+withRadius) {
@@ -287,17 +282,9 @@ class GameModel {
                 let mid = at.z + vertSize
                 let lower = at.z - vertSize
                 
-                if top  > mid {
-                    // column extends above explosion
-                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: top, forMode: .top)
-                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: mid, forMode: .middle)
-                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: lower, forMode: .bottom)
-                } else {
-                    // no upper section as this point
-                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: 0, forMode: .top)
-                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: 0, forMode: .middle)
-                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: lower, forMode: .bottom)
-                }
+                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: top, forMode: .top)
+                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: mid, forMode: .middle)
+                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: lower, forMode: .bottom)
                 
                 // update actual map
                 let newElevation = lower + max(0,top-mid)
