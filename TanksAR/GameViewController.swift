@@ -193,7 +193,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
     @IBAction func powerChanged(_ sender: UISlider) {
         gameModel.setTankPower(power: sender.value)
-        print("set tank power to \(sender.value)")
+        //print("set tank power to \(sender.value)")
     }
     
     func clearAllPlanes() {
