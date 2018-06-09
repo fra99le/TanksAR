@@ -144,7 +144,7 @@ class ImageBuf {
                     
                     //let nv = (andMaximum - withMinimum) * (r-minValue) / (maxValue-minValue) + withMinimum
                     let nv = ( CGFloat(andMaximum - withMinimum) / CGFloat(maxValue-minValue) ) * CGFloat(r-minValue) + CGFloat(withMinimum)
-                    setPixel(x: i, y: j, r: nv, g: nv, b: nv, a: 1.0)
+                    setPixel(x: i, y: j, r: nv, g: 0, b: 0, a: nv)
                 }
             }
         }
