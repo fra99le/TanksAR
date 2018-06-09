@@ -290,12 +290,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         
         // keep references to each block
         boardBlocks = Array(repeating: Array(repeating: SCNNode(), count: numPerSide), count: numPerSide)
-        
+        let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
+
         for i in 0..<numPerSide {
             for j in 0..<numPerSide {
                 // create block
-                let blockNode = SCNNode()
+                let blockNode = SCNNode(geometry: SCNBox(width: edgeSize, height: 1, length: edgeSize, chamferRadius: 0))
                 boardBlocks[i][j] = blockNode
+                blockNode.position.y = -1 // make sure update will happen initially
 
                 // add to board
                 board?.addChildNode(boardBlocks[i][j])
@@ -316,16 +318,21 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 let yPos = CGFloat(elevation/2)
                 let ySize = CGFloat(elevation)
 
-                // create a cube
+                // update cube
                 let blockNode = boardBlocks[i][j]
-                //print("block at \(i),\(j) is \(blockNode)")
-                let geometry = SCNBox(width: edgeSize, height: ySize, length: edgeSize, chamferRadius: 0)
-                blockNode.position = SCNVector3(xPos-CGFloat(gameModel.board.boardSize/2),
-                                                yPos,
-                                                zPos-CGFloat(gameModel.board.boardSize/2))
-
-                geometry.firstMaterial?.diffuse.contents = UIColor.green
-                blockNode.geometry = geometry
+                
+                if blockNode.position.y != Float(yPos) {
+                    //print("block at \(i),\(j) is \(blockNode)")
+                    blockNode.position = SCNVector3(xPos-CGFloat(gameModel.board.boardSize/2),
+                                                    yPos,
+                                                    zPos-CGFloat(gameModel.board.boardSize/2))
+                    if let geometry = blockNode.geometry as? SCNBox {
+                        geometry.width = edgeSize
+                        geometry.height = ySize
+                        geometry.length = edgeSize
+                        geometry.firstMaterial?.diffuse.contents = UIColor.green
+                    }
+                }
             }
         }
     }
