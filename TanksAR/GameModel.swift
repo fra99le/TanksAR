@@ -53,7 +53,7 @@ struct FireResult {
 }
 
 enum ElevationMode {
-    case top, middle, bottom, old
+    case top, middle, bottom, old, actual
 }
 
 // Note: For the model x,y are surface image coordinates, and z is elevation
@@ -82,11 +82,11 @@ class GameModel {
         placeTanks()
     }
 
-    func getElevation(longitude: Int, latitude: Int, forMode: ElevationMode = .top) -> Float {
+    func getElevation(longitude: Int, latitude: Int, forMode: ElevationMode = .actual) -> Float {
         return getElevation(fromMap: board.surface, longitude: longitude, latitude: latitude, forMode: forMode)
     }
-    
-    func getElevation(fromMap: ImageBuf, longitude: Int, latitude: Int, forMode: ElevationMode = .top) -> Float {
+
+    func getElevation(fromMap: ImageBuf, longitude: Int, latitude: Int, forMode: ElevationMode = .actual) -> Float {
         guard longitude >= 0 else { return -1 }
         guard longitude < fromMap.width else { return -1 }
         guard latitude >= 0 else { return -1 }
@@ -103,16 +103,18 @@ class GameModel {
             elevation = Float(b * 255)
         case .old:
             elevation = Float(a * 255)
+        case .actual:
+            elevation = Float(r * 255)
         }
         //print("Elevation at \(longitude),\(latitude) is \(elevation).")
         return elevation
     }
 
-    func setElevation(longitude: Int, latitude: Int, to: Float, forMode: ElevationMode = .top) {
+    func setElevation(longitude: Int, latitude: Int, to: Float, forMode: ElevationMode = .actual) {
         setElevation(forMap: board.surface, longitude: longitude, latitude: latitude, to: to, forMode: forMode)
     }
     
-    func setElevation(forMap: ImageBuf, longitude: Int, latitude: Int, to: Float, forMode: ElevationMode = .top) {
+    func setElevation(forMap: ImageBuf, longitude: Int, latitude: Int, to: Float, forMode: ElevationMode = .actual) {
         guard longitude >= 0 else { return }
         guard longitude < forMap.width else { return }
         guard latitude >= 0 else { return }
@@ -128,6 +130,11 @@ class GameModel {
         case .bottom:
             b = CGFloat(newElevation / 255)
         case .old:
+            a = CGFloat(newElevation / 255)
+        case .actual:
+            r = CGFloat(newElevation / 255)
+            g = 0
+            b = 0
             a = CGFloat(newElevation / 255)
         }
         forMap.setPixel(x: longitude, y: latitude, r: r, g: g, b: b, a: a)
@@ -298,6 +305,7 @@ class GameModel {
             }
 
         }
+        NSLog("applyExplosion finished")
         
         return changeBuf
     }
