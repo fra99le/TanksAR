@@ -10,7 +10,7 @@ import UIKit
 import SceneKit
 import ARKit
 
-class GameViewController: UIViewController, ARSCNViewDelegate {
+class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
@@ -23,6 +23,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     let timeScaling = 10
+    let numPerSide = 50
     var boardBlocks: [[SCNNode]] = []
     
     @IBOutlet var tapToSelectLabel: UILabel!
@@ -286,13 +287,26 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     
     func addBoard() {
         // use cubes until I can sort out actual Meshes.
-        let numPerSide = 50
-        
-        let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         
         // keep references to each block
         boardBlocks = Array(repeating: Array(repeating: SCNNode(), count: numPerSide), count: numPerSide)
         
+        for i in 0..<numPerSide {
+            for j in 0..<numPerSide {
+                // create block
+                let blockNode = SCNNode()
+                boardBlocks[i][j] = blockNode
+
+                // add to board
+                board?.addChildNode(boardBlocks[i][j])
+            }
+        }
+        updateBoard()
+    }
+    
+    func updateBoard() {
+        let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
+
         for i in 0..<numPerSide {
             for j in 0..<numPerSide {
                 // determine location of segment
@@ -303,8 +317,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
                 let ySize = CGFloat(elevation)
 
                 // create a cube
-                let blockNode = SCNNode()
-                boardBlocks[i][j] = blockNode
+                let blockNode = boardBlocks[i][j]
                 //print("block at \(i),\(j) is \(blockNode)")
                 let geometry = SCNBox(width: edgeSize, height: ySize, length: edgeSize, chamferRadius: 0)
                 blockNode.position = SCNVector3(xPos-CGFloat(gameModel.board.boardSize/2),
@@ -313,9 +326,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
 
                 geometry.firstMaterial?.diffuse.contents = UIColor.green
                 blockNode.geometry = geometry
-
-                // add to board
-                board?.addChildNode(blockNode)
             }
         }
     }
@@ -324,7 +334,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     @IBAction func fireButtonPressed(_ sender: UIButton) {
         print("Fire button pressed")
         launchProjectile()
-        updateUI()
+        fireButton.isEnabled = false
+        powerSlider.isEnabled = false
     }
     
     func launchProjectile() {
@@ -488,8 +499,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
             group.repeatCount = 1
             group.isRemovedOnCompletion = true
             group.animations = animations
+            group.delegate = self // will call updateUI when animation finishes
             explosion.addAnimation(group, forKey: "explosion")
         }
+    }
+    
+    func animationDidStop(_ animation: CAAnimation, finished: Bool) {
+            fireButton.isEnabled = true
+            powerSlider.isEnabled = true
+            updateUI()
     }
     
     func updateUI() {
@@ -499,7 +517,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         let currentPower = gameModel.board.players[gameModel.board.currentPlayer].tank.velocity
         powerSlider.setValue(currentPower, animated: false)
         
-        // update all tanke turrets
+        // update all tank turrets
 
+        // updte board
+        updateBoard()
     }
 }
