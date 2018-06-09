@@ -136,11 +136,11 @@ class GameModel {
     
     func placeTanks(withMargin: Int = 50, minDist: Int = 10) {
         for i in 0..<board.players.count {
-            let x = drand48() * Double(board.surface.width-withMargin*2) + Double(withMargin)
-            let y = drand48() * Double(board.surface.height-withMargin*2) + Double(withMargin)
+            let x = Float(drand48() * Double(board.surface.width-withMargin*2) + Double(withMargin))
+            let y = Float(drand48() * Double(board.surface.height-withMargin*2) + Double(withMargin))
 
             let tankElevation = getElevation(longitude: Int(x), latitude: Int(y))
-            board.players[i].tank = Tank(position: SCNVector3(x: Float(x), y: Float(y), z: Float(tankElevation)),
+            board.players[i].tank = Tank(position: SCNVector3(x: x, y: y, z: tankElevation),
                                          azimuth: 0, altitude: Float(Double.pi/4), velocity: 10)
         
             // flatten area around tanks
@@ -162,7 +162,7 @@ class GameModel {
                 let yDiff = latitude - j
                 let dist = sqrt(Double(xDiff*xDiff + yDiff*yDiff))
                 if( dist < Double(withRadius)) {
-                    board.surface.setPixel(x: i, y: j, r: Double(elevation/255.0), g: 0, b: 0, a: 1.0)
+                    setElevation(longitude: i, latitude: j, to: elevation)
                 }
             }
         }
