@@ -24,11 +24,12 @@ class ImageBuf {
     func setSize(width: Int, height: Int) {
         self.width = width
         self.height = height
-        pixels = [Pixel](repeating: Pixel(r: 0, g: 0, b: 0, a: 0), count: width*height)
+        pixels = [Pixel](repeating: Pixel(r: 1, g: 1, b: 1, a: 1), count: width*height)
     }
     
     func getPixel(x: Int, y: Int) -> (red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) {
         let offset = x + y*width
+        guard offset >= 0 && offset < pixels.count else { return (0,0,0,0) }
         
         let pixel = pixels[offset]
         let r = pixel.r
@@ -36,6 +37,7 @@ class ImageBuf {
         let b = pixel.b
         let a = pixel.a
         
+//        NSLog("getPixel(\(x),\(y)) -> \(r),\(g),\(b),\(a)")
         return (r, g, b, a)
     }
     
@@ -45,7 +47,10 @@ class ImageBuf {
  
     func setPixel(x: Int, y: Int, r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat) {
         let offset = x + y*width
-        
+        guard offset >= 0 && offset < pixels.count else { return }
+
+//        NSLog("setPixel(\(x),\(y)) <- \(r),\(g),\(b),\(a)")
+
         let pixel = Pixel(r: r, g: g, b: b, a: a)
         pixels[offset] = pixel
     }
