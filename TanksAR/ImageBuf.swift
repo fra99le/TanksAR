@@ -66,44 +66,42 @@ class ImageBuf {
     
     // see: https://en.wikipedia.org/wiki/Diamond-square_algorithm
     func doDiamondSquare() {
+        guard isPowerOfTwo(width-1) else { return }
+        guard isPowerOfTwo(height-1) else { return }
+
         // randomly assign corners
-        setPixel(x: 0, y: 0, r: drand48(), g: drand48(), b: drand48(), a: 1.0)
-        setPixel(x: 0, y: height-1, r: drand48(), g: drand48(), b: drand48(), a: 1.0)
-        setPixel(x: width-1, y: 0, r: drand48(), g: drand48(), b: drand48(), a: 1.0)
-        setPixel(x: width-1, y: height-1, r: drand48(), g: drand48(), b: drand48(), a: 1.0)
+        setPixel(x: 0, y: 0, r: drand48(), g: 0, b: 0, a: 1.0)
+        setPixel(x: 0, y: height-1, r: drand48(), g: 0, b: 0, a: 1.0)
+        setPixel(x: width-1, y: 0, r: drand48(), g: 0, b: 0, a: 1.0)
+        setPixel(x: width-1, y: height-1, r: drand48(), g: 0, b: 0, a: 1.0)
 
         // make recursive call
-        doDiamondSquare(x1: 0,y1: 0, x2: width-1, y2: height-1)
+        doDiamondSquare(x1: 0, y1: 0, x2: width-1, y2: height-1)
     }
     
     func doDiamondSquare(x1: Int, y1: Int, x2: Int, y2: Int) {
         if (x2-1) <= x1 || (y2-1) <= y1 { return }
         
-        let scale = 0.1
-        
-        // compute center
-        let (red: r1, green: _, blue: _, alpha: _) = getPixel(x: x1, y: y1)
-        let (red: r2, green: _, blue: _, alpha: _) = getPixel(x: x2, y: y1)
-        let (red: r3, green: _, blue: _, alpha: _) = getPixel(x: x1, y: y2)
-        let (red: r4, green: _, blue: _, alpha: _) = getPixel(x: x2, y: y2)
+        // compute center location
         let xc = (x1 + x2) / 2
         let yc = (y1 + y2) / 2
-        let sum = (r1+r2+r3+r4)
-        let randomAdd = CGFloat(drand48()*scale)
-        let average = sum / 4
-        let rc = average + randomAdd
-        setPixel(x: xc, y: yc, r: rc, g: rc, b: rc, a: 1.0)
-
-        // compute edge centers
-        let te = (r1 + rc + r2) / 3.0 + CGFloat(drand48()*scale)
-        let le = (r1 + rc + r3) / 3.0 + CGFloat(drand48()*scale)
-        let re = (r4 + rc + r2) / 3.0 + CGFloat(drand48()*scale)
-        let be = (r3 + rc + r4) / 3.0 + CGFloat(drand48()*scale)
-        setPixel(x: xc, y: y1, r: te, g: te, b: te, a: 1.0)
-        setPixel(x: x1, y: yc, r: le, g: le, b: le, a: 1.0)
-        setPixel(x: x2, y: yc, r: re, g: re, b: re, a: 1.0)
-        setPixel(x: xc, y: y2, r: be, g: be, b: be, a: 1.0)
-
+        let size = xc - x1
+//        if size > 200 {
+//            NSLog("center of \(x1),\(y1) and \(x2),\(y2) is \(xc),\(yc)")
+//        } else {
+//            NSLog("Returning for debugging purposes")
+//            return
+//        }
+        
+        // compute center (diamond step)
+        diamondStep(x: xc, y: yc, size: size)
+        
+        // compute edge centers (square step)
+        squareStep(x: xc, y: y1, size: size)
+        squareStep(x: x1, y: yc, size: size)
+        squareStep(x: xc, y: y2, size: size)
+        squareStep(x: x2, y: yc, size: size)
+        
         // perform recursions
         doDiamondSquare(x1: x1, y1: y1, x2: xc, y2: yc)
         doDiamondSquare(x1: xc, y1: y1, x2: x2, y2: yc)
@@ -111,6 +109,44 @@ class ImageBuf {
         doDiamondSquare(x1: xc, y1: yc, x2: x2, y2: y2)
     }
     
+    func diamondSquareStep(x: Int, y: Int, size: Int, pattern: [[Int]]) {
+        var sum: CGFloat = 0.0
+        var count = 0
+        let randomScale = CGFloat(size) / CGFloat(width)
+
+        for offsets in pattern {
+            let x = x + size * offsets[0]
+            let y = y + size * offsets[1]
+            
+//            NSLog("trying to sample \(x),\(y)")
+            guard x >= 0 else { continue }
+            guard x < width else { continue }
+            guard y >= 0 else { continue }
+            guard y < height else { continue }
+            
+            let (red: r, green: _, blue: _, alpha: _) = getPixel(x: x, y: y)
+            sum += r
+            count += 1
+        }
+        
+        let avg = sum / CGFloat(count)
+        let noise = randomScale * CGFloat(drand48()) - (randomScale/2)
+        let value = avg + noise
+//        NSLog("\(avg) = \(sum) / \(count), noise=\(noise)")
+        
+        setPixel(x: x, y: y, r: value, g: 0, b: 0, a: value)
+    }
+    
+    func diamondStep(x: Int, y: Int, size: Int) {
+        diamondSquareStep(x: x, y: y, size: size,
+                    pattern: [[-1, -1], [-1,1], [1,-1], [1,1]]);
+    }
+
+    func squareStep(x: Int, y: Int, size: Int) {
+        diamondSquareStep(x: x, y: y, size: size,
+                    pattern: [[0, -1], [-1,0], [1,0], [0,1]]);
+    }
+
     func normalize() {
         
     }
@@ -149,5 +185,4 @@ class ImageBuf {
             }
         }
     }
-    
 }
