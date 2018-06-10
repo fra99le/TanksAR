@@ -279,15 +279,15 @@ class GameModel {
                 
                 let currElevation = getElevation(longitude: i, latitude: j)
                 let top = currElevation
-                let mid = at.z + vertSize
-                let lower = at.z - vertSize
+                let middle = at.z + vertSize
+                let bottom = at.z - vertSize
                 
                 setElevation(forMap: changeBuf, longitude: i, latitude: j, to: top, forMode: .top)
-                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: mid, forMode: .middle)
-                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: lower, forMode: .bottom)
+                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: middle, forMode: .middle)
+                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: bottom, forMode: .bottom)
                 
                 // update actual map
-                let newElevation = lower + max(0,top-mid)
+                let newElevation = bottom + max(0,top-middle)
                 setElevation(longitude: i, latitude: j, to: newElevation)
             }
 
