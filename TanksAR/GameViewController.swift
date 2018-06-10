@@ -129,7 +129,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     func candidatePlane(_ planeAnchor: ARPlaneAnchor) -> SCNNode {
         let node = SCNNode()
         
-        print("plane extents are \(planeAnchor.extent.x),\(planeAnchor.extent.z).")
+        NSLog("plane extents are \(planeAnchor.extent.x),\(planeAnchor.extent.z).")
         let geometry = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
         node.geometry = geometry
         
@@ -142,7 +142,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     @IBOutlet var placeBoardGesture: UITapGestureRecognizer!
     @IBAction func screenTapped(_ sender: UIGestureRecognizer) {
         let touchLocation = sender.location(in: sceneView)
-        print("Screen tapped at \(touchLocation)")
+        NSLog("Screen tapped at \(touchLocation)")
         let hitTestResult = sceneView.hitTest(touchLocation, types: [.existingPlaneUsingGeometry])
         
         for result in hitTestResult {
@@ -152,7 +152,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                     break
                 }
             } else {
-                print("Board already placed")
+                NSLog("Board already placed")
             }
         }
     }
@@ -162,8 +162,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         guard let gesture = sender as? UIPanGestureRecognizer else { return }
         guard tankNodes.count > 0 else { return }
         
-        print("Screen dragged \(gesture).")
-        print("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
+        NSLog("Screen dragged \(gesture).")
+        NSLog("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
         // determine player
         let player = gameModel.board.currentPlayer
         let tankNode = tankNodes[player]
@@ -172,7 +172,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         let tank = gameModel.getTank(forPlayer: player)
         let currAzimuth = tank.azimuth
         let currAltitude = tank.altitude
-        print("currAzimuth: \(currAzimuth), currAltitude: \(currAltitude)")
+        NSLog("currAzimuth: \(currAzimuth), currAltitude: \(currAltitude)")
 
         // update values
         let translation = gesture.translation(in: nil)
@@ -184,7 +184,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { return }
         turretNode.eulerAngles.y = newAzimuth * (Float.pi/180)
         hingeNode.eulerAngles.x = newAltitude * (Float.pi/180)
-        print("newAzimuth: \(newAzimuth), newAltitude: \(newAltitude)")
+        NSLog("newAzimuth: \(newAzimuth), newAltitude: \(newAltitude)")
         
         if gesture.state == .ended {
             gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
@@ -209,8 +209,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // remove all candidate planes
         clearAllPlanes()
         
-        print("Placing board at \(withExtentOf)")
-        print("plane extents are \(withExtentOf.extent.x),\(withExtentOf.extent.z).")
+        NSLog("Placing board at \(withExtentOf)")
+        NSLog("plane extents are \(withExtentOf.extent.x),\(withExtentOf.extent.z).")
 
         let scaleNode = SCNNode()
         let boardBaseNode = SCNNode()
@@ -279,7 +279,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             tankNode.scale = SCNVector3(30,30,30)
             //tankNode.eulerAngles.x = Float.pi / 2
 
-            print("Adding tank at \(tankNode.position)")
+            NSLog("Adding tank at \(tankNode.position)")
             board?.addChildNode(tankNode)
             tankNodes.append(tankNode)
         }
@@ -322,7 +322,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 let blockNode = boardBlocks[i][j]
                 
                 if blockNode.position.y != Float(yPos) {
-                    //print("block at \(i),\(j) is \(blockNode)")
+                    //NSLog("block at \(i),\(j) is \(blockNode)")
                     blockNode.position = SCNVector3(xPos-CGFloat(gameModel.board.boardSize/2),
                                                     yPos,
                                                     zPos-CGFloat(gameModel.board.boardSize/2))
@@ -359,10 +359,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         let xVel = -power * sin(azi) * cos(alt)
         let yVel = power * sin(alt)
         let zVel = -power * cos(azi) * cos(alt)
-        print("tank angles: \(tank.azimuth),\(tank.altitude)")
-        print("angles in radians: \(azi),\(alt)")
-        print("velocity: \(xVel),\(yVel),\(zVel)")
-        print("position: \(position)")
+        NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
+        NSLog("angles in radians: \(azi),\(alt)")
+        NSLog("velocity: \(xVel),\(yVel),\(zVel)")
+        NSLog("position: \(position)")
         let velocity = SCNVector3(xVel, yVel, zVel)
         
         // convert to model coordinate space
@@ -374,10 +374,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         muzzleVelocity.x = velocity.x
         muzzleVelocity.y = velocity.z
         muzzleVelocity.z = velocity.y
-        print("view pos: \(position)")
-        print("view vel: \(velocity)")
-        print("model pos: \(muzzlePosition)")
-        print("model vel: \(muzzleVelocity)")
+        NSLog("view pos: \(position)")
+        NSLog("view vel: \(velocity)")
+        NSLog("model pos: \(muzzlePosition)")
+        NSLog("model vel: \(muzzleVelocity)")
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
 
@@ -413,7 +413,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             var prevPosition = firstPosition
             let timeStep = CFTimeInterval(fireResult.timeStep / Float(timeScaling))
             for currPosition in fireResult.trajectory {
-                //print("trajectory position: \(currPosition) at time \(currTime)")
+                //NSLog("trajectory position: \(currPosition) at time \(currTime)")
                 // convert currPostion to AR space
                 var arPosition = currPosition
                 arPosition.x = currPosition.x - Float(gameModel.board.boardSize/2)
