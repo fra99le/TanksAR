@@ -193,6 +193,7 @@ class GameModel {
         }
         board.players[board.currentPlayer].tank.azimuth = cleanAzimuth
         board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
+        NSLog("tank for player \(board.currentPlayer) set to \(board.players[board.currentPlayer].tank.azimuth)º,\(board.players[board.currentPlayer].tank.altitude)º")
     }
 
     func setTankPower(power: Float) {
