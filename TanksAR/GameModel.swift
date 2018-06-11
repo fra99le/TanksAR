@@ -92,19 +92,19 @@ class GameModel {
         guard latitude >= 0 else { return -1 }
         guard latitude < fromMap.height else { return -1 }
 
-        let (red: r, green: g, blue: b, alpha: a) = fromMap.getPixel(x: longitude, y: latitude)
-        var elevation = Float(r*255)
+        let pixel = fromMap.getPixel(x: longitude, y: latitude)
+        var elevation = Float(pixel.r*255)
         switch forMode {
         case .top:
-            elevation = Float(r * 255)
+            elevation = Float(pixel.r * 255)
         case .middle:
-            elevation = Float(g * 255)
+            elevation = Float(pixel.g * 255)
         case .bottom:
-            elevation = Float(b * 255)
+            elevation = Float(pixel.b * 255)
         case .old:
-            elevation = Float(a * 255)
+            elevation = Float(pixel.a * 255)
         case .actual:
-            elevation = Float(r * 255)
+            elevation = Float(pixel.r * 255)
         }
         //print("Elevation at \(longitude),\(latitude) is \(elevation).")
         return elevation
@@ -121,24 +121,24 @@ class GameModel {
         guard latitude < forMap.height else { return }
         
         let newElevation = max(0,to)
-        var (red: r, green: g, blue: b, alpha: a) = forMap.getPixel(x: longitude, y: latitude)
+        var pixel = forMap.getPixel(x: longitude, y: latitude)
         switch forMode {
         case .top:
-            r = CGFloat(newElevation / 255)
+            pixel.r = CGFloat(newElevation / 255)
         case .middle:
-            g = CGFloat(newElevation / 255)
+            pixel.g = CGFloat(newElevation / 255)
         case .bottom:
-            b = CGFloat(newElevation / 255)
+            pixel.b = CGFloat(newElevation / 255)
         case .old:
-            a = CGFloat(newElevation / 255)
+            pixel.a = CGFloat(newElevation / 255)
         case .actual:
-            r = CGFloat(newElevation / 255)
-            g = r
-            b = r
-            a = r
+            pixel.r = CGFloat(newElevation / 255)
+            pixel.g = pixel.r
+            pixel.b = pixel.r
+            pixel.a = pixel.r
         }
         
-        forMap.setPixel(x: longitude, y: latitude, value: Pixel(r: r, g: g, b: b, a: a))
+        forMap.setPixel(x: longitude, y: latitude, value: pixel)
         //print("Elevation at \(longitude),\(latitude) is now \(r*255),\(g*255),\(b*255),\(a*255).")
     }
     
