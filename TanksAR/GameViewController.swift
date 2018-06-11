@@ -193,7 +193,20 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
     @IBAction func powerChanged(_ sender: UISlider) {
         gameModel.setTankPower(power: sender.value)
-        //print("set tank power to \(sender.value)")
+        //NSLog("set tank power to \(sender.value)")
+    }
+    
+    // MARK: - Helper methods
+    func toModelSpace(_ position: SCNVector3) -> SCNVector3 {
+        return SCNVector3(x: position.x + Float(gameModel.board.boardSize/2),
+                            y: position.z + Float(gameModel.board.boardSize/2),
+                            z: position.y)
+    }
+
+    func fromModelSpace(_ position: SCNVector3) -> SCNVector3 {
+        return SCNVector3(x: position.x - Float(gameModel.board.boardSize/2),
+                          y: position.z,
+                          z: position.y - Float(gameModel.board.boardSize/2))
     }
     
     func clearAllPlanes() {
@@ -273,9 +286,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             guard let tankNode = tankScene?.rootNode.childNode(withName: "Tank", recursively: false) else { continue }
             
             guard let tank = player.tank else { continue }
-            tankNode.position = SCNVector3(tank.lon-Float(gameModel.board.boardSize/2),
-                                           tank.elev,
-                                           tank.lat-Float(gameModel.board.boardSize/2))
+            tankNode.position = fromModelSpace(tank.position)
             tankNode.scale = SCNVector3(30,30,30)
             //tankNode.eulerAngles.x = Float.pi / 2
 
@@ -330,7 +341,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                         geometry.width = edgeSize
                         geometry.height = ySize
                         geometry.length = edgeSize
-                        geometry.firstMaterial?.diffuse.contents = UIColor.green
                     }
                 }
             }
@@ -368,9 +378,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // convert to model coordinate space
         var muzzlePosition = position
         var muzzleVelocity = velocity
-        muzzlePosition.x = position.x + Float(gameModel.board.boardSize/2)
-        muzzlePosition.y = position.z + Float(gameModel.board.boardSize/2)
-        muzzlePosition.z = position.y
+        muzzlePosition = toModelSpace(position)
         muzzleVelocity.x = velocity.x
         muzzleVelocity.y = velocity.z
         muzzleVelocity.z = velocity.y
@@ -393,9 +401,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             let firstPosition = fireResult.trajectory.first {
             shell.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
             // convert back to view coordinates
-            shell.position.x = firstPosition.x - Float(gameModel.board.boardSize/2)
-            shell.position.y = firstPosition.z
-            shell.position.z = firstPosition.y - Float(gameModel.board.boardSize/2)
+            shell.position = fromModelSpace(firstPosition)
             shell.opacity = 0.0
             board?.addChildNode(shellNode!)
 
@@ -415,10 +421,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             for currPosition in fireResult.trajectory {
                 //NSLog("trajectory position: \(currPosition) at time \(currTime)")
                 // convert currPostion to AR space
-                var arPosition = currPosition
-                arPosition.x = currPosition.x - Float(gameModel.board.boardSize/2)
-                arPosition.y = currPosition.z
-                arPosition.z = currPosition.y - Float(gameModel.board.boardSize/2)
+                let arPosition = fromModelSpace(currPosition)
                 
                 // add animations for shell here
                 let animation = CABasicAnimation(keyPath: "position")
@@ -447,7 +450,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             group.isRemovedOnCompletion = true
             group.animations = animations
             shell.addAnimation(group, forKey: "balistics")
+            finalAnimation = group
         }
+        NSLog("shell landed at time \(currTime).")
         
         // animate explosion
         if let oldExplosion = explosionNode {
@@ -455,12 +460,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         }
         explosionNode = SCNNode(geometry: SCNSphere(radius: 1))
         if let explosion = explosionNode,
-            let position = fireResult.trajectory.last {
+            let lastPosition = fireResult.trajectory.last {
             explosion.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
             // convert back to view coordinates
-            explosion.position.x = position.x - Float(gameModel.board.boardSize/2)
-            explosion.position.y = position.z
-            explosion.position.z = position.y - Float(gameModel.board.boardSize/2)
+            explosion.position = fromModelSpace(lastPosition)
             explosion.opacity = 0
             board?.addChildNode(explosion)
             
