@@ -207,7 +207,7 @@ class GameModel {
         print("Player \(board.currentPlayer) now active.")
 
         let timeStep = Float(1)/Float(10)
-        let gravity = Float(9.80665)
+        let gravity = Float(-9.80665)
         
         // compute trajectory
         var trajectory: [SCNVector3] = []
@@ -223,11 +223,11 @@ class GameModel {
             
             // update position
             position.x += velocity.x * timeStep
-            position.y += velocity.y * timeStep
+            position.y += velocity.y * timeStep + 0.5 * gravity * (timeStep*timeStep)
             position.z += velocity.z * timeStep
 
             // update velocity
-            velocity.z -= 0.5 * gravity * (timeStep*timeStep)
+            velocity.z += gravity * timeStep
             
             // check for impact
             let distAboveLand = position.z - getElevation(longitude: Int(position.x), latitude: Int(position.y))
