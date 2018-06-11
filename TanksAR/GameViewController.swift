@@ -247,6 +247,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     
 
     // MARK: - UI element actions
+    // make this a target for unwinding segues
+    @IBAction func unwindToGameScreen(unwindSegue: UIStoryboardSegue) {
+        
+    }
+    
     @IBAction func fireButtonPressed(_ sender: UIButton) {
         NSLog("Fire button pressed")
         launchProjectile()
