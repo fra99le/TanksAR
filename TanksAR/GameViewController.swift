@@ -47,7 +47,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         
         // create the game board
         gameModel.generateBoard()
-        
+        mapImage.image = gameModel.board.surface.asUIImage()
+
         sceneView.autoenablesDefaultLighting = true
     }
     
@@ -329,6 +330,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             }
         }
         updateBoard()
+        mapImage.image = gameModel.board.surface.asUIImage()
     }
     
     func updateBoard() {
@@ -405,6 +407,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
 
+        mapImage.image = fireResult.mapUpdate.asUIImage()
+        
         // time for use in animations
         var currTime = CFTimeInterval(0)
         var finalAnimation: CAAnimation? = nil
@@ -679,5 +683,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         // updte board
         updateBoard()
+    }
+    
+    // MARK: - Map View
+    
+    @IBOutlet var mapImage: UIImageView!
+    
+    @IBAction func toggleMap(_ sender: UIButton) {
+        mapImage.isHidden = !mapImage.isHidden
     }
 }

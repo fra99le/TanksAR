@@ -138,19 +138,42 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xA9-IZ-spM">
+                                <rect key="frame" x="0.0" y="99" width="375" height="500"/>
+                                <color key="backgroundColor" red="0.99999600649999998" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                <gestureRecognizers/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="500" id="jeu-V6-LS8"/>
+                                </constraints>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="5hr-VT-zKA" appends="YES" id="OZ7-DK-dcj"/>
+                                </connections>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Zlt-bF-eIw">
+                                <rect key="frame" x="329" y="617" width="30" height="30"/>
+                                <state key="normal" title="Map"/>
+                                <connections>
+                                    <action selector="toggleMap:" destination="BV1-FR-VrT" eventType="touchUpInside" id="Mqe-P1-AaZ"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="YBO-zh-2lA" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="0q8-ZV-c52"/>
                             <constraint firstItem="Vhx-eP-M1c" firstAttribute="top" secondItem="dTU-l8-x8U" secondAttribute="bottom" constant="8" id="5hh-vd-wkK"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="Zlt-bF-eIw" secondAttribute="trailing" constant="16" id="5qY-Oo-gYQ"/>
                             <constraint firstItem="QIh-1p-M8Z" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="40" id="6NT-Ok-ViS"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="top" secondItem="GEX-Hw-PMz" secondAttribute="top" id="C9f-08-Ydg"/>
                             <constraint firstItem="dTU-l8-x8U" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="CRC-q8-09j"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="xA9-IZ-spM" secondAttribute="trailing" id="DgK-kz-HrG"/>
+                            <constraint firstItem="xA9-IZ-spM" firstAttribute="top" secondItem="Vhx-eP-M1c" secondAttribute="bottom" id="FIC-LM-YuX"/>
+                            <constraint firstItem="xA9-IZ-spM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="WrH-Pp-ZZq"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Rqa-bG-wWn" secondAttribute="bottom" constant="20" id="bzU-jY-qDN"/>
                             <constraint firstItem="Rqa-bG-wWn" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="cjR-RF-DNz"/>
                             <constraint firstItem="dTU-l8-x8U" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="dzb-hW-aEZ"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="bottom" secondItem="Z0Y-yR-u5V" secondAttribute="bottom" id="iuZ-hH-2hL"/>
                             <constraint firstItem="YBO-zh-2lA" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="20" id="jXm-4I-tiD"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Zlt-bF-eIw" secondAttribute="bottom" constant="20" id="kQY-S4-SHO"/>
                             <constraint firstItem="Vhx-eP-M1c" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="p8b-BE-ajp"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="trailing" secondItem="Z0Y-yR-u5V" secondAttribute="trailing" id="qQm-OX-dIS"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="xJs-TJ-zrJ"/>
@@ -160,6 +183,7 @@
                     </view>
                     <connections>
                         <outlet property="fireButton" destination="Rqa-bG-wWn" id="9ul-PN-kLT"/>
+                        <outlet property="mapImage" destination="xA9-IZ-spM" id="aZg-42-6Ed"/>
                         <outlet property="placeBoardGesture" destination="NvL-x5-eHp" id="T9y-nK-hH1"/>
                         <outlet property="powerLabel" destination="Vhx-eP-M1c" id="wCr-8P-Tg3"/>
                         <outlet property="powerSlider" destination="dTU-l8-x8U" id="8DV-HN-nHY"/>
@@ -180,6 +204,8 @@
                         <action selector="screenDragged:" destination="BV1-FR-VrT" id="O4C-8x-pwk"/>
                     </connections>
                 </panGestureRecognizer>
+                <tapGestureRecognizer id="5hr-VT-zKA" userLabel="Backup Place Board Gesture"/>
+                <pinchGestureRecognizer id="Ryc-85-irL" userLabel="Rescale Gesture"/>
             </objects>
             <point key="canvasLocation" x="261.60000000000002" y="61.619190404797607"/>
         </scene>
