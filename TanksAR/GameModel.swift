@@ -133,11 +133,12 @@ class GameModel {
             a = CGFloat(newElevation / 255)
         case .actual:
             r = CGFloat(newElevation / 255)
-            g = 0
-            b = 0
-            a = CGFloat(newElevation / 255)
+            g = r
+            b = r
+            a = r
         }
-        forMap.setPixel(x: longitude, y: latitude, r: r, g: g, b: b, a: a)
+        
+        forMap.setPixel(x: longitude, y: latitude, value: Pixel(r: r, g: g, b: b, a: a))
         //print("Elevation at \(longitude),\(latitude) is now \(r*255),\(g*255),\(b*255),\(a*255).")
     }
     
