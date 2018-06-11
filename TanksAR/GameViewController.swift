@@ -25,6 +25,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     let timeScaling = 10
     let numPerSide = 50
     var boardBlocks: [[SCNNode]] = []
+    var dropBlocks: [SCNNode] = []
     
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
@@ -191,6 +192,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         }
     }
 
+    // MARK: - UI element actions
+    @IBAction func fireButtonPressed(_ sender: UIButton) {
+        NSLog("Fire button pressed")
+        launchProjectile()
+        fireButton.isEnabled = false
+        powerSlider.isEnabled = false
+    }
+    
     @IBAction func powerChanged(_ sender: UISlider) {
         gameModel.setTankPower(power: sender.value)
         //NSLog("set tank power to \(sender.value)")
@@ -345,14 +354,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 }
             }
         }
-    }
-    
-    // MARK: UI elements
-    @IBAction func fireButtonPressed(_ sender: UIButton) {
-        print("Fire button pressed")
-        launchProjectile()
-        fireButton.isEnabled = false
-        powerSlider.isEnabled = false
+
+        // remove any dropBlocks that may still be around
+        for block in dropBlocks {
+            block.removeFromParentNode()
+        }
+        NSLog("updateBoard finished")
     }
     
     func launchProjectile() {
@@ -391,7 +398,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         // time for use in animations
         var currTime = CFTimeInterval(0)
-
+        var finalAnimation: CAAnimation? = nil
+        
         // create shell object
         if let oldShell = shellNode {
             oldShell.removeFromParentNode()
@@ -509,15 +517,145 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             group.repeatCount = 1
             group.isRemovedOnCompletion = true
             group.animations = animations
-            group.delegate = self // will call updateUI when animation finishes
+            //group.delegate = self
             explosion.addAnimation(group, forKey: "explosion")
+            finalAnimation = group
         }
+        NSLog("explosion ended at time \(currTime).")
+
+        // animate board update
+        var dropNeeded = false
+        let dropTime: Double = 3
+        for block in dropBlocks {
+            block.removeFromParentNode()
+        }
+        // stages:
+        //  1. dropBlocks created, boardBlocks set to bottom height (immediate)
+        //  2. dropBlocks drop over fixed interval
+        //  3. dropBlocks dissappear, boardBlocks set to final height (immediate)
+        for j in 0..<numPerSide {
+            for i in 0..<numPerSide {
+                let boardBlock = boardBlocks[i][j]
+                let blockGeometry = boardBlock.geometry as! SCNBox
+                let modelPos = toModelSpace(boardBlock.position)
+
+                // get elevations for block
+                let current = gameModel.getElevation(fromMap: fireResult.mapUpdate,
+                                                     longitude: Int(modelPos.x), latitude: Int(modelPos.y),
+                                                     forMode: .old)
+                let top = gameModel.getElevation(fromMap: fireResult.mapUpdate,
+                                                 longitude: Int(modelPos.x), latitude: Int(modelPos.y),
+                                                 forMode: .top)
+                let middle = gameModel.getElevation(fromMap: fireResult.mapUpdate,
+                                                    longitude: Int(modelPos.x), latitude: Int(modelPos.y),
+                                                    forMode: .middle)
+                let bottom = gameModel.getElevation(fromMap: fireResult.mapUpdate,
+                                                    longitude: Int(modelPos.x), latitude: Int(modelPos.y),
+                                                    forMode: .bottom)
+                
+                if top > middle && middle > bottom {
+                    dropNeeded = true
+                    NSLog("(\(i),\(j)) will drop, top: \(top), middle: \(middle), bottom: \(bottom)")
+                    // need to create and animate a drop block
+                    let dropBlock = SCNNode(geometry: SCNBox(width: blockGeometry.width,
+                                                             height: CGFloat(top-middle),
+                                                             length: blockGeometry.length, chamferRadius: 0))
+                    dropBlock.position = boardBlock.position
+                    dropBlock.position.y = (top+middle)/2
+                    board?.addChildNode(dropBlock)
+                    dropBlocks.append(dropBlock)
+
+                    var finalPosition = dropBlock.position
+                    finalPosition.y = bottom + (top-middle)/2
+                    
+                    var animations: [CAAnimation] = []
+                    
+                    // make block appear
+                    let animation1 = CABasicAnimation(keyPath: "opacity")
+                    animation1.fromValue = 0
+                    animation1.toValue = 1
+                    animation1.beginTime = currTime
+                    animation1.duration = 0
+                    animations.append(animation1)
+                    
+                    // animate drop
+                    let animation2 = CABasicAnimation(keyPath: "position")
+                    animation2.fromValue = dropBlock.position
+                    animation2.toValue = finalPosition
+                    animation2.beginTime = currTime
+                    animation2.duration = CFTimeInterval(dropTime)
+                    animations.append(animation2)
+                    
+                    let group = CAAnimationGroup()
+                    group.beginTime = 0
+                    group.duration = currTime
+                    group.repeatCount = 1
+                    group.isRemovedOnCompletion = true
+                    group.animations = animations
+                    dropBlock.addAnimation(group, forKey: "block \(i),\(j) drop")
+                    finalAnimation = group
+                }
+                
+                let finalElevation = bottom + max(0,(top-middle))
+                if  finalElevation != current {
+                    // final elevation will be different
+                    NSLog("(\(i),\(j)) changes final height by \(current-finalElevation), \(current) -> \(finalElevation), top: \(top), middle: \(middle), bottom: \(bottom)")
+                    let collapseHeight = min(bottom,current)
+                    
+                    // resize at appropriate time
+                    let animation1 = CABasicAnimation(keyPath: "geometry.height")
+                    animation1.fromValue = blockGeometry.height
+                    animation1.toValue = collapseHeight
+                    animation1.beginTime = currTime
+                    animation1.duration = CFTimeInterval(0)
+                    boardBlock.addAnimation(animation1, forKey: "block \(i),\(j) resize")
+
+                    // handle repositioning
+                    let animation2 = CABasicAnimation(keyPath: "position.y")
+                    animation2.fromValue = boardBlock.position.y
+                    animation2.toValue = collapseHeight/2
+                    animation2.beginTime = currTime
+                    animation2.duration = CFTimeInterval(0)
+                    boardBlock.addAnimation(animation2, forKey: "block \(i),\(j) reposition")
+                }
+            }
+        }
+        if dropNeeded {
+            currTime += dropTime
+        }
+        NSLog("board settled at time \(currTime).")
+        
+        // a do-nothing animation to call the delegate
+        NSLog("animation should stop at time \(currTime)")
+        NSLog("final animiation starts at \(String(describing: finalAnimation?.beginTime))s and goes for \(String(describing: finalAnimation?.duration))s.")
+        finalAnimation?.delegate = self
+    }
+    
+    func animationDidStart(_ anim: CAAnimation) {
+        NSLog("Animation started")
     }
     
     func animationDidStop(_ animation: CAAnimation, finished: Bool) {
-            fireButton.isEnabled = true
-            powerSlider.isEnabled = true
-            updateUI()
+        NSLog("Animation stopped (finished: \(finished))")
+        NSLog("\tbegan at: \(animation.beginTime), with duration: \(animation.duration)")
+        
+        /*
+        // because this gets called way way way too soon
+        // see: https://stackoverflow.com/questions/24056205/how-to-use-background-thread-in-swift
+        DispatchQueue.global(qos: .background).async {
+            print("This is run on the background queue")
+            Thread.sleep(forTimeInterval: animation.beginTime+animation.duration)
+
+            DispatchQueue.main.async {
+                print("This is run on the main queue, after the previous code in outer block")
+         */
+                self.fireButton.isEnabled = true
+                self.powerSlider.isEnabled = true
+                self.updateUI()
+        /*
+            }
+        }
+        */
     }
     
     func updateUI() {
