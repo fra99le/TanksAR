@@ -10,12 +10,18 @@ import UIKit
 import SceneKit
 import ARKit
 
+struct UserConfig {
+    var scaleFactor: Float
+    var rotation: Float
+}
+
 class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
     var boardPlaced = false
     var boardSize: Float = 1.0
+    var boardScaleFactor: Float = 1.0
     var candidatePlanes: [SCNNode] = []
     var board: SCNNode? = nil
     var gameModel = GameModel()
@@ -26,6 +32,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     let numPerSide = 50
     var boardBlocks: [[SCNNode]] = []
     var dropBlocks: [SCNNode] = []
+    var users: [UserConfig] = []
     
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
@@ -64,6 +71,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // cause board placement to occur when view reappears
         unplaceBoard()
         updateUI()
+        
+        placeBoardGesture.require(toFail: backupPlaceBoardGesture)
+        rescaleGesture.require(toFail: rotateGesture)
         
         // Run the view's session
         sceneView.session.run(configuration)
@@ -164,6 +174,18 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         }
     }
 
+    @IBOutlet var backupPlaceBoardGesture: UITapGestureRecognizer!
+    @IBAction func screenDoubleTapped(_ sender: UIGestureRecognizer) {
+        let touchLocation = sender.location(in: sceneView)
+        NSLog("Screen double tapped at \(touchLocation)")
+
+        let position = SCNVector3(0, -0.5, -2.0)
+        let scaleFactor = 1.0 / Float(gameModel.board.boardSize)
+        placeBoard(atLocation: position, withScaleFactor: scaleFactor)
+    }
+    
+
+    
     @IBOutlet var screenDraggingGesture: UIPanGestureRecognizer!
     @IBAction func screenDragged(_ sender: UIGestureRecognizer) {
         guard let gesture = sender as? UIPanGestureRecognizer else { return }
@@ -197,6 +219,32 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
         }
     }
+
+    @IBOutlet var rescaleGesture: UIPinchGestureRecognizer!
+    @IBAction func rescaleGesture(_ sender: UIPinchGestureRecognizer) {
+        let player = gameModel.board.currentPlayer
+        let newScale = CGFloat(boardScaleFactor) * sender.scale
+        board?.scale = SCNVector3(newScale,newScale,newScale)
+
+        if sender.state == .ended {
+            NSLog("pinch gesture: \(sender.scale)x ended for player \(player)")
+            users[player].scaleFactor *= Float(sender.scale)
+            NSLog("scale for user \(player) set to \(users[player].scaleFactor)")
+        }
+    }
+
+    @IBOutlet var rotateGesture: UIRotationGestureRecognizer!
+    @IBAction func rotateGesture(_ sender: UIRotationGestureRecognizer) {
+        let player = gameModel.board.currentPlayer
+        board?.eulerAngles.y = Float(CGFloat(users[player].rotation) - sender.rotation)
+
+        if sender.state == .ended {
+            NSLog("rotate gesture: \(sender.rotation) ended or player \(player)")
+            users[player].rotation -= Float(sender.rotation)
+            NSLog("rotation for user \(player) set to \(users[player].rotation)")
+        }
+    }
+    
 
     // MARK: - UI element actions
     @IBAction func fireButtonPressed(_ sender: UIButton) {
@@ -233,22 +281,29 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     
     func placeBoard(_ atLocationOf: ARHitTestResult) {
         guard let withExtentOf = atLocationOf.anchor as? ARPlaneAnchor else { return }
+        let planePosition = atLocationOf.worldTransform.columns.3
+        let position = SCNVector3(planePosition.x, planePosition.y, planePosition.z)
+        let boardSize = min(withExtentOf.extent.x,withExtentOf.extent.z)
+        let scaleFactor = Float(boardSize) / Float(gameModel.board.boardSize)
+
+        NSLog("Placing board at \(withExtentOf)")
+        NSLog("plane extents are \(withExtentOf.extent.x),\(withExtentOf.extent.z).")
         
+        placeBoard(atLocation: position, withScaleFactor: scaleFactor)
+    }
+
+    func placeBoard(atLocation: SCNVector3, withScaleFactor: Float) {
         // remove all candidate planes
         clearAllPlanes()
         
-        NSLog("Placing board at \(withExtentOf)")
-        NSLog("plane extents are \(withExtentOf.extent.x),\(withExtentOf.extent.z).")
-
         let scaleNode = SCNNode()
         let boardBaseNode = SCNNode()
 
         // set scale factor for scaling node
-        let planePosition = atLocationOf.worldTransform.columns.3
-        scaleNode.position = SCNVector3(planePosition.x, planePosition.y, planePosition.z)
-        let boardSize = min(withExtentOf.extent.x,withExtentOf.extent.z)
-        let scaleFactor = Float(boardSize) / Float(gameModel.board.boardSize)
-        scaleNode.scale = SCNVector3(scaleFactor,scaleFactor,scaleFactor)
+        scaleNode.position = atLocation
+        boardScaleFactor = withScaleFactor
+        scaleNode.scale = SCNVector3(boardScaleFactor,boardScaleFactor,boardScaleFactor)
+        scaleNode.name = "scaleNode"
         board = scaleNode
         sceneView.scene.rootNode.addChildNode(scaleNode)
 
@@ -264,7 +319,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         gameModel.startGame(numPlayers: 2)
         addBoard()
         addTanks()
-        
+        users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0),
+                             count: gameModel.board.players.count)
+
         // disable selection of a board location
         boardPlaced = true
         placeBoardGesture.isEnabled = false
@@ -679,9 +736,31 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         let currentPower = gameModel.board.players[gameModel.board.currentPlayer].tank.velocity
         powerSlider.setValue(currentPower, animated: false)
         
-        // update all tank turrets
+        // update scale and rotation for player
+        let scaleNode = board!
+        let rotationAnimation = CABasicAnimation(keyPath: "eulerAngles.y")
+        rotationAnimation.fromValue = scaleNode.eulerAngles.y
+        rotationAnimation.toValue = users[gameModel.board.currentPlayer].rotation
+        rotationAnimation.beginTime = 0
+        rotationAnimation.duration = 1
+        scaleNode.addAnimation(rotationAnimation, forKey: "Player Rotation")
+        scaleNode.eulerAngles.y = users[gameModel.board.currentPlayer].rotation
+        NSLog("rotating to \(rotationAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
+        
+        let rescaleAnimation = CABasicAnimation(keyPath: "scale")
+        rescaleAnimation.fromValue = scaleNode.scale
+        let newFactor = boardScaleFactor * users[gameModel.board.currentPlayer].scaleFactor
+        let newScale = SCNVector3(newFactor,newFactor,newFactor)
+        rescaleAnimation.toValue = newScale
+        rescaleAnimation.beginTime = 0
+        rescaleAnimation.duration = 1
+        scaleNode.addAnimation(rescaleAnimation, forKey: "Player Scaling")
+        scaleNode.scale = newScale
+        NSLog("scaling to \(rescaleAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
 
-        // updte board
+        // update all tank turrets
+        
+        // update board
         updateBoard()
     }
     

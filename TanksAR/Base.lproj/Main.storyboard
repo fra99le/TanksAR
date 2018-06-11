@@ -86,6 +86,9 @@
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="NvL-x5-eHp" appends="YES" id="ZtK-JS-eZj"/>
                                     <outletCollection property="gestureRecognizers" destination="MI9-nU-qrH" appends="YES" id="9Sq-pE-l5s"/>
+                                    <outletCollection property="gestureRecognizers" destination="5hr-VT-zKA" appends="YES" id="I4R-Xc-6ZO"/>
+                                    <outletCollection property="gestureRecognizers" destination="Ryc-85-irL" appends="YES" id="Brw-Nx-6De"/>
+                                    <outletCollection property="gestureRecognizers" destination="hW4-6f-hnA" appends="YES" id="JBo-bG-RpC"/>
                                 </connections>
                             </arscnView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YBO-zh-2lA">
@@ -145,9 +148,6 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="500" id="jeu-V6-LS8"/>
                                 </constraints>
-                                <connections>
-                                    <outletCollection property="gestureRecognizers" destination="5hr-VT-zKA" appends="YES" id="OZ7-DK-dcj"/>
-                                </connections>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Zlt-bF-eIw">
                                 <rect key="frame" x="329" y="617" width="30" height="30"/>
@@ -182,11 +182,14 @@
                         <viewLayoutGuide key="safeArea" id="Z0Y-yR-u5V"/>
                     </view>
                     <connections>
+                        <outlet property="backupPlaceBoardGesture" destination="5hr-VT-zKA" id="oEq-9l-kHp"/>
                         <outlet property="fireButton" destination="Rqa-bG-wWn" id="9ul-PN-kLT"/>
                         <outlet property="mapImage" destination="xA9-IZ-spM" id="aZg-42-6Ed"/>
                         <outlet property="placeBoardGesture" destination="NvL-x5-eHp" id="T9y-nK-hH1"/>
                         <outlet property="powerLabel" destination="Vhx-eP-M1c" id="wCr-8P-Tg3"/>
                         <outlet property="powerSlider" destination="dTU-l8-x8U" id="8DV-HN-nHY"/>
+                        <outlet property="rescaleGesture" destination="Ryc-85-irL" id="Zgb-pY-Yux"/>
+                        <outlet property="rotateGesture" destination="hW4-6f-hnA" id="7db-fY-lfI"/>
                         <outlet property="sceneView" destination="rD7-ry-WZM" id="MY9-Cc-IRd"/>
                         <outlet property="screenDraggingGesture" destination="MI9-nU-qrH" id="ZqZ-JY-4a2"/>
                         <outlet property="tapToSelectLabel" destination="QIh-1p-M8Z" id="CIX-dN-J2b"/>
@@ -194,9 +197,14 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
                 <exit id="FxJ-NK-Vbj" userLabel="Exit" sceneMemberID="exit"/>
-                <tapGestureRecognizer id="NvL-x5-eHp">
+                <tapGestureRecognizer id="NvL-x5-eHp" userLabel="Place Board Gesture">
                     <connections>
                         <action selector="screenTapped:" destination="BV1-FR-VrT" id="uMH-Mh-b8x"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <tapGestureRecognizer numberOfTapsRequired="2" id="5hr-VT-zKA" userLabel="Backup Place Board Gesture">
+                    <connections>
+                        <action selector="screenDoubleTapped:" destination="BV1-FR-VrT" id="AhC-D4-PNd"/>
                     </connections>
                 </tapGestureRecognizer>
                 <panGestureRecognizer minimumNumberOfTouches="1" id="MI9-nU-qrH">
@@ -204,8 +212,16 @@
                         <action selector="screenDragged:" destination="BV1-FR-VrT" id="O4C-8x-pwk"/>
                     </connections>
                 </panGestureRecognizer>
-                <tapGestureRecognizer id="5hr-VT-zKA" userLabel="Backup Place Board Gesture"/>
-                <pinchGestureRecognizer id="Ryc-85-irL" userLabel="Rescale Gesture"/>
+                <pinchGestureRecognizer id="Ryc-85-irL" userLabel="Rescale Gesture">
+                    <connections>
+                        <action selector="rescaleGesture:" destination="BV1-FR-VrT" id="ogX-bq-8eQ"/>
+                    </connections>
+                </pinchGestureRecognizer>
+                <rotationGestureRecognizer id="hW4-6f-hnA">
+                    <connections>
+                        <action selector="rotateGesture:" destination="BV1-FR-VrT" id="5jT-kZ-lhc"/>
+                    </connections>
+                </rotationGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="261.60000000000002" y="61.619190404797607"/>
         </scene>
