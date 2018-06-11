@@ -41,6 +41,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
+        // seed the random number generator
+        let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
+        srand48(Int(time))
+        
         // create the game board
         gameModel.generateBoard()
         
@@ -140,6 +144,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         return node
     }
 
+    // MARK: - Gesture Regcognizers
     @IBOutlet var placeBoardGesture: UITapGestureRecognizer!
     @IBAction func screenTapped(_ sender: UIGestureRecognizer) {
         let touchLocation = sender.location(in: sceneView)
@@ -327,6 +332,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
     
     func updateBoard() {
+        NSLog("updateBoard started")
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
 
         for i in 0..<numPerSide {
@@ -352,6 +358,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                         geometry.length = edgeSize
                     }
                 }
+                
+                // update color
+                blockNode.geometry?.firstMaterial?.diffuse.contents = UIColor.green
             }
         }
 
@@ -661,6 +670,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     func updateUI() {
         guard boardPlaced else { return }
 
+        NSLog("updating UI")
         // make sure power slider matches player
         let currentPower = gameModel.board.players[gameModel.board.currentPlayer].tank.velocity
         powerSlider.setValue(currentPower, animated: false)
