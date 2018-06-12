@@ -552,10 +552,13 @@
                     <connections>
                         <outlet property="altitudeTextField" destination="mqz-a3-GjR" id="Zzk-BD-MGY"/>
                         <outlet property="azimuthTextField" destination="Zc7-1f-OtB" id="934-c7-sGM"/>
+                        <outlet property="doneButton" destination="Js0-hE-nSn" id="TUL-Lz-hvE"/>
                         <outlet property="velocityTextField" destination="bNa-EN-CUq" id="ilu-ZF-1FS"/>
                         <outlet property="weaponChangeButton" destination="6Ve-vl-p53" id="rM0-1q-MZW"/>
                         <outlet property="weaponPicker" destination="afG-Z2-aa2" id="Bwr-tC-Kma"/>
                         <outlet property="weaponSizeButton" destination="dGq-dl-MtA" id="X9O-ag-6LB"/>
+                        <outlet property="weaponSizeLabel" destination="boy-SC-xjz" id="XR3-hH-EdP"/>
+                        <outlet property="weaponTypeLabel" destination="kqm-EV-GC3" id="RK1-dt-mEg"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bg2-bi-Ycl" userLabel="First Responder" sceneMemberID="firstResponder"/>
