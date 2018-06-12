@@ -24,6 +24,7 @@ struct Player {
     var name: String = "Unknown"
     var score: Int64 = 0
     var weaponID: Int = 0
+    var weaponSizeID: Int = 0
     // need to add shielding info
 }
 
@@ -49,11 +50,14 @@ enum WeaponStyle {
     case explosive, generative, mud, napalm, mirv
 }
 
-struct Weapon {
+struct WeaponSize {
     var name: String
-    var subType: String
     var size: Float
     var cost: Int
+}
+struct Weapon {
+    var name: String
+    var sizes: [WeaponSize]
     var style: WeaponStyle
 }
 
@@ -78,13 +82,13 @@ class GameModel {
     var board: GameBoard = GameBoard()
     
     var weaponsList = [
-        Weapon(name: "Standard", subType: "", size: 15, cost: 10, style: .explosive),
-        Weapon(name: "Nuke", subType: "baby", size: 75, cost: 1000, style: .explosive),
-        Weapon(name: "Nuke", subType: "regular", size: 150, cost: 2000, style: .explosive),
-        Weapon(name: "Nuke", subType: "heavy", size: 300, cost: 3000, style: .explosive),
-        Weapon(name: "Dirty", subType: "baby", size: 75, cost: 1000, style: .generative),
-        Weapon(name: "Dirty", subType: "regular", size: 150, cost: 2000, style: .generative),
-        Weapon(name: "Dirty", subType: "heavy", size: 300, cost: 3000, style: .generative)
+        Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 15, cost: 10)], style: .explosive),
+        Weapon(name: "Nuke", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
+                                     WeaponSize(name: "regular", size: 150, cost: 2000),
+                                     WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .explosive),
+        Weapon(name: "Dirty Bomb", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
+                                     WeaponSize(name: "regular", size: 150, cost: 2000),
+                                     WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .generative)
         ]
     
     // high-score data
@@ -183,6 +187,12 @@ class GameModel {
             board.players[i].tank = Tank(position: SCNVector3(x: x, y: y, z: tankElevation),
                                          azimuth: 0, altitude: Float(Double.pi/4), velocity: 100)
         
+            if i%2 == 1 {
+                board.players[i].weaponID = 1
+            } else {
+                board.players[i].weaponID = 2
+            }
+            
             // flatten area around tanks
             let tank = board.players[i].tank!
             flattenAreaAt(longitude: Int(tank.position.x), latitude: Int(tank.position.y), withRadius: 100)
@@ -247,7 +257,8 @@ class GameModel {
         var position = muzzlePosition
         var velocity = muzzleVelocity
         let weapon = weaponsList[board.players[board.currentPlayer].weaponID]
-        NSLog("firing \(weapon.name) with size \(weapon.size) and style \(weapon.style).")
+        let weaponSize = weapon.sizes[board.players[board.currentPlayer].weaponSizeID].size
+        NSLog("firing \(weapon.name) with size \(weaponSize) and style \(weapon.style).")
         
         var iterCount = 0
         while airborn {
@@ -282,7 +293,7 @@ class GameModel {
         let blastRadius = Float(100)
         
         // update board with new values
-        let updates = applyExplosion(at: impactPosition, withRadius: weapon.size, andStyle: weapon.style)
+        let updates = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
         
         let result: FireResult = FireResult(timeStep: timeStep,
                                             trajectory: trajectory,
