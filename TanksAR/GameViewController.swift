@@ -28,7 +28,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     var tankNodes: [SCNNode] = []
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
-    let timeScaling = 10
+    let timeScaling = 1
     let numPerSide = 50
     var boardBlocks: [[SCNNode]] = []
     var dropBlocks: [SCNNode] = []
@@ -50,10 +50,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // seed the random number generator
-        let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
-        srand48(Int(time))
-        
         // create the game board
         gameModel.generateBoard()
         mapImage.image = gameModel.board.surface.asUIImage()
@@ -71,11 +67,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         configuration.planeDetection = [.horizontal]
 
         // cause board placement to occur when view reappears
-        unplaceBoard()
-        updateUI()
+        // this causes problems with the weapons view
+        //unplaceBoard()
+        //updateUI()
         
         placeBoardGesture.require(toFail: backupPlaceBoardGesture)
-        rescaleGesture.require(toFail: rotateGesture)
         
         // Run the view's session
         sceneView.session.run(configuration)
@@ -167,6 +163,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         for result in hitTestResult {
             if !boardPlaced {
                 if (result.anchor as? ARPlaneAnchor) != nil {
+                    placeBoardGesture.isEnabled = false
                     placeBoard(result)
                     break
                 }
@@ -261,6 +258,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         powerSlider.isEnabled = false
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let dest = segue.destination as? WeaponsViewController {
+            dest.gameModel = gameModel
+        } else {
+            super.prepare(for: segue, sender: sender)
+        }
+    }
+    
     @IBAction func powerChanged(_ sender: UISlider) {
         gameModel.setTankPower(power: sender.value)
         //NSLog("set tank power to \(sender.value)")
@@ -277,6 +282,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         return SCNVector3(x: position.x - Float(gameModel.board.boardSize/2),
                           y: position.z,
                           z: position.y - Float(gameModel.board.boardSize/2))
+    }
+
+    func toModelScale(_ vector: SCNVector3) -> SCNVector3 {
+        let ret = SCNVector3(vector.x,vector.y,vector.z)
+        return ret
+    }
+
+    func fromModelScale(_ vector: SCNVector3) -> SCNVector3 {
+        let ret = SCNVector3(vector.x,vector.y,vector.z)
+        return ret
     }
     
     func clearAllPlanes() {
@@ -300,6 +315,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
 
     func placeBoard(atLocation: SCNVector3, withScaleFactor: Float) {
+        NSLog("\(#function) started")
+
         // remove all candidate planes
         clearAllPlanes()
         
@@ -338,9 +355,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         screenDraggingGesture.isEnabled = true
         powerLabel.isHidden = false
         powerSlider.isHidden = false
+        
+        NSLog("\(#function) finished")
     }
 
     func unplaceBoard() {
+        NSLog("\(#function) started")
+
         // enable selection of a board location
         boardPlaced = false
         placeBoardGesture.isEnabled = true
@@ -357,9 +378,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 node.removeFromParentNode()
             }
         }
+        
+        NSLog("\(#function) finished")
     }
     
     func addTanks() {
+        NSLog("\(#function) started")
         for player in gameModel.board.players {
             let tankScene = SCNScene(named: "art.scnassets/Tank.scn")
             guard let tankNode = tankScene?.rootNode.childNode(withName: "Tank", recursively: false) else { continue }
@@ -373,9 +397,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             board?.addChildNode(tankNode)
             tankNodes.append(tankNode)
         }
+        NSLog("\(#function) finished")
     }
     
     func addBoard() {
+        NSLog("\(#function) started")
+
         // use cubes until I can sort out actual Meshes.
         
         // keep references to each block
@@ -395,10 +422,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         }
         updateBoard()
         mapImage.image = gameModel.board.surface.asUIImage()
+        
+        NSLog("\(#function) finished")
     }
     
     func updateBoard() {
-        NSLog("updateBoard started")
+        NSLog("\(#function) started")
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
 
         for i in 0..<numPerSide {
@@ -434,10 +463,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         for block in dropBlocks {
             block.removeFromParentNode()
         }
-        NSLog("updateBoard finished")
+        NSLog("\(#function) finished")
     }
     
     func launchProjectile() {
+        NSLog("\(#function) started")
+
         // get location of muzzle
         let tankNode = tankNodes[gameModel.board.currentPlayer]
         guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true) else { return }
@@ -461,9 +492,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         var muzzlePosition = position
         var muzzleVelocity = velocity
         muzzlePosition = toModelSpace(position)
-        muzzleVelocity.x = velocity.x
-        muzzleVelocity.y = velocity.z
-        muzzleVelocity.z = velocity.y
+        muzzleVelocity = toModelScale(velocity)
         NSLog("view pos: \(position)")
         NSLog("view vel: \(velocity)")
         NSLog("model pos: \(muzzlePosition)")
@@ -471,8 +500,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
 
-        mapImage.image = fireResult.mapUpdate.asUIImage()
-        
+        animateResult(fireResult: fireResult)
+        NSLog("\(#function) finished")
+    }
+    
+    func animateResult(fireResult: FireResult) {
+        NSLog("\(#function) started")
+
         // time for use in animations
         var currTime = CFTimeInterval(0)
         var finalAnimation: CAAnimation? = nil
@@ -632,7 +666,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 
                 if top > middle && middle > bottom {
                     dropNeeded = true
-                    NSLog("(\(i),\(j)) will drop, top: \(top), middle: \(middle), bottom: \(bottom)")
+                    //NSLog("(\(i),\(j)) will drop, top: \(top), middle: \(middle), bottom: \(bottom)")
                     // need to create and animate a drop block
                     let dropBlock = SCNNode(geometry: SCNBox(width: blockGeometry.width,
                                                              height: CGFloat(top-middle),
@@ -665,7 +699,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                     
                     let group = CAAnimationGroup()
                     group.beginTime = 0
-                    group.duration = currTime
+                    group.duration = currTime + dropTime
                     group.repeatCount = 1
                     group.isRemovedOnCompletion = true
                     group.animations = animations
@@ -673,11 +707,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                     finalAnimation = group
                 }
                 
-                let finalElevation = bottom + max(0,(top-middle))
-                if  finalElevation != current {
-                    // final elevation will be different
-                    NSLog("(\(i),\(j)) changes final height by \(current-finalElevation), \(current) -> \(finalElevation), top: \(top), middle: \(middle), bottom: \(bottom)")
-                    let collapseHeight = min(bottom,current)
+                let collapseHeight = min(bottom,current)
+                if  bottom != current {
+                    // heigth adjustment needed
+                    //NSLog("(\(i),\(j)) height change needed, \(current) -> \(bottom), top: \(top), middle: \(middle), bottom: \(bottom)")
                     
                     // resize at appropriate time
                     let animation1 = CABasicAnimation(keyPath: "geometry.height")
@@ -685,7 +718,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                     animation1.toValue = collapseHeight
                     animation1.beginTime = currTime
                     animation1.duration = CFTimeInterval(0)
-                    boardBlock.addAnimation(animation1, forKey: "block \(i),\(j) resize")
+                    boardBlocks[i][j].addAnimation(animation1, forKey: "block \(i),\(j) resize")
 
                     // handle repositioning
                     let animation2 = CABasicAnimation(keyPath: "position.y")
@@ -693,7 +726,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                     animation2.toValue = collapseHeight/2
                     animation2.beginTime = currTime
                     animation2.duration = CFTimeInterval(0)
-                    boardBlock.addAnimation(animation2, forKey: "block \(i),\(j) reposition")
+                    boardBlocks[i][j].addAnimation(animation2, forKey: "block \(i),\(j) reposition")
                 }
             }
         }
@@ -706,6 +739,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         NSLog("animation should stop at time \(currTime)")
         NSLog("final animiation starts at \(String(describing: finalAnimation?.beginTime))s and goes for \(String(describing: finalAnimation?.duration))s.")
         finalAnimation?.delegate = self
+        
+        NSLog("\(#function) finished")
     }
     
     func animationDidStart(_ anim: CAAnimation) {
@@ -738,7 +773,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     func updateUI() {
         guard boardPlaced else { return }
 
-        NSLog("updating UI")
+        NSLog("\(#function) started")
+        //mapImage.image = fireResult.mapUpdate.asUIImage()
+
         // make sure power slider matches player
         let currentPower = gameModel.board.players[gameModel.board.currentPlayer].tank.velocity
         powerSlider.setValue(currentPower, animated: false)
@@ -769,6 +806,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         
         // update board
         updateBoard()
+        
+        NSLog("\(#function) finished")
     }
     
     // MARK: - Map View
