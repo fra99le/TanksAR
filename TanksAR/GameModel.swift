@@ -23,6 +23,8 @@ struct Player {
     var tank: Tank!
     var name: String = "Unknown"
     var score: Int64 = 0
+    var weapon: Weapon?
+    // need to add shielding info
 }
 
 struct GameBoard {
@@ -41,6 +43,18 @@ struct GameBoard {
 struct HighScore {
     var name: String = "Unknown"
     var score: Int64 = 0
+}
+
+enum WeaponStyle {
+    case explosive, generative, mud, napalm, mirv
+}
+
+struct Weapon {
+    var name: String
+    var subType: String
+    var size: Float
+    var cost: Int
+    var style: WeaponStyle
 }
 
 struct FireResult {
@@ -62,6 +76,16 @@ enum ElevationMode {
 class GameModel {
     // game board
     var board: GameBoard = GameBoard()
+    
+    var weaponsList = [
+        Weapon(name: "Standard", subType: "", size: 15, cost: 10, style: .explosive),
+        Weapon(name: "Nuke", subType: "baby", size: 75, cost: 1000, style: .explosive),
+        Weapon(name: "Nuke", subType: "regular", size: 150, cost: 2000, style: .explosive),
+        Weapon(name: "Nuke", subType: "heavy", size: 300, cost: 3000, style: .explosive),
+        Weapon(name: "Dirty", subType: "baby", size: 75, cost: 1000, style: .generative),
+        Weapon(name: "Dirty", subType: "regular", size: 150, cost: 2000, style: .generative),
+        Weapon(name: "Dirty", subType: "heavy", size: 300, cost: 3000, style: .generative)
+        ]
     
     // high-score data
     let highScores: [HighScore] = []
@@ -149,7 +173,7 @@ class GameModel {
 
             let tankElevation = getElevation(longitude: Int(x), latitude: Int(y))
             board.players[i].tank = Tank(position: SCNVector3(x: x, y: y, z: tankElevation),
-                                         azimuth: 0, altitude: Float(Double.pi/4), velocity: 10)
+                                         azimuth: 0, altitude: Float(Double.pi/4), velocity: 100)
         
             // flatten area around tanks
             let tank = board.players[i].tank!
@@ -207,7 +231,7 @@ class GameModel {
         board.currentPlayer = (board.currentPlayer + 1) % board.players.count
         print("Player \(board.currentPlayer) now active.")
 
-        let timeStep = Float(1)/Float(10)
+        let timeStep = Float(1)/Float(60)
         let gravity = Float(-9.80665)
         
         // compute trajectory
@@ -215,7 +239,9 @@ class GameModel {
         var airborn = true
         var position = muzzlePosition
         var velocity = muzzleVelocity
-
+        let weapon = board.players[board.currentPlayer].weapon!
+        NSLog("firing \(weapon.name) with size \(weapon.size) and style \(weapon.style).")
+        
         var iterCount = 0
         while airborn {
             //print("computing trajectory: pos=\(position), vel=\(velocity)")
@@ -223,16 +249,17 @@ class GameModel {
             trajectory.append(position)
             
             // update position
+            // NOTE: the model should do all calculations in model space, not view space
             position.x += velocity.x * timeStep
-            position.y += velocity.y * timeStep + 0.5 * gravity * (timeStep*timeStep)
-            position.z += velocity.z * timeStep
+            position.y += velocity.y * timeStep
+            position.z += velocity.z * timeStep + 0.5 * gravity * (timeStep*timeStep)
 
             // update velocity
             velocity.z += gravity * timeStep
             
             // check for impact
             let distAboveLand = position.z - getElevation(longitude: Int(position.x), latitude: Int(position.y))
-            if position.y<0 || distAboveLand<0 {
+            if position.z<0 || distAboveLand<0 {
                 airborn = false
             }
             if iterCount > 10000 {
@@ -241,29 +268,36 @@ class GameModel {
             iterCount += 1
             
         }
+        NSLog("shell took \(timeStep*Float(iterCount))s (\(iterCount) iterations) to land")
         
         // deal with impact
         let impactPosition = position
         let blastRadius = Float(100)
         
         // update board with new values
-        let updates = applyExplosion(at: impactPosition, withRadius: blastRadius)
+        let updates = applyExplosion(at: impactPosition, withRadius: weapon.size, andStyle: weapon.style)
         
         let result: FireResult = FireResult(timeStep: timeStep,
                                             trajectory: trajectory,
                                             explosionRadius: blastRadius,
                                             mapUpdate: updates)
+
+        board.currentPlayer = (board.currentPlayer + 1) % board.players.count
+        print("Player \(board.currentPlayer) now active.")
         
+        NSLog("\(#function) finished")
+
         return result
     }
     
-    func applyExplosion(at: SCNVector3, withRadius: Float) -> ImageBuf {
-        NSLog("applyExplosion started")
+    func applyExplosion(at: SCNVector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> ImageBuf {
+        NSLog("\(#function) started")
         let changeBuf = ImageBuf()
         changeBuf.copy(board.surface)
 
-        NSLog("applyExplosion starting explosion computation")
-
+        NSLog("\(#function) starting explosion computation at \(at) with radius \(withRadius) and style \(andStyle).")
+        let style = andStyle
+        
         // update things in the radius of the explosion
         for j in Int(at.y-withRadius)...Int(at.y+withRadius) {
             for i in Int(at.x-withRadius)...Int(at.x+withRadius) {
@@ -280,22 +314,54 @@ class GameModel {
                 let vertSize = sqrt(withRadius*withRadius - horizDist*horizDist)
                 
                 let currElevation = getElevation(longitude: i, latitude: j)
-                let top = currElevation
-                let middle = at.z + vertSize
-                let bottom = at.z - vertSize
+                let expTop = at.z + vertSize
+                let expBottom = at.z - vertSize
                 
-                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: top, forMode: .top)
-                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: middle, forMode: .middle)
-                setElevation(forMap: changeBuf, longitude: i, latitude: j, to: bottom, forMode: .bottom)
-                
-                // update actual map
-                let newElevation = bottom + max(0,top-middle)
-                setElevation(longitude: i, latitude: j, to: newElevation)
+                if style == .explosive  {
+                    let top = currElevation
+                    let middle = expTop
+                    let bottom = expBottom
+                    
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: top, forMode: .top)
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: middle, forMode: .middle)
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: bottom, forMode: .bottom)
+                    
+                    // update actual map
+                    let newElevation = min(currElevation, bottom + max(0,top-middle))
+                    setElevation(longitude: i, latitude: j, to: newElevation)
+                } else if style == .generative {
+                    let top = expTop
+                    let middle = expBottom
+                    let bottom = currElevation
+
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: top, forMode: .top)
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: bottom, forMode: .middle)
+                    setElevation(forMap: changeBuf, longitude: i, latitude: j, to: currElevation, forMode: .bottom)
+                    
+                    // update actual map
+                    var newElevation = currElevation
+                    if middle > currElevation {
+                        newElevation = currElevation + (top - middle) // new chunk is elevated
+                    } else if top > currElevation {
+                        newElevation = top // new chunk crosses old surface
+                    } else if top <= currElevation {
+                        newElevation = currElevation // new chunk below old surface
+                    } else {
+                        newElevation = currElevation * 1.1
+                        //NSLog("Unconsidered case, this is wierd! top: \(top), middle: \(middle), bottom: \(bottom), curr: \(currElevation)")
+                    }
+//                    if( newElevation != currElevation) {
+//                        NSLog("generative level change: \(currElevation) -> \(newElevation) at \(i),\(j)")
+//                    }
+                    setElevation(longitude: i, latitude: j, to: newElevation)
+                } else {
+                    NSLog("\(#function) doesn't handle \(andStyle) style.")
+                }
             }
 
         }
-        NSLog("applyExplosion finished")
-        
+        NSLog("\(#function) finished")
+
         return changeBuf
     }
     
