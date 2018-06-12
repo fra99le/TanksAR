@@ -33,7 +33,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     var boardBlocks: [[SCNNode]] = []
     var dropBlocks: [SCNNode] = []
     var users: [UserConfig] = []
-    
+    var numHumans: Int = 0
+    var numAIs: Int = 0
+
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
     @IBOutlet var powerSlider: UISlider!
@@ -321,7 +323,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         boardBaseNode.opacity = 1.0
         board?.addChildNode(boardBaseNode)
 
-        gameModel.startGame(numPlayers: 2)
+        gameModel.startGame(numPlayers: numHumans, numAIs: numAIs)
         addBoard()
         addTanks()
         users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0),

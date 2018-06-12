@@ -75,8 +75,8 @@ class GameModel {
         board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 40.0/255.0)
     }
     
-    func startGame(numPlayers: Int) {
-        board.players = [Player](repeating: Player(), count: numPlayers)
+    func startGame(numPlayers: Int, numAIs: Int = 0) {
+        board.players = [Player](repeating: Player(), count: numPlayers+numAIs)
         board.currentPlayer = 0
         
         placeTanks()
