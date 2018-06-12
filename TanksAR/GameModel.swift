@@ -91,12 +91,19 @@ class GameModel {
     let highScores: [HighScore] = []
     
     func generateBoard() {
+        NSLog("\(#function) started")
+        
+        // seed the random number generator
+        //let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
+        //srand48(Int(time))
+        
         board.boardSize = 1025
         board.surface.setSize(width: board.boardSize, height: board.boardSize)
         board.bedrock.setSize(width: board.boardSize, height: board.boardSize)
         
         board.surface.fillUsingDiamondSquare(withMinimum: 50.0/255.0, andMaximum: 200.0/255.0)
-        board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 40.0/255.0)
+        //board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 40.0/255.0)
+        NSLog("\(#function) finished")
     }
     
     func startGame(numPlayers: Int, numAIs: Int = 0) {
@@ -167,6 +174,7 @@ class GameModel {
     }
     
     func placeTanks(withMargin: Int = 50, minDist: Int = 10) {
+        NSLog("\(#function) started")
         for i in 0..<board.players.count {
             let x = Float(drand48() * Double(board.surface.width-withMargin*2) + Double(withMargin))
             let y = Float(drand48() * Double(board.surface.height-withMargin*2) + Double(withMargin))
@@ -179,6 +187,7 @@ class GameModel {
             let tank = board.players[i].tank!
             flattenAreaAt(longitude: Int(tank.position.x), latitude: Int(tank.position.y), withRadius: 100)
         }
+        NSLog("\(#function) started")
     }
     
     func flattenAreaAt(longitude: Int, latitude: Int, withRadius: Int) {
@@ -227,9 +236,7 @@ class GameModel {
     }
 
     func fire(muzzlePosition: SCNVector3, muzzleVelocity: SCNVector3) -> FireResult {
-        print("Fire isn't fully implemented, yet!")
-        board.currentPlayer = (board.currentPlayer + 1) % board.players.count
-        print("Player \(board.currentPlayer) now active.")
+        NSLog("\(#function) started")
 
         let timeStep = Float(1)/Float(60)
         let gravity = Float(-9.80665)
@@ -366,6 +373,8 @@ class GameModel {
     }
     
     func fluidFill(startX: Int, startY: Int, totalVolume: Float) {
+        NSLog("\(#function) started")
+
         var remainingVolume = totalVolume
         
         // need a priority queue of edge pixels ordered by height
@@ -384,5 +393,7 @@ class GameModel {
                 // update volume left
                 remainingVolume -= volumeAdded
         }
+        NSLog("\(#function) started")
+
     }
 }
