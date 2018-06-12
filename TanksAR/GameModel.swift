@@ -23,7 +23,7 @@ struct Player {
     var tank: Tank!
     var name: String = "Unknown"
     var score: Int64 = 0
-    var weapon: Weapon?
+    var weaponID: Int = 0
     // need to add shielding info
 }
 
@@ -246,7 +246,7 @@ class GameModel {
         var airborn = true
         var position = muzzlePosition
         var velocity = muzzleVelocity
-        let weapon = board.players[board.currentPlayer].weapon!
+        let weapon = weaponsList[board.players[board.currentPlayer].weaponID]
         NSLog("firing \(weapon.name) with size \(weapon.size) and style \(weapon.style).")
         
         var iterCount = 0
