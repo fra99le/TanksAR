@@ -65,6 +65,8 @@ class ImageBuf {
         guard isPowerOfTwo(width-1) else { return }
         guard isPowerOfTwo(height-1) else { return }
 
+        NSLog("\(#function) started")
+
         // randomly assign corners
         setPixel(x: 0, y: 0, r: drand48(), g: 0, b: 0, a: 1.0)
         setPixel(x: 0, y: height-1, r: drand48(), g: 0, b: 0, a: 1.0)
@@ -73,6 +75,9 @@ class ImageBuf {
 
         // make recursive call
         doDiamondSquare(left: 0, right: width-1, top: 0, bottom: height-1)
+        
+        NSLog("\(#function) finished")
+
     }
     
     func doDiamondSquare(left: Int, right: Int, top: Int, bottom: Int) {
@@ -152,6 +157,8 @@ class ImageBuf {
     }
 
     func fillUsingDiamondSquare(withMinimum: Float, andMaximum: Float) {
+        NSLog("\(#function) started")
+
         guard isPowerOfTwo(width-1) else { return }
         guard isPowerOfTwo(height-1) else { return }
         
@@ -179,9 +186,13 @@ class ImageBuf {
                 pixels[i] = Pixel(r: nv, g: 0, b: 0, a: nv)
             }
         }
+
+        NSLog("\(#function) started")
     }
     
     func asUIImage() -> UIImage {
+        NSLog("\(#function) started")
+
         // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
         UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 1);
 
@@ -203,6 +214,8 @@ class ImageBuf {
 
         UIGraphicsEndImageContext();
         
+        NSLog("\(#function) finished")
+
         return image
     }
 }
