@@ -23,7 +23,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     var boardSize: Float = 1.0
     var boardScaleFactor: Float = 1.0
     var candidatePlanes: [SCNNode] = []
-    var board: SCNNode? = nil
+    var board = SCNNode()
     var gameModel = GameModel()
     var tankNodes: [SCNNode] = []
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
@@ -54,6 +54,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         gameModel.generateBoard()
         mapImage.image = gameModel.board.surface.asUIImage()
 
+        // start a game
+        gameModel.startGame(numPlayers: numHumans, numAIs: numAIs)
+        addBoard()
+        addTanks()
+        users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0),
+                             count: gameModel.board.players.count)
+        
         sceneView.autoenablesDefaultLighting = true
     }
     
@@ -81,7 +88,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         super.viewWillDisappear(animated)
 
         // cause board placement to occur when view reappears
-        unplaceBoard()
+        //unplaceBoard()
 
         // Pause the view's session
         sceneView.session.pause()
@@ -163,7 +170,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         for result in hitTestResult {
             if !boardPlaced {
                 if (result.anchor as? ARPlaneAnchor) != nil {
-                    placeBoardGesture.isEnabled = false
                     placeBoard(result)
                     break
                 }
@@ -223,7 +229,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     @IBAction func rescaleGesture(_ sender: UIPinchGestureRecognizer) {
         let player = gameModel.board.currentPlayer
         let newScale = CGFloat(boardScaleFactor) * sender.scale
-        board?.scale = SCNVector3(newScale,newScale,newScale)
+        board.scale = SCNVector3(newScale,newScale,newScale)
 
         if sender.state == .ended {
             NSLog("pinch gesture: \(sender.scale)x ended for player \(player)")
@@ -235,7 +241,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     @IBOutlet var rotateGesture: UIRotationGestureRecognizer!
     @IBAction func rotateGesture(_ sender: UIRotationGestureRecognizer) {
         let player = gameModel.board.currentPlayer
-        board?.eulerAngles.y = Float(CGFloat(users[player].rotation) - sender.rotation)
+        board.eulerAngles.y = Float(CGFloat(users[player].rotation) - sender.rotation)
 
         if sender.state == .ended {
             NSLog("rotate gesture: \(sender.rotation) ended or player \(player)")
@@ -320,41 +326,37 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // remove all candidate planes
         clearAllPlanes()
         
-        let scaleNode = SCNNode()
-        let boardBaseNode = SCNNode()
-
         // set scale factor for scaling node
+        let scaleNode = board
         scaleNode.position = atLocation
         boardScaleFactor = withScaleFactor
         scaleNode.scale = SCNVector3(boardScaleFactor,boardScaleFactor,boardScaleFactor)
         scaleNode.name = "scaleNode"
-        board = scaleNode
         sceneView.scene.rootNode.addChildNode(scaleNode)
 
         // set size, orientation, and color of board base
         let geometry = SCNPlane(width: CGFloat(gameModel.board.boardSize),
                                 height: CGFloat(gameModel.board.boardSize))
         geometry.firstMaterial?.diffuse.contents = UIColor.green
+
+        let boardBaseNode = SCNNode()
         boardBaseNode.geometry = geometry
         boardBaseNode.eulerAngles.x = -Float.pi / 2
         boardBaseNode.opacity = 1.0
-        board?.addChildNode(boardBaseNode)
-
-        gameModel.startGame(numPlayers: numHumans, numAIs: numAIs)
-        addBoard()
-        addTanks()
-        users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0),
-                             count: gameModel.board.players.count)
+        board.addChildNode(boardBaseNode)
 
         // disable selection of a board location
         boardPlaced = true
         placeBoardGesture.isEnabled = false
+        backupPlaceBoardGesture.isEnabled = false
         tapToSelectLabel.isHidden = true
         fireButton.isEnabled = true
         fireButton.isHidden = false
         screenDraggingGesture.isEnabled = true
         powerLabel.isHidden = false
         powerSlider.isHidden = false
+        
+        updateBoard()
         
         NSLog("\(#function) finished")
     }
@@ -365,6 +367,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // enable selection of a board location
         boardPlaced = false
         placeBoardGesture.isEnabled = true
+        backupPlaceBoardGesture.isEnabled = true
         tapToSelectLabel.isHidden = false
         fireButton.isEnabled = false
         fireButton.isHidden = true
@@ -373,10 +376,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         powerSlider.isHidden = true
         
         // remove board and tanks
-        if let nodes = board?.childNodes {
-            for node in  nodes {
-                node.removeFromParentNode()
-            }
+        let nodes = board.childNodes
+        for node in  nodes {
+            node.removeFromParentNode()
         }
         
         NSLog("\(#function) finished")
@@ -394,7 +396,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             //tankNode.eulerAngles.x = Float.pi / 2
 
             NSLog("Adding tank at \(tankNode.position)")
-            board?.addChildNode(tankNode)
+            board.addChildNode(tankNode)
             tankNodes.append(tankNode)
         }
         NSLog("\(#function) finished")
@@ -417,7 +419,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 blockNode.position.y = -1 // make sure update will happen initially
 
                 // add to board
-                board?.addChildNode(boardBlocks[i][j])
+                board.addChildNode(boardBlocks[i][j])
             }
         }
         updateBoard()
@@ -522,7 +524,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             // convert back to view coordinates
             shell.position = fromModelSpace(firstPosition)
             shell.opacity = 0.0
-            board?.addChildNode(shellNode!)
+            board.addChildNode(shellNode!)
 
             // see: https://stackoverflow.com/questions/11737658/how-to-chain-different-caanimation-in-an-ios-application
             var animations: [CABasicAnimation] = []
@@ -584,7 +586,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             // convert back to view coordinates
             explosion.position = fromModelSpace(lastPosition)
             explosion.opacity = 0
-            board?.addChildNode(explosion)
+            board.addChildNode(explosion)
             
             var animations: [CABasicAnimation] = []
             
@@ -673,7 +675,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                                                              length: blockGeometry.length, chamferRadius: 0))
                     dropBlock.position = boardBlock.position
                     dropBlock.position.y = (top+middle)/2
-                    board?.addChildNode(dropBlock)
+                    board.addChildNode(dropBlock)
                     dropBlocks.append(dropBlock)
 
                     var finalPosition = dropBlock.position
@@ -781,7 +783,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         powerSlider.setValue(currentPower, animated: false)
         
         // update scale and rotation for player
-        let scaleNode = board!
+        let scaleNode = board
         let rotationAnimation = CABasicAnimation(keyPath: "eulerAngles.y")
         rotationAnimation.fromValue = scaleNode.eulerAngles.y
         rotationAnimation.toValue = users[gameModel.board.currentPlayer].rotation

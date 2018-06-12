@@ -41,7 +41,9 @@ class MenuViewController: UIViewController {
 
     // make this a target for unwinding segues
     @IBAction func unwindToMainMenu(unwindSegue: UIStoryboardSegue) {
-        
+        if let source = unwindSegue.source as? GameViewController {
+            source.unplaceBoard()
+        }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
