@@ -8,7 +8,7 @@
 
 import UIKit
 
-class WeaponsViewController: UIViewController, UITextFieldDelegate, UIPickerViewDataSource, UIPickerViewDelegate {
+class WeaponsViewController: UIViewController, UITextFieldDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,7 +17,6 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate, UIPickerView
         azimuthTextField.delegate = self
         altitudeTextField.delegate = self
         velocityTextField.delegate = self
-        weaponPicker.delegate = self
 
         if let model = gameModel {
             let player = model.board.players[model.board.currentPlayer]
@@ -25,6 +24,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate, UIPickerView
             altitudeTextField.text = "\(player.tank.altitude * (180/Float.pi))º"
             velocityTextField.text = "\(player.tank.velocity) m/s"
         }
+        
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -99,79 +99,47 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate, UIPickerView
         NSLog("new value: \(sender.text!)")
     }
     
-    var sizeMode = false
+    @IBOutlet weak var doneButton: UIButton!
+    @IBOutlet weak var reasonLabel: UILabel!
+    
     @IBOutlet weak var weaponTypeLabel: UILabel!
     @IBOutlet weak var weaponSizeLabel: UILabel!
+    @IBOutlet weak var weaponCostLabel: UILabel!
     
-    @IBOutlet weak var weaponSizeButton: UIButton!
-    @IBOutlet weak var weaponChangeButton: UIButton!
+    @IBOutlet weak var weaponTypeStepper: UIStepper!
+    @IBOutlet weak var weaponSizeStepper: UIStepper!
     
-    @IBOutlet weak var doneButton: UIButton!
-    
-    @IBAction func changeWeaponTapped(_ sender: UIButton) {
-        sizeMode = false
-        weaponPicker.isHidden = false
-        doneButton.isHidden = true
-    }
-    
-    @IBAction func changeSizeTapped(_ sender: UIButton) {
-        sizeMode = true
-        weaponPicker.isHidden = false
-        doneButton.isHidden = true
-    }
-    
-    @IBOutlet weak var weaponPicker: UIPickerView!
-    
-    // MARK: - UIPickerViewDataSource
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        // number of scrolly wheels
-        return 1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        guard let model = gameModel else { return 0 }
-        let board = model.board
-        let weapons = model.weaponsList
-
-        // number of values in scrolly wheel \(component)
-        if sizeMode {
-            return weapons[board.players[board.currentPlayer].weaponID].sizes.count
-        } else {
-            return weapons.count
-        }
-    }
-
-    // MARK: - UIPickerViewDelegate
-    func pickerView(_ picker: UIPickerView, titleForRow: Int, forComponent: Int) -> String? {
-        guard let model = gameModel else { return "Unknown" }
-        let board = model.board
-        let weapons = model.weaponsList
-
-        if sizeMode {
-            let player = board.players[board.currentPlayer]
-            return weapons[player.weaponID].sizes[player.weaponSizeID].name
-        } else  {
-            return weapons[titleForRow].name
-        }
-    }
-
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    @IBAction func weaponTypeStepperTapped(_ sender: UIStepper) {
         NSLog("\(#function) called")
         guard let model = gameModel else { return }
         let board = model.board
         var players = board.players
 
-        // set appropriate value
-        if sizeMode {
-            players[board.currentPlayer].weaponSizeID = row
-        } else {
-            players[board.currentPlayer].weaponID = row
-            players[board.currentPlayer].weaponSizeID = max(players[board.currentPlayer].weaponSizeID,
-                                                            model.weaponsList[row].sizes.count-1)
-        }
-        
-        weaponPicker.isHidden = true
-        
+        // update weapon id for player
+        let weaponID = Int(sender.value)
+        model.board.players[board.currentPlayer].weaponID = weaponID
+        model.board.players[board.currentPlayer].weaponSizeID = min(players[board.currentPlayer].weaponSizeID,
+                                                                    model.weaponsList[weaponID].sizes.count-1)
+        NSLog("weapon now \(weaponID)")
+        NSLog("weapon size now \(model.board.players[board.currentPlayer].weaponSizeID)")
+
+        // update size stepper options
+        weaponSizeStepper.maximumValue = Double(model.weaponsList[weaponID].sizes.count-1)
+        weaponSizeStepper.stepValue = Double(1)
+
+        updateUI()
+    }
+    
+    @IBAction func weaponSizeStepperTapped(_ sender: UIStepper) {
+        NSLog("\(#function) called")
+        guard let model = gameModel else { return }
+        let board = model.board
+
+        // update size ID for player
+        let weaponSizeID = Int(sender.value)
+        model.board.players[board.currentPlayer].weaponSizeID = weaponSizeID
+        NSLog("weapon size now \(weaponSizeID)")
+
         updateUI()
     }
     
@@ -179,21 +147,43 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate, UIPickerView
         guard let model = gameModel else { return }
         let board = model.board
         var players = board.players
+        let player = players[board.currentPlayer]
+        let weaponID = player.weaponID
+        let weapon = model.weaponsList[weaponID]
+        let weaponSize = weapon.sizes[player.weaponSizeID]
+
+        // update limits on steppers
+        weaponTypeStepper.minimumValue = 0
+        weaponTypeStepper.maximumValue = Double(model.weaponsList.count) - 1
+        weaponTypeStepper.stepValue = Double(1)
+        weaponTypeStepper.value = Double(weaponID)
+        weaponSizeStepper.minimumValue = 0
+        weaponSizeStepper.maximumValue = Double(model.weaponsList[weaponID].sizes.count) - 1
+        weaponSizeStepper.stepValue = Double(1)
+        weaponSizeStepper.value = Double(player.weaponSizeID)
 
         // update labels
-        let player = players[board.currentPlayer]
-        let weapon = model.weaponsList[player.weaponID]
+        NSLog("weapon name: \(weapon.name), size: \(weaponSize.name), cost: \(weaponSize.cost)")
         weaponTypeLabel.text = weapon.name
-        weaponSizeLabel.text = weapon.sizes[player.weaponSizeID].name
-        if weaponSizeLabel.text == "" {
-            weaponSizeLabel.text = "N/A"
-            weaponSizeButton.isEnabled = false
-        } else {
-            weaponSizeButton.isEnabled = true
+        weaponSizeLabel.text = weaponSize.name
+        weaponCostLabel.text = "\(weaponSize.cost) points"
+        weaponCostLabel.textColor = UIColor.black
+        
+        // disable done button and give a reason if weapon is invalid
+        doneButton.isEnabled = true
+        reasonLabel.isHidden = true
+        if weaponID > 0 && weaponSize.cost > player.score {
+            reasonLabel.text = "Insufficient points for selected weapon!"
+            reasonLabel.isHidden = false
+            weaponCostLabel.textColor = UIColor.red
+            doneButton.isEnabled = false
         }
-
-        // restore normal visibilites
-        doneButton.isHidden = false
-        weaponPicker.isHidden = true
+        
+        if  weaponSizeStepper.maximumValue < 2 {
+            weaponSizeLabel.text = "N/A"
+            weaponSizeStepper.isEnabled = false
+        } else {
+            weaponSizeStepper.isEnabled = true
+        }
     }
 }
