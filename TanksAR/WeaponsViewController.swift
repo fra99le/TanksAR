@@ -17,6 +17,13 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         azimuthTextField.delegate = self
         altitudeTextField.delegate = self
         velocityTextField.delegate = self
+        
+        if let model = gameModel {
+            let player = model.board.players[model.board.currentPlayer]
+            azimuthTextField.text = "\(player.tank.azimuth * (180/Float.pi))º"
+            altitudeTextField.text = "\(player.tank.altitude * (180/Float.pi))º"
+            velocityTextField.text = "\(player.tank.velocity) m/s"
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -52,30 +59,38 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
 
         if str.last == "º" {
             textField.text = String(str.dropLast())
+        } else if str.suffix(4) == " m/s" {
+            textField.text = String(str.dropLast(4))
         }
 
         return true
     }
     
-    @IBAction func azimuthChanged(_ sender: UITextField) {
+    @IBAction func valueChanged(_ sender: UITextField) {
         guard let str: String = sender.text else { return }
-        NSLog("azimuthChanged to \(str)")
+        NSLog("valueChanged to \(str)")
         guard let newValue = Double(str) else { return }
 
         // update model
         guard let model = gameModel else { return }
+        guard model.board.currentPlayer < model.board.players.count else { return }
         let player = model.board.players[model.board.currentPlayer]
-        model.setTankAim(azimuth: Float(newValue), altitude: player.tank.altitude)
+        
+        if sender == azimuthTextField {
+            model.setTankAim(azimuth: Float(newValue) * (Float.pi/180), altitude: player.tank.altitude)
+            azimuthTextField.text = "\(Float(newValue))º"
+        } else if sender == altitudeTextField {
+            model.setTankAim(azimuth: player.tank.azimuth, altitude: Float(newValue) * (Float.pi/180))
+            altitudeTextField.text = "\(Float(newValue))º"
+        } else if sender == velocityTextField {
+            model.setTankPower(power: Float(newValue))
+            velocityTextField.text = "\(Float(newValue)) m/s"
+        } else  {
+            NSLog("\(#function): Unknown sender \(sender)")
+        }
         
         // re-add degree symbol
-        azimuthTextField.text = "\(newValue)º"
-        NSLog("new value: \(azimuthTextField.text!)")
-    }
-    
-    @IBAction func altitudeChanged(_ sender: UITextField) {
-    }
-    
-    @IBAction func powerChanged(_ sender: UITextField) {
+        NSLog("new value: \(sender.text!)")
     }
     
     @IBOutlet weak var weaponSizeButton: UIButton!
