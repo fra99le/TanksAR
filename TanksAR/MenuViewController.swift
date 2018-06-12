@@ -10,7 +10,7 @@ import UIKit
 
 class MenuViewController: UIViewController {
 
-    var humans = 1
+    var humans = 2
     var ais = 0
     
     override func viewDidLoad() {
