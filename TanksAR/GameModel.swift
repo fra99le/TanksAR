@@ -185,7 +185,7 @@ class GameModel {
 
             let tankElevation = getElevation(longitude: Int(x), latitude: Int(y))
             board.players[i].tank = Tank(position: SCNVector3(x: x, y: y, z: tankElevation),
-                                         azimuth: 0, altitude: Float(Double.pi/4), velocity: 100)
+                                         azimuth: 0, altitude: Float(Double.pi/4), velocity: 50)
         
             if i%2 == 1 {
                 board.players[i].weaponID = 1

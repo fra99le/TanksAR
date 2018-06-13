@@ -13,6 +13,8 @@
 		5314E47F20C8CC970070481A /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		5314E48020C8CC980070481A /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		533032A320CF00990014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
+		533032A420CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
+		533032A520CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
 		5373BF0720CB5B8D00817E4B /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5373BF0620CB5B8D00817E4B /* Default-568h@2x.png */; };
 		53EEDB6820C83C3E00B8B71D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6720C83C3E00B8B71D /* AppDelegate.swift */; };
 		53EEDB6A20C83C3F00B8B71D /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 53EEDB6920C83C3F00B8B71D /* art.scnassets */; };
@@ -306,6 +308,7 @@
 				5314E47F20C8CC970070481A /* GameViewController.swift in Sources */,
 				53EEDB7F20C83C4700B8B71D /* TanksARTests.swift in Sources */,
 				53EEDB9F20C84A3E00B8B71D /* GameModel.swift in Sources */,
+				533032A420CF822F0014A16D /* WeaponsViewController.swift in Sources */,
 				5314E47D20C8C4B20070481A /* ImageBuf.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -317,6 +320,7 @@
 				5314E48020C8CC980070481A /* GameViewController.swift in Sources */,
 				53EEDB8A20C83C4700B8B71D /* TanksARUITests.swift in Sources */,
 				53EEDBA020C84A3E00B8B71D /* GameModel.swift in Sources */,
+				533032A520CF822F0014A16D /* WeaponsViewController.swift in Sources */,
 				5314E47E20C8C4B20070481A /* ImageBuf.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

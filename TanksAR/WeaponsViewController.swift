@@ -20,8 +20,8 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
 
         if let model = gameModel {
             let player = model.board.players[model.board.currentPlayer]
-            azimuthTextField.text = "\(player.tank.azimuth * (180/Float.pi))º"
-            altitudeTextField.text = "\(player.tank.altitude * (180/Float.pi))º"
+            azimuthTextField.text = "\(player.tank.azimuth)º"
+            altitudeTextField.text = "\(player.tank.altitude)º"
             velocityTextField.text = "\(player.tank.velocity) m/s"
         }
         

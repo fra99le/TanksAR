@@ -40,7 +40,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     @IBOutlet var fireButton: UIButton!
     @IBOutlet var powerSlider: UISlider!
     @IBOutlet var powerLabel: UILabel!
-
+    @IBOutlet weak var hudStackView: UIStackView!
+    
+    @IBOutlet weak var azimuthLabel: UILabel!
+    @IBOutlet weak var altitudeLabel: UILabel!
+    @IBOutlet weak var velocityLabel: UILabel!
+    @IBOutlet weak var weaponLabel: UILabel!    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -61,6 +67,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0),
                              count: gameModel.board.players.count)
         
+        unplaceBoard()
+        
         sceneView.autoenablesDefaultLighting = true
     }
     
@@ -78,6 +86,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         //unplaceBoard()
         //updateUI()
         
+        updateHUD()
+
         placeBoardGesture.require(toFail: backupPlaceBoardGesture)
         
         // Run the view's session
@@ -222,6 +232,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         
         if gesture.state == .ended {
             gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
+            updateHUD()
+        } else {
+            // hack to allow realtime updating of HUD
+            gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
+            updateHUD()
+            gameModel.setTankAim(azimuth: currAzimuth, altitude: currAltitude)
         }
     }
 
@@ -275,6 +291,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     @IBAction func powerChanged(_ sender: UISlider) {
         gameModel.setTankPower(power: sender.value)
         //NSLog("set tank power to \(sender.value)")
+        updateHUD()
     }
     
     // MARK: - Helper methods
@@ -355,7 +372,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         screenDraggingGesture.isEnabled = true
         powerLabel.isHidden = false
         powerSlider.isHidden = false
-        
+        hudStackView.isHidden = false
+
         updateBoard()
         
         NSLog("\(#function) finished")
@@ -374,12 +392,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         screenDraggingGesture.isEnabled = false
         powerLabel.isHidden = true
         powerSlider.isHidden = true
+        hudStackView.isHidden = true
         
         // remove board and tanks
-        let nodes = board.childNodes
-        for node in  nodes {
-            node.removeFromParentNode()
-        }
+//        let nodes = board.childNodes
+//        for node in  nodes {
+//            node.removeFromParentNode()
+//        }
         
         NSLog("\(#function) finished")
     }
@@ -804,12 +823,31 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         scaleNode.scale = newScale
         NSLog("scaling to \(rescaleAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
 
+        updateHUD()
+        
         // update all tank turrets
         
         // update board
         updateBoard()
         
         NSLog("\(#function) finished")
+    }
+    
+    func updateHUD() {
+        let board = gameModel.board
+        let player = board.players[board.currentPlayer]
+        let tank = player.tank!
+        
+        azimuthLabel.text = String(format: "%.02fº", tank.azimuth)
+        altitudeLabel.text = String(format: "%.02fº", tank.altitude)
+        velocityLabel.text = String(format: "%.02f m/s", tank.velocity)
+
+        var weaponName = gameModel.weaponsList[player.weaponID].name
+        let sizeStr = gameModel.weaponsList[player.weaponID].sizes[player.weaponSizeID].name
+        if sizeStr != "" && sizeStr.lowercased() != "n/a" {
+            weaponName.append(" (\(sizeStr))")
+        }
+        weaponLabel.text = weaponName
     }
     
     // MARK: - Map View
