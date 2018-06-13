@@ -25,6 +25,7 @@ struct Player {
     var score: Int64 = 0
     var weaponID: Int = 0
     var weaponSizeID: Int = 0
+    var ai: PlayerAI? = nil
     // need to add shielding info
 }
 
@@ -111,8 +112,14 @@ class GameModel {
     }
     
     func startGame(numPlayers: Int, numAIs: Int = 0) {
-        board.players = [Player](repeating: Player(), count: numPlayers+numAIs)
+        let totalPlayers = numPlayers+numAIs
+        board.players = [Player](repeating: Player(), count: totalPlayers)
         board.currentPlayer = 0
+
+        // add AI objects to AI players
+        for i in numPlayers..<totalPlayers {
+            board.players[i].ai = PlayerAI(model: self)
+        }
         
         placeTanks()
     }

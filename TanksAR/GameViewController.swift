@@ -521,6 +521,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
 
+        // record result for AIs
+        if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
+            // player is an AI
+            let impact = fireResult.trajectory.last!
+            ai.recordResult(azimuth: azi, altitude: alt, velocity: power,
+                              impactX: impact.x, impactY: impact.y, impactZ: impact.z)
+        }
+
         animateResult(fireResult: fireResult)
         NSLog("\(#function) finished")
     }
@@ -785,6 +793,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 self.fireButton.isEnabled = true
                 self.powerSlider.isEnabled = true
                 self.updateUI()
+        
+        // do AI stuff if next player is an AI
+        if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
+            // player is an AI
+            let (azimuth: azi, altitude: alt, velocity: vel) = ai.fireParameters(players: gameModel.board.players)
+            gameModel.setTankAim(azimuth: azi, altitude: alt)
+            gameModel.setTankPower(power: vel)
+            updateUI()
+            launchProjectile()
+        }
         /*
             }
         }
