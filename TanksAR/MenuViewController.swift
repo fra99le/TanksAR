@@ -10,8 +10,9 @@ import UIKit
 
 class MenuViewController: UIViewController {
 
-    var humans = 2
-    var ais = 0
+    var humans = 1
+    var ais = 2
+    var rounds = 2
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,10 +58,12 @@ class MenuViewController: UIViewController {
     
     @IBOutlet weak var humansNumLabel: UILabel!
     @IBOutlet weak var aisNumLabel: UILabel!
-    
+    @IBOutlet weak var roundsNumLabel: UILabel!
+
     @IBOutlet weak var humansStepper: UIStepper!
     @IBOutlet weak var aisStepper: UIStepper!
-    
+    @IBOutlet weak var roundsStepper: UIStepper!
+
     @IBAction func humansStepperTapped(_ sender: UIStepper) {
         humans = Int(sender.value)
         updateUI()
@@ -70,11 +73,19 @@ class MenuViewController: UIViewController {
         ais = Int(sender.value)
         updateUI()
     }
+
+    @IBAction func roundsStepperTapped(_ sender: UIStepper) {
+        rounds = Int(sender.value)
+        updateUI()
+    }
     
+
     func updateUI() {
         humansStepper.value = Double(humans)
         aisStepper.value = Double(ais)
+        roundsStepper.value = Double(rounds)
         humansNumLabel.text = "\(humans)"
         aisNumLabel.text = "\(ais)"
+        roundsNumLabel.text = "\(rounds)"
     }
 }
