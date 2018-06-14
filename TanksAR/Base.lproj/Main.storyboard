@@ -743,7 +743,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qxm-BG-9xa" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="VoF-Mf-UJ3" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1201" y="785"/>
+            <point key="canvasLocation" x="1201" y="877"/>
         </scene>
         <!--Instructions-->
         <scene sceneID="OBn-gq-pag">
