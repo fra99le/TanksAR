@@ -43,11 +43,30 @@ class PlayerAI {
         gameModel = model
     }
     
-    func recordResult(azimuth: Float, altitude: Float, velocity: Float,
-                      impactX: Float, impactY: Float, impactZ: Float) {
+    func fromSpherical(azi: Float, alt: Float, velocity: Float) -> (x: Float, y: Float, z: Float) {
+        let azimuth = azi * (Float.pi / 180)
+        let altitude = alt * (Float.pi / 180)
         let xVel = -velocity * sin(azimuth) * cos(altitude)
         let yVel = velocity * sin(altitude)
         let zVel = -velocity * cos(azimuth) * cos(altitude)
+
+        return (xVel, yVel, zVel)
+    }
+
+    func toSpherical(xVel: Float, yVel: Float, zVel: Float) -> (azimuth: Float, altitude: Float, velocity: Float) {
+        let horiz = sqrt( xVel*xVel + zVel*zVel )
+        let retAzi = (180 / Float.pi) * atan2(-xVel, -zVel)
+        let retAlt = (180 / Float.pi) * atan2(yVel, horiz)
+        let retVel = sqrt( horiz*horiz + yVel*yVel )
+
+        return (retAzi, retAlt, retVel)
+    }
+    
+    func recordResult(azimuth: Float, altitude: Float, velocity: Float,
+                      impactX: Float, impactY: Float, impactZ: Float) {
+        let (xVel, yVel, zVel) = fromSpherical(azi: azimuth, alt: altitude, velocity: velocity)
+        let (azi2, alt2, vel2) = toSpherical(xVel: xVel, yVel: yVel, zVel: zVel)
+        NSLog("\(#function): \(azimuth),\(altitude),\(velocity) -> linear -> \(azi2),\(alt2),\(vel2)")
         let newSample = Sample(azimuth: azimuth, altitude: altitude, velocity: velocity,
                                velocityX: xVel, velocityY: yVel, velocityZ: zVel,
                                impactX: impactX, impactY: impactY, impactZ: impactZ)
@@ -62,11 +81,13 @@ class PlayerAI {
         // see: https://en.wikipedia.org/wiki/Nelder–Mead_method
         
         // fill initial simplex
+        print("lastFour: \(lastFour)")
         if lastFour.count < 4 {
             let azimuth = Float(drand48() * 360)
             let altitude = Float(drand48() * 50) + 30
             let power = Float(drand48() * 70) + 30
             
+            NSLog("\(#function): firing at random, (\(lastFour.count) samples), (\(azimuth),\(altitude),\(power))")
             return (azimuth, altitude, power)
         }
         
@@ -112,16 +133,11 @@ class PlayerAI {
         let retX = furthest.velocityX + 1.5 * deltaX
         let retY = furthest.velocityY + 1.5 * deltaY
         let retZ = furthest.velocityZ + 1.5 * deltaZ
-
+        print("next sample (x,y,z) = (\(retX),\(retY),\(retZ))")
+        
         // convert new sample to polar coordinates
-//        let xVel = -velocity * sin(azimuth) * cos(altitude)
-//        let yVel = velocity * sin(altitude)
-//        let zVel = -velocity * cos(azimuth) * cos(altitude)
-        let horiz = sqrt( retX*retX + retZ*retZ )
-        let retAzi = (180 / Float.pi) * atan2(-retZ, -retX)
-        let retAlt = (180 / Float.pi) * atan2(retY, horiz)
-        let retVel = sqrt( horiz*horiz + retY*retY )
-
+        let (retAzi, retAlt, retVel) = toSpherical(xVel: retX, yVel: retY, zVel: retZ)
+        
         return (retAzi, retAlt, retVel)
     }
     

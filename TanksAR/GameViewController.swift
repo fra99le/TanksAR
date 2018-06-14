@@ -559,7 +559,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
             // player is an AI
             let impact = fireResult.trajectory.last!
-            ai.recordResult(azimuth: azi, altitude: alt, velocity: power,
+            ai.recordResult(azimuth: tank.azimuth, altitude: tank.altitude, velocity: power,
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
         }
 
@@ -819,7 +819,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // do AI stuff if next player is an AI
         if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
             // player is an AI
-            let (azimuth: azi, altitude: alt, velocity: vel) = ai.fireParameters(players: gameModel.board.players)
+            let (azi, alt, vel) = ai.fireParameters(players: gameModel.board.players)
+            NSLog("ai firing parameters: (\(azi),\(alt),\(vel))")
             gameModel.setTankAim(azimuth: azi, altitude: alt)
             gameModel.setTankPower(power: vel)
             updateUI()
