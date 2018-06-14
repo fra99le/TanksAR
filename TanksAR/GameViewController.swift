@@ -13,6 +13,7 @@ import ARKit
 struct UserConfig {
     var scaleFactor: Float
     var rotation: Float
+    var tank: SCNNode?
 }
 
 class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelegate {
@@ -28,14 +29,17 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     var tankNodes: [SCNNode] = []
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
-    let timeScaling = 1
+    let timeScaling = 3
     let numPerSide = 50
     var boardBlocks: [[SCNNode]] = []
     var dropBlocks: [SCNNode] = []
     var users: [UserConfig] = []
     var numHumans: Int = 0
     var numAIs: Int = 0
-
+    var numRounds: Int = 0
+    var roundChanged: Bool = false
+    var gameOver = false
+    
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
     @IBOutlet var powerSlider: UISlider!
@@ -57,16 +61,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         sceneView.showsStatistics = true
         
         // create the game board
-        gameModel.generateBoard()
-        mapImage.image = gameModel.board.surface.asUIImage()
 
         // start a game
-        gameModel.startGame(numPlayers: numHumans, numAIs: numAIs)
+        NSLog("\(#function) starting \(numRounds) round game.")
+        gameModel.startGame(numPlayers: numHumans, numAIs: numAIs, rounds: numRounds)
         addBoard()
-        addTanks()
-        users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0),
+        users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0, tank: nil),
                              count: gameModel.board.players.count)
-        
+        addTanks()
+        mapImage.image = gameModel.board.surface.asUIImage()
+
         unplaceBoard()
         
         sceneView.autoenablesDefaultLighting = true
@@ -181,6 +185,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             if !boardPlaced {
                 if (result.anchor as? ARPlaneAnchor) != nil {
                     placeBoard(result)
+                    updateUI()
                     break
                 }
             } else {
@@ -206,8 +211,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         guard let gesture = sender as? UIPanGestureRecognizer else { return }
         guard tankNodes.count > 0 else { return }
         
-        NSLog("Screen dragged \(gesture).")
-        NSLog("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
+        //NSLog("Screen dragged \(gesture).")
+        //NSLog("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
         // determine player
         let player = gameModel.board.currentPlayer
         let tankNode = tankNodes[player]
@@ -216,7 +221,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         let tank = gameModel.getTank(forPlayer: player)
         let currAzimuth = tank.azimuth
         let currAltitude = tank.altitude
-        NSLog("currAzimuth: \(currAzimuth), currAltitude: \(currAltitude)")
+        //NSLog("currAzimuth: \(currAzimuth), currAltitude: \(currAltitude)")
 
         // update values
         let translation = gesture.translation(in: nil)
@@ -228,7 +233,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { return }
         turretNode.eulerAngles.y = newAzimuth * (Float.pi/180)
         hingeNode.eulerAngles.x = newAltitude * (Float.pi/180)
-        NSLog("newAzimuth: \(newAzimuth), newAltitude: \(newAltitude)")
+        //NSLog("newAzimuth: \(newAzimuth), newAltitude: \(newAltitude)")
         
         if gesture.state == .ended {
             gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
@@ -248,9 +253,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         board.scale = SCNVector3(newScale,newScale,newScale)
 
         if sender.state == .ended {
-            NSLog("pinch gesture: \(sender.scale)x ended for player \(player)")
+            //NSLog("pinch gesture: \(sender.scale)x ended for player \(player)")
             users[player].scaleFactor *= Float(sender.scale)
-            NSLog("scale for user \(player) set to \(users[player].scaleFactor)")
+            //NSLog("scale for user \(player) set to \(users[player].scaleFactor)")
         }
     }
 
@@ -260,9 +265,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         board.eulerAngles.y = Float(CGFloat(users[player].rotation) - sender.rotation)
 
         if sender.state == .ended {
-            NSLog("rotate gesture: \(sender.rotation) ended or player \(player)")
+            //NSLog("rotate gesture: \(sender.rotation) ended or player \(player)")
             users[player].rotation -= Float(sender.rotation)
-            NSLog("rotation for user \(player) set to \(users[player].rotation)")
+            //NSLog("rotation for user \(player) set to \(users[player].rotation)")
         }
     }
     
@@ -278,11 +283,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         launchProjectile()
         fireButton.isEnabled = false
         powerSlider.isEnabled = false
+        screenDraggingGesture.isEnabled = false
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let dest = segue.destination as? WeaponsViewController {
             dest.gameModel = gameModel
+        } else if let dest = segue.destination as? GameOverViewController {
+            let (name, score) = gameModel.getWinner()
+            dest.winner = name
+            dest.score = score
         } else {
             super.prepare(for: segue, sender: sender)
         }
@@ -308,12 +318,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
 
     func toModelScale(_ vector: SCNVector3) -> SCNVector3 {
-        let ret = SCNVector3(vector.x,vector.y,vector.z)
+        let ret = SCNVector3(vector.x,vector.z,vector.y)
         return ret
     }
 
     func fromModelScale(_ vector: SCNVector3) -> SCNVector3 {
-        let ret = SCNVector3(vector.x,vector.y,vector.z)
+        let ret = SCNVector3(vector.x,vector.z,vector.y)
         return ret
     }
     
@@ -405,7 +415,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     
     func addTanks() {
         NSLog("\(#function) started")
-        for player in gameModel.board.players {
+        tankNodes = [SCNNode](repeating: SCNNode(), count: gameModel.board.players.count)
+        
+        for i in 0..<gameModel.board.players.count {
+            let player = gameModel.board.players[i]
             let tankScene = SCNScene(named: "art.scnassets/Tank.scn")
             guard let tankNode = tankScene?.rootNode.childNode(withName: "Tank", recursively: false) else { continue }
             
@@ -413,12 +426,19 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             tankNode.position = fromModelSpace(tank.position)
             tankNode.scale = SCNVector3(30,30,30)
             //tankNode.eulerAngles.x = Float.pi / 2
-
+            users[i].tank = tankNode
+            
             NSLog("Adding tank at \(tankNode.position)")
             board.addChildNode(tankNode)
-            tankNodes.append(tankNode)
+            tankNodes[i] = tankNode
         }
         NSLog("\(#function) finished")
+    }
+    
+    func removeTanks() {
+        for i in 0..<gameModel.board.players.count {
+            users[i].tank?.removeFromParentNode()
+        }
     }
     
     func addBoard() {
@@ -442,11 +462,23 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             }
         }
         updateBoard()
-        mapImage.image = gameModel.board.surface.asUIImage()
+        //mapImage.image = gameModel.board.surface.asUIImage()
         
         NSLog("\(#function) finished")
     }
     
+    func removeBoard() {
+        NSLog("\(#function) started")
+        for i in 0..<numPerSide {
+            for j in 0..<numPerSide {
+                boardBlocks[i][j].removeFromParentNode()
+            }
+        }
+        board.removeFromParentNode()
+        NSLog("\(#function) finished")
+    }
+    
+
     func updateBoard() {
         NSLog("\(#function) started")
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
@@ -500,9 +532,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         let power = tank.velocity
         let azi = tank.azimuth * (Float.pi/180)
         let alt = tank.altitude * (Float.pi/180)
+        
         let xVel = -power * sin(azi) * cos(alt)
         let yVel = power * sin(alt)
         let zVel = -power * cos(azi) * cos(alt)
+        
         NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
         NSLog("angles in radians: \(azi),\(alt)")
         NSLog("velocity: \(xVel),\(yVel),\(zVel)")
@@ -530,6 +564,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         }
 
         animateResult(fireResult: fireResult)
+        roundChanged = fireResult.newRound
+        
         NSLog("\(#function) finished")
     }
     
@@ -780,20 +816,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         NSLog("Animation stopped (finished: \(finished))")
         NSLog("\tbegan at: \(animation.beginTime), with duration: \(animation.duration)")
         
-        /*
-        // because this gets called way way way too soon
-        // see: https://stackoverflow.com/questions/24056205/how-to-use-background-thread-in-swift
-        DispatchQueue.global(qos: .background).async {
-            print("This is run on the background queue")
-            Thread.sleep(forTimeInterval: animation.beginTime+animation.duration)
-
-            DispatchQueue.main.async {
-                print("This is run on the main queue, after the previous code in outer block")
-         */
-                self.fireButton.isEnabled = true
-                self.powerSlider.isEnabled = true
-                self.updateUI()
-        
         // do AI stuff if next player is an AI
         if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
             // player is an AI
@@ -802,11 +824,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             gameModel.setTankPower(power: vel)
             updateUI()
             launchProjectile()
+        } else {
+            // return control to human player
+            fireButton.isEnabled = true
+            powerSlider.isEnabled = true
+            screenDraggingGesture.isEnabled = true
+            updateUI()
         }
-        /*
-            }
-        }
-        */
+        
     }
     
     func updateUI() {
@@ -814,7 +839,20 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         NSLog("\(#function) started")
         //mapImage.image = fireResult.mapUpdate.asUIImage()
-
+        if roundChanged {
+            NSLog("round change detected")
+            if gameModel.board.currentRound > gameModel.board.totalRounds {
+                NSLog("round \(gameModel.board.currentRound) > \(gameModel.board.totalRounds), game over!")
+                gameOver = true
+                performSegue(withIdentifier: "Game Over", sender: nil)
+                return
+            }
+            NSLog("Starting round \(gameModel.board.currentRound) of \(gameModel.board.currentRound).")
+            removeTanks()
+            addTanks()
+            roundChanged = false
+        }
+        
         // make sure power slider matches player
         let currentPower = gameModel.board.players[gameModel.board.currentPlayer].tank.velocity
         powerSlider.setValue(currentPower, animated: false)
@@ -843,7 +881,32 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         updateHUD()
         
-        // update all tank turrets
+        // update all tanks turrets and existence
+        for i in 0..<users.count {
+            let player = gameModel.board.players[i]
+            let user = users[i]
+            guard let tankNode = user.tank else { continue }
+
+            if player.hitPoints <= 0 {
+                tankNode.removeFromParentNode()
+            }
+            
+            guard let tank = player.tank else { continue }
+            guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { return }
+            guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { return }
+            guard let barrelNode = tankNode.childNode(withName: "barrel", recursively: true) else { return }
+            turretNode.eulerAngles.y = tank.azimuth * (Float.pi/180)
+            hingeNode.eulerAngles.x = tank.altitude * (Float.pi/180)
+
+            // set colors to highlight current player
+            var color = UIColor.darkGray
+            if gameModel.board.currentPlayer == i {
+                color = UIColor.gray
+            }
+            tankNode.geometry?.firstMaterial?.diffuse.contents = color
+            turretNode.geometry?.firstMaterial?.diffuse.contents = color
+            barrelNode.geometry?.firstMaterial?.diffuse.contents = color
+        }
         
         // update board
         updateBoard()

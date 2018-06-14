@@ -50,6 +50,8 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
     
     var gameModel: GameModel? = nil
     
+    @IBOutlet weak var scoreLabel: UILabel!
+    
     @IBOutlet weak var azimuthTextField: UITextField!
     @IBOutlet weak var altitudeTextField: UITextField!
     @IBOutlet weak var velocityTextField: UITextField!
@@ -152,6 +154,9 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         let weapon = model.weaponsList[weaponID]
         let weaponSize = weapon.sizes[player.weaponSizeID]
 
+        // update score label
+        scoreLabel.text = "Score: \(player.score)"
+        
         // update limits on steppers
         weaponTypeStepper.minimumValue = 0
         weaponTypeStepper.maximumValue = Double(model.weaponsList.count) - 1

@@ -25,6 +25,7 @@ struct Player {
     var score: Int64 = 0
     var weaponID: Int = 0
     var weaponSizeID: Int = 0
+    var hitPoints: Float = 1000
     var ai: PlayerAI? = nil
     // need to add shielding info
 }
@@ -40,6 +41,10 @@ struct GameBoard {
     // player
     var players: [Player] = []
     var currentPlayer: Int = 0
+    
+    // game progress
+    var totalRounds = 1
+    var currentRound = 1
 }
 
 struct HighScore {
@@ -69,6 +74,8 @@ struct FireResult {
     
     // need data to update map
     var mapUpdate: ImageBuf
+    
+    var newRound: Bool
 }
 
 enum ElevationMode {
@@ -81,9 +88,10 @@ enum ElevationMode {
 class GameModel {
     // game board
     var board: GameBoard = GameBoard()
+    let tankSize: Float = 30
     
     var weaponsList = [
-        Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 15, cost: 10)], style: .explosive),
+        Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 35, cost: 10)], style: .explosive),
         Weapon(name: "Nuke", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
                                      WeaponSize(name: "regular", size: 150, cost: 2000),
                                      WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .explosive),
@@ -111,19 +119,52 @@ class GameModel {
         NSLog("\(#function) finished")
     }
     
-    func startGame(numPlayers: Int, numAIs: Int = 0) {
+    func startGame(numPlayers: Int, numAIs: Int = 0, rounds: Int) {
         let totalPlayers = numPlayers+numAIs
         board.players = [Player](repeating: Player(), count: totalPlayers)
         board.currentPlayer = 0
+
+        board.currentRound = 1
+        board.totalRounds = rounds
+        NSLog("\(#function) starting \(board.totalRounds) round game.")
+        
+        // set player names
+        for i in numPlayers..<totalPlayers {
+            if i < numPlayers {
+                board.players[i].name = "Player \(i+1)"
+            } else {
+                board.players[i].name = "Al \(i-numPlayers+1)"
+            }
+        }
 
         // add AI objects to AI players
         for i in numPlayers..<totalPlayers {
             board.players[i].ai = PlayerAI(model: self)
         }
-        
-        placeTanks()
+
+        startRound()
     }
 
+    func resetAIs() {
+        let totalPlayers = board.players.count
+
+        // add AI objects to AI players
+        for i in 0..<totalPlayers {
+            guard let ai = board.players[i].ai else { continue }
+            ai.reset(model: self)
+        }
+    }
+
+    func startRound() {
+        generateBoard()
+        placeTanks()
+        resetAIs()
+        
+        for i in 0..<board.players.count {
+            board.players[i].hitPoints = 1000
+        }
+    }
+    
     func getElevation(longitude: Int, latitude: Int, forMode: ElevationMode = .actual) -> Float {
         return getElevation(fromMap: board.surface, longitude: longitude, latitude: latitude, forMode: forMode)
     }
@@ -194,12 +235,6 @@ class GameModel {
             board.players[i].tank = Tank(position: SCNVector3(x: x, y: y, z: tankElevation),
                                          azimuth: 0, altitude: Float(Double.pi/4), velocity: 50)
         
-            if i%2 == 1 {
-                board.players[i].weaponID = 1
-            } else {
-                board.players[i].weaponID = 2
-            }
-            
             // flatten area around tanks
             let tank = board.players[i].tank!
             flattenAreaAt(longitude: Int(tank.position.x), latitude: Int(tank.position.y), withRadius: 100)
@@ -209,9 +244,9 @@ class GameModel {
     
     func flattenAreaAt(longitude: Int, latitude: Int, withRadius: Int) {
         let min_x = (longitude<withRadius) ? 0 : longitude-withRadius
-        let max_x = (longitude+withRadius>board.surface.width) ? 0 : longitude+withRadius
+        let max_x = (longitude+withRadius>=board.surface.width) ? board.surface.width-1 : longitude+withRadius
         let min_y = (latitude<withRadius) ? 0 : latitude-withRadius
-        let max_y = (latitude+withRadius>board.surface.height) ? board.surface.height-1 : latitude+withRadius
+        let max_y = (latitude+withRadius>=board.surface.height) ? board.surface.height-1 : latitude+withRadius
 
         let elevation = getElevation(longitude: longitude, latitude: latitude)
         for j in min_y...max_y {
@@ -258,13 +293,18 @@ class GameModel {
         let timeStep = Float(1)/Float(60)
         let gravity = Float(-9.80665)
         
+        // charge points
+        let player = board.players[board.currentPlayer]
+        let weapon = weaponsList[player.weaponID]
+        let weaponSize = weapon.sizes[player.weaponSizeID].size
+        let weaponCost = weapon.sizes[player.weaponSizeID].cost
+        board.players[board.currentPlayer].score -= Int64(weaponCost)
+        
         // compute trajectory
         var trajectory: [SCNVector3] = []
         var airborn = true
         var position = muzzlePosition
         var velocity = muzzleVelocity
-        let weapon = weaponsList[board.players[board.currentPlayer].weaponID]
-        let weaponSize = weapon.sizes[board.players[board.currentPlayer].weaponSizeID].size
         NSLog("firing \(weapon.name) with size \(weaponSize) and style \(weapon.style).")
         
         var iterCount = 0
@@ -287,6 +327,20 @@ class GameModel {
             if position.z<0 || distAboveLand<0 {
                 airborn = false
             }
+            
+            for i in 0..<board.players.count {
+                let player = board.players[i]
+                
+                guard let tank = player.tank else { continue }
+                guard board.players[i].hitPoints > 0 else  { continue }
+                
+                let dist = distance(from: tank.position, to: position)
+                if dist < (weaponSize + tankSize) {
+                    // hit a tank
+                    airborn = false
+                }
+            }
+
             if iterCount > 10000 {
                 break
             }
@@ -297,17 +351,26 @@ class GameModel {
         
         // deal with impact
         let impactPosition = position
-        let blastRadius = Float(100)
+        let blastRadius = weaponSize
         
         // update board with new values
+        let sizeID = board.players[board.currentPlayer].weaponSizeID
         let updates = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
+        damageCheck(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
+        
+        let roundEnded = roundCheck()
         
         let result: FireResult = FireResult(timeStep: timeStep,
                                             trajectory: trajectory,
                                             explosionRadius: blastRadius,
-                                            mapUpdate: updates)
-
+                                            mapUpdate: updates,
+                                            newRound: roundEnded)
+        
         board.currentPlayer = (board.currentPlayer + 1) % board.players.count
+        while !roundEnded && board.players[board.currentPlayer].hitPoints <= 0 {
+            NSLog("skipping downed player )\(board.currentPlayer)")
+            board.currentPlayer = (board.currentPlayer + 1) % board.players.count
+        }
         print("Player \(board.currentPlayer) now active.")
         
         NSLog("\(#function) finished")
@@ -388,6 +451,88 @@ class GameModel {
         NSLog("\(#function) finished")
 
         return changeBuf
+    }
+    
+    func distance(from: SCNVector3, to: SCNVector3) -> Float {
+        let xDiff = from.x - to.x
+        let yDiff = from.y - to.y
+        let zDiff = from.z - to.z
+        
+        return sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff)
+    }
+    
+    func damageCheck(at: SCNVector3, fromWeapon: Weapon, withSize: Int) {
+        NSLog("\(#function) started")
+
+        for i in 0..<board.players.count {
+            NSLog("checking tank \(i)")
+            let player = board.players[i]
+            
+            guard let tank = player.tank else { continue }
+            let tankPos = tank.position
+            NSLog("tank at \(tankPos)")
+            
+            let dist = distance(from: tankPos, to: at)
+            NSLog("dist = \(dist)")
+            let weaponSize = fromWeapon.sizes[withSize].size
+            if dist < (weaponSize + tankSize) && board.players[i].hitPoints > 0 {
+                NSLog("Player \(board.currentPlayer) hit player \(i)")
+                let effectiveDist = min(1,dist-tankSize)
+                NSLog("effectiveDist: \(effectiveDist)")
+                let damage = (weaponSize * weaponSize) / (effectiveDist * effectiveDist)
+                NSLog("damage: \(damage)")
+                board.players[i].hitPoints = max(0, board.players[i].hitPoints -  damage)
+                
+                if board.currentPlayer != i {
+                    board.players[board.currentPlayer].score += Int64(damage)
+                    if board.players[i].hitPoints <= 0 {
+                        board.players[board.currentPlayer].score += 1000
+                    }
+                    NSLog("\tplayer \(board.currentPlayer) score now \(board.players[board.currentPlayer].score)")
+                }
+            }
+        }
+        
+        NSLog("\(#function) finished")
+    }
+
+    func roundCheck() -> Bool {
+        var playersLeft = 0
+        for player in board.players {
+            if player.hitPoints > 0 {
+                playersLeft += 1
+            }
+        }
+        
+        let newRound = playersLeft <= 1
+        if newRound {
+            // apply round bonuses
+            NSLog("Round ended")
+            for i in 0..<board.players.count {
+                let player = board.players[i]
+                if player.score > 0 {
+                    board.players[i].score = Int64(Double(board.players[i].score) * 1.1)
+                    NSLog("\tPlayer \(0) score now \(board.players[i].score)")
+                }
+            }
+            board.currentRound += 1
+            startRound()
+        }
+        
+        return newRound
+    }
+    
+    func getWinner() -> (name: String, score: Int64) {
+        var maxScore = board.players[0].score - 1
+        var winner = ""
+        for i in 0..<board.players.count {
+            if board.players[i].score > maxScore {
+                maxScore = board.players[i].score
+                winner = board.players[i].name
+            }
+        }
+        
+        return (winner, maxScore)
     }
     
     func fluidFill(startX: Int, startY: Int, totalVolume: Float) {

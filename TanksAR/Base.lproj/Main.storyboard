@@ -390,6 +390,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                         <outlet property="tapToSelectLabel" destination="QIh-1p-M8Z" id="CIX-dN-J2b"/>
                         <outlet property="velocityLabel" destination="8y6-5I-LW8" id="KR7-jr-Q4n"/>
                         <outlet property="weaponLabel" destination="vGF-fx-Cq1" id="SQS-zr-ebi"/>
+                        <segue destination="m2W-CC-yJa" kind="show" identifier="Game Over" id="Na1-51-Y44"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
@@ -650,6 +651,62 @@ If no surfaces can be found, double tap to place board in the air.</string>
                 <exit id="gNR-gT-bqm" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="1201" y="62"/>
+        </scene>
+        <!--Game Over-->
+        <scene sceneID="FNf-V2-a2G">
+            <objects>
+                <viewController title="Game Over" id="m2W-CC-yJa" customClass="GameOverViewController" customModule="TanksAR" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="p5J-al-LAf">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="yk4-H7-oto">
+                                <rect key="frame" x="91" y="244" width="193.5" height="179"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Game Over" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ubf-Hj-K1V" userLabel="Game Over">
+                                        <rect key="frame" x="0.0" y="0.0" width="193.5" height="48"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="R2f-li-nI8" userLabel="Player">
+                                        <rect key="frame" x="0.0" y="68" width="193.5" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lag-2k-8L8" userLabel="Score">
+                                        <rect key="frame" x="0.0" y="108.5" width="193.5" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IQu-im-ecU">
+                                        <rect key="frame" x="0.0" y="149" width="193.5" height="30"/>
+                                        <state key="normal" title="Done"/>
+                                        <connections>
+                                            <segue destination="VoF-Mf-UJ3" kind="unwind" unwindAction="unwindToMainMenuWithUnwindSegue:" id="ewo-ue-Eov"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="yk4-H7-oto" firstAttribute="centerX" secondItem="p5J-al-LAf" secondAttribute="centerX" id="CdB-Dg-Muv"/>
+                            <constraint firstItem="yk4-H7-oto" firstAttribute="centerY" secondItem="p5J-al-LAf" secondAttribute="centerY" id="ZQH-bU-tFc"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="qKl-Mg-HlQ"/>
+                    </view>
+                    <connections>
+                        <outlet property="playerLabel" destination="R2f-li-nI8" id="LrT-ll-sA3"/>
+                        <outlet property="scoreLabel" destination="lag-2k-8L8" id="xyQ-EJ-hk3"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="qxm-BG-9xa" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="VoF-Mf-UJ3" userLabel="Exit" sceneMemberID="exit"/>
+            </objects>
+            <point key="canvasLocation" x="1201" y="785"/>
         </scene>
         <!--Instructions-->
         <scene sceneID="OBn-gq-pag">

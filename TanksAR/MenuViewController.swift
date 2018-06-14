@@ -51,6 +51,8 @@ class MenuViewController: UIViewController {
         if let dest = segue.destination as? GameViewController {
             dest.numHumans = humans;
             dest.numAIs = ais;
+            dest.numRounds = rounds
+            NSLog("\(#function) starting \(dest.numRounds) round game.")
         } else {
             super.prepare(for: segue, sender: sender)
         }
