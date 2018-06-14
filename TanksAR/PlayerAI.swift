@@ -17,6 +17,11 @@ struct Sample {
     var altitude: Float
     var velocity: Float
     
+    // component vectors
+    var velocityX: Float
+    var velocityY: Float
+    var velocityZ: Float
+    
     // result
     var impactX: Float
     var impactY: Float
@@ -40,7 +45,11 @@ class PlayerAI {
     
     func recordResult(azimuth: Float, altitude: Float, velocity: Float,
                       impactX: Float, impactY: Float, impactZ: Float) {
+        let xVel = -velocity * sin(azimuth) * cos(altitude)
+        let yVel = velocity * sin(altitude)
+        let zVel = -velocity * cos(azimuth) * cos(altitude)
         let newSample = Sample(azimuth: azimuth, altitude: altitude, velocity: velocity,
+                               velocityX: xVel, velocityY: yVel, velocityZ: zVel,
                                impactX: impactX, impactY: impactY, impactZ: impactZ)
         data.append(newSample)
 
@@ -55,8 +64,8 @@ class PlayerAI {
         // fill initial simplex
         if lastFour.count < 4 {
             let azimuth = Float(drand48() * 360)
-            let altitude = Float(drand48() * 90)
-            let power = Float(drand48() * 100)
+            let altitude = Float(drand48() * 50) + 30
+            let power = Float(drand48() * 70) + 30
             
             return (azimuth, altitude, power)
         }
@@ -82,27 +91,36 @@ class PlayerAI {
 
         // compute simplex relative target player
         // take three closest and average them
-        var sumAzi = Float(0)
-        var sumAlt = Float(0)
-        var sumVel = Float(0)
+        var sumX = Float(0)
+        var sumY = Float(0)
+        var sumZ = Float(0)
         for sample in lastFour {
-            sumAzi += sample.azimuth
-            sumAlt += sample.altitude
-            sumVel += sample.velocity
+            sumX += sample.velocityX
+            sumY += sample.velocityY
+            sumZ += sample.velocityZ
         }
-        let meanAzi = sumAzi / 3
-        let meanAlt = sumAlt / 3
-        let meanVel = sumVel / 3
+        let meanX = sumX / 3
+        let meanY = sumY / 3
+        let meanZ = sumZ / 3
 
         // take furthest and form a vector
-        let deltaAzi = meanAzi - furthest.azimuth
-        let deltaAlt = meanAlt - furthest.altitude
-        let deltaVel = meanVel - furthest.velocity
+        let deltaX = meanX - furthest.velocityX
+        let deltaY = meanY - furthest.velocityY
+        let deltaZ = meanZ - furthest.velocityZ
 
-        // get new guess by following vector 1.5x from furthest
-        let retAzi = furthest.azimuth + 1.5 * deltaAzi
-        let retAlt = furthest.altitude + 1.5 * deltaAlt
-        let retVel = furthest.velocity + 1.5 * deltaVel
+        // find new x,y,z to sample by following vector 1.5x from furthest
+        let retX = furthest.velocityX + 1.5 * deltaX
+        let retY = furthest.velocityY + 1.5 * deltaY
+        let retZ = furthest.velocityZ + 1.5 * deltaZ
+
+        // convert new sample to polar coordinates
+//        let xVel = -velocity * sin(azimuth) * cos(altitude)
+//        let yVel = velocity * sin(altitude)
+//        let zVel = -velocity * cos(azimuth) * cos(altitude)
+        let horiz = sqrt( retX*retX + retZ*retZ )
+        let retAzi = (180 / Float.pi) * atan2(-retZ, -retX)
+        let retAlt = (180 / Float.pi) * atan2(retY, horiz)
+        let retVel = sqrt( horiz*horiz + retY*retY )
 
         return (retAzi, retAlt, retVel)
     }
