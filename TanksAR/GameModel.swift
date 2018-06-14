@@ -279,7 +279,7 @@ class GameModel {
         }
         board.players[board.currentPlayer].tank.azimuth = cleanAzimuth
         board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
-        NSLog("tank for player \(board.currentPlayer) set to \(board.players[board.currentPlayer].tank.azimuth)º,\(board.players[board.currentPlayer].tank.altitude)º")
+        //NSLog("tank for player \(board.currentPlayer) set to \(board.players[board.currentPlayer].tank.azimuth)º,\(board.players[board.currentPlayer].tank.altitude)º")
     }
 
     func setTankPower(power: Float) {
@@ -480,7 +480,8 @@ class GameModel {
                 NSLog("Player \(board.currentPlayer) hit player \(i)")
                 let effectiveDist = min(1,dist-tankSize)
                 NSLog("effectiveDist: \(effectiveDist)")
-                let damage = (weaponSize * weaponSize) / (effectiveDist * effectiveDist)
+                let damage = min(board.players[i].hitPoints,
+                                 (weaponSize * weaponSize) / (effectiveDist * effectiveDist))
                 NSLog("damage: \(damage)")
                 board.players[i].hitPoints = max(0, board.players[i].hitPoints -  damage)
                 
