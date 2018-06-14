@@ -107,8 +107,8 @@ class GameModel {
         NSLog("\(#function) started")
         
         // seed the random number generator
-        //let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
-        //srand48(Int(time))
+        let time = UInt32(NSDate().timeIntervalSinceReferenceDate)
+        srand48(Int(time))
         
         board.boardSize = 1025
         board.surface.setSize(width: board.boardSize, height: board.boardSize)
