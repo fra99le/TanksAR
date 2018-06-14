@@ -14,12 +14,14 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        playerNameField.delegate = self
         azimuthTextField.delegate = self
         altitudeTextField.delegate = self
         velocityTextField.delegate = self
 
         if let model = gameModel {
             let player = model.board.players[model.board.currentPlayer]
+            playerNameField.text = "\(player.name)"
             azimuthTextField.text = "\(player.tank.azimuth)º"
             altitudeTextField.text = "\(player.tank.altitude)º"
             velocityTextField.text = "\(player.tank.velocity) m/s"
@@ -49,6 +51,21 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
     */
     
     var gameModel: GameModel? = nil
+    
+    @IBOutlet weak var playerNameField: UITextField!
+    @IBAction func playerNameChanged(_ sender: UITextField) {
+        guard let model = gameModel else { return }
+        let board = model.board
+
+        if let newName = sender.text {
+            NSLog("new name: \(newName)")
+            model.board.players[board.currentPlayer].name = newName
+        } else {
+            NSLog("new name missing!")
+            model.board.players[board.currentPlayer].name = "Player \(board.currentPlayer+1)"
+        }
+        updateUI()
+    }
     
     @IBOutlet weak var scoreLabel: UILabel!
     
@@ -156,6 +173,9 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
 
         // update score label
         scoreLabel.text = "Score: \(player.score)"
+        
+        // update name
+        playerNameField.text = board.players[board.currentPlayer].name
         
         // update limits on steppers
         weaponTypeStepper.minimumValue = 0
