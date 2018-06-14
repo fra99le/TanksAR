@@ -129,12 +129,13 @@ class GameModel {
         NSLog("\(#function) starting \(board.totalRounds) round game.")
         
         // set player names
-        for i in numPlayers..<totalPlayers {
+        for i in 0..<totalPlayers {
             if i < numPlayers {
                 board.players[i].name = "Player \(i+1)"
             } else {
                 board.players[i].name = "Al \(i-numPlayers+1)"
             }
+            NSLog("player \(i)'s name is \(board.players[i].name)")
         }
 
         // add AI objects to AI players

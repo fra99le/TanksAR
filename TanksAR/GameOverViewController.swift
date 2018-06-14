@@ -18,7 +18,7 @@ class GameOverViewController: UIViewController {
 
         // Do any additional setup after loading the view.
         
-        playerLabel.text = "Player \(winner) wins!"
+        playerLabel.text = "\(winner) wins!"
         scoreLabel.text = "Score: \(score)"
     }
 
