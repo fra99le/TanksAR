@@ -332,7 +332,7 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QIh-1p-M8Z">
                                 <rect key="frame" x="16" y="88" width="343" height="122"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                <string key="text">Tap to place board on a flat surface (highligted in grey).  Device may need to be moved around to find a surface.
+                                <string key="text">Tap to place board on a horizontal surface (highligted in grey).  Device may need to be moved around to find a surface.
 
 If no surfaces can be found, double tap to place board in the air.</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
