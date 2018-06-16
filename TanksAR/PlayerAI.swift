@@ -79,6 +79,7 @@ class PlayerAI {
     func fireParameters(players: [Player]) -> (azimuth: Float, altitude: Float, velocity: Float) {
         // pick parameters using Nelder-Mead algorithm
         // see: https://en.wikipedia.org/wiki/Nelder–Mead_method
+        // also: http://www.scholarpedia.org/article/Nelder-Mead_algorithm
         
         // fill initial simplex
         print("lastFour: \(lastFour)")
@@ -129,10 +130,10 @@ class PlayerAI {
         let deltaY = meanY - furthest.velocityY
         let deltaZ = meanZ - furthest.velocityZ
 
-        // find new x,y,z to sample by following vector 1.5x from furthest
-        let retX = furthest.velocityX + 1.5 * deltaX
-        let retY = furthest.velocityY + 1.5 * deltaY
-        let retZ = furthest.velocityZ + 1.5 * deltaZ
+        // find new x,y,z to sample by following vector 2x from furthest
+        let retX = furthest.velocityX + 2 * deltaX
+        let retY = furthest.velocityY + 2 * deltaY
+        let retZ = furthest.velocityZ + 2 * deltaZ
         print("next sample (x,y,z) = (\(retX),\(retY),\(retZ))")
         
         // convert new sample to polar coordinates
