@@ -225,8 +225,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         // update values
         let translation = gesture.translation(in: nil)
-        let newAzimuth = currAzimuth + Float(translation.x)
-        let newAltitude = currAltitude - Float(translation.y)
+        
+        let rotationScale: Float = 5
+        let newAzimuth = currAzimuth + Float(translation.x) / rotationScale
+        let newAltitude = currAltitude - Float(translation.y) / rotationScale
 
         // find/adjust tank model's aiming
         guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { return }
@@ -480,7 +482,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     
 
     func updateBoard() {
-        NSLog("\(#function) started")
+        //NSLog("\(#function) started")
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
 
         for i in 0..<numPerSide {
@@ -516,7 +518,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         for block in dropBlocks {
             block.removeFromParentNode()
         }
-        NSLog("\(#function) finished")
+        //NSLog("\(#function) finished")
     }
     
     func launchProjectile() {
@@ -538,9 +540,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         let zVel = -power * cos(azi) * cos(alt)
         
         NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
-        NSLog("angles in radians: \(azi),\(alt)")
-        NSLog("velocity: \(xVel),\(yVel),\(zVel)")
-        NSLog("position: \(position)")
         let velocity = SCNVector3(xVel, yVel, zVel)
         
         // convert to model coordinate space
@@ -548,18 +547,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         var muzzleVelocity = velocity
         muzzlePosition = toModelSpace(position)
         muzzleVelocity = toModelScale(velocity)
-        NSLog("view pos: \(position)")
-        NSLog("view vel: \(velocity)")
-        NSLog("model pos: \(muzzlePosition)")
-        NSLog("model vel: \(muzzleVelocity)")
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
 
         // record result for AIs
-        if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
+        if let ai = gameModel.board.players[fireResult.playerID].ai {
             // player is an AI
             let impact = fireResult.trajectory.last!
-            ai.recordResult(azimuth: tank.azimuth, altitude: tank.altitude, velocity: power,
+            ai.recordResult(azimuth: tank.azimuth, altitude: tank.altitude, velocity: tank.velocity,
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
         }
 
@@ -570,7 +565,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
     
     func animateResult(fireResult: FireResult) {
-        NSLog("\(#function) started")
+        //NSLog("\(#function) started")
 
         // time for use in animations
         var currTime = CFTimeInterval(0)
@@ -636,7 +631,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             shell.addAnimation(group, forKey: "balistics")
             finalAnimation = group
         }
-        NSLog("shell landed at time \(currTime).")
+        //NSLog("shell landed at time \(currTime).")
         
         // animate explosion
         if let oldExplosion = explosionNode {
@@ -697,7 +692,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             explosion.addAnimation(group, forKey: "explosion")
             finalAnimation = group
         }
-        NSLog("explosion ended at time \(currTime).")
+        //NSLog("explosion ended at time \(currTime).")
 
         // animate board update
         var dropNeeded = false
@@ -798,14 +793,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         if dropNeeded {
             currTime += dropTime
         }
-        NSLog("board settled at time \(currTime).")
+        //NSLog("board settled at time \(currTime).")
         
         // a do-nothing animation to call the delegate
-        NSLog("animation should stop at time \(currTime)")
-        NSLog("final animiation starts at \(String(describing: finalAnimation?.beginTime))s and goes for \(String(describing: finalAnimation?.duration))s.")
+        //NSLog("animation should stop at time \(currTime)")
+        //NSLog("final animiation starts at \(String(describing: finalAnimation?.beginTime))s and goes for \(String(describing: finalAnimation?.duration))s.")
         finalAnimation?.delegate = self
         
-        NSLog("\(#function) finished")
+        //NSLog("\(#function) finished")
     }
     
     func animationDidStart(_ anim: CAAnimation) {
@@ -813,16 +808,18 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
     
     func animationDidStop(_ animation: CAAnimation, finished: Bool) {
-        NSLog("Animation stopped (finished: \(finished))")
-        NSLog("\tbegan at: \(animation.beginTime), with duration: \(animation.duration)")
+        NSLog("Animation stopped (finished: \(finished))\n\n\n")
+        //NSLog("\tbegan at: \(animation.beginTime), with duration: \(animation.duration)")
         
         // do AI stuff if next player is an AI
         if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
             // player is an AI
             let (azi, alt, vel) = ai.fireParameters(players: gameModel.board.players)
-            NSLog("ai firing parameters: (\(azi),\(alt),\(vel))")
+            NSLog("ai firing parameters, azi,alt,vel: (\(azi),\(alt),\(vel))")
             gameModel.setTankAim(azimuth: azi, altitude: alt)
             gameModel.setTankPower(power: vel)
+            let tank = gameModel.board.players[gameModel.board.currentPlayer].tank!
+            NSLog("ai firing parameters, azi,alt,vel: (\(tank.azimuth),\(tank.altitude),\(tank.velocity)) (updated)")
             updateUI()
             launchProjectile()
         } else {
@@ -838,7 +835,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     func updateUI() {
         guard boardPlaced else { return }
 
-        NSLog("\(#function) started")
+        //NSLog("\(#function) started")
         //mapImage.image = fireResult.mapUpdate.asUIImage()
         if roundChanged {
             NSLog("round change detected")
@@ -867,7 +864,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         rotationAnimation.duration = 1
         scaleNode.addAnimation(rotationAnimation, forKey: "Player Rotation")
         scaleNode.eulerAngles.y = users[gameModel.board.currentPlayer].rotation
-        NSLog("rotating to \(rotationAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
+        //NSLog("rotating to \(rotationAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
         
         let rescaleAnimation = CABasicAnimation(keyPath: "scale")
         rescaleAnimation.fromValue = scaleNode.scale
@@ -878,7 +875,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         rescaleAnimation.duration = 1
         scaleNode.addAnimation(rescaleAnimation, forKey: "Player Scaling")
         scaleNode.scale = newScale
-        NSLog("scaling to \(rescaleAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
+        //NSLog("scaling to \(rescaleAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
 
         updateHUD()
         
@@ -912,7 +909,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // update board
         updateBoard()
         
-        NSLog("\(#function) finished")
+        //NSLog("\(#function) finished")
     }
     
     func updateHUD() {

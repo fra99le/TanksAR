@@ -68,6 +68,8 @@ struct Weapon {
 }
 
 struct FireResult {
+    var playerID: Int = 0
+    
     var timeStep: Float = 1
     var trajectory: [SCNVector3] = []
     var explosionRadius: Float = 100
@@ -89,6 +91,8 @@ class GameModel {
     // game board
     var board: GameBoard = GameBoard()
     let tankSize: Float = 30
+    let maxPower: Float = 100
+    let elevationScale: Float = 4.0
     
     var weaponsList = [
         Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 35, cost: 10)], style: .explosive),
@@ -114,8 +118,8 @@ class GameModel {
         board.surface.setSize(width: board.boardSize, height: board.boardSize)
         board.bedrock.setSize(width: board.boardSize, height: board.boardSize)
         
-        board.surface.fillUsingDiamondSquare(withMinimum: 50.0/255.0, andMaximum: 200.0/255.0)
-        //board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 40.0/255.0)
+        board.surface.fillUsingDiamondSquare(withMinimum: 10.0/255.0, andMaximum: 255.0/255.0)
+        //board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 10.0/255.0)
         NSLog("\(#function) finished")
     }
     
@@ -191,7 +195,7 @@ class GameModel {
             elevation = Float(pixel.r * 255)
         }
         //print("Elevation at \(longitude),\(latitude) is \(elevation).")
-        return elevation
+        return elevation * elevationScale
     }
 
     func setElevation(longitude: Int, latitude: Int, to: Float, forMode: ElevationMode = .actual) {
@@ -204,7 +208,7 @@ class GameModel {
         guard latitude >= 0 else { return }
         guard latitude < forMap.height else { return }
         
-        let newElevation = max(0,to)
+        let newElevation = max(0,to) / elevationScale
         var pixel = forMap.getPixel(x: longitude, y: latitude)
         switch forMode {
         case .top:
@@ -285,7 +289,7 @@ class GameModel {
     func setTankPower(power: Float) {
         guard power >= 0 else { return }
 
-        board.players[board.currentPlayer].tank.velocity = power
+        board.players[board.currentPlayer].tank.velocity = min(power,maxPower)
     }
 
     func fire(muzzlePosition: SCNVector3, muzzleVelocity: SCNVector3) -> FireResult {
@@ -361,7 +365,8 @@ class GameModel {
         
         let roundEnded = roundCheck()
         
-        let result: FireResult = FireResult(timeStep: timeStep,
+        let result: FireResult = FireResult(playerID: board.currentPlayer,
+                                            timeStep: timeStep,
                                             trajectory: trajectory,
                                             explosionRadius: blastRadius,
                                             mapUpdate: updates,
@@ -380,7 +385,7 @@ class GameModel {
     }
     
     func applyExplosion(at: SCNVector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> ImageBuf {
-        NSLog("\(#function) started")
+        //NSLog("\(#function) started")
         let changeBuf = ImageBuf()
         changeBuf.copy(board.surface)
 
@@ -449,7 +454,7 @@ class GameModel {
             }
 
         }
-        NSLog("\(#function) finished")
+        //NSLog("\(#function) finished")
 
         return changeBuf
     }
@@ -466,23 +471,22 @@ class GameModel {
         NSLog("\(#function) started")
 
         for i in 0..<board.players.count {
-            NSLog("checking tank \(i)")
             let player = board.players[i]
             
             guard let tank = player.tank else { continue }
             let tankPos = tank.position
-            NSLog("tank at \(tankPos)")
+            //NSLog("\ttank at \(tankPos)")
             
             let dist = distance(from: tankPos, to: at)
-            NSLog("dist = \(dist)")
+            NSLog("\t tank \(i) dist = \(dist)")
             let weaponSize = fromWeapon.sizes[withSize].size
             if dist < (weaponSize + tankSize) && board.players[i].hitPoints > 0 {
-                NSLog("Player \(board.currentPlayer) hit player \(i)")
+                NSLog("\t\tPlayer \(board.currentPlayer) hit player \(i)")
                 let effectiveDist = min(1,dist-tankSize)
-                NSLog("effectiveDist: \(effectiveDist)")
+                NSLog("\t\teffectiveDist: \(effectiveDist)")
                 let damage = min(board.players[i].hitPoints,
                                  (weaponSize * weaponSize) / (effectiveDist * effectiveDist))
-                NSLog("damage: \(damage)")
+                NSLog("\t\tdamage: \(damage)")
                 board.players[i].hitPoints = max(0, board.players[i].hitPoints -  damage)
                 
                 if board.currentPlayer != i {
