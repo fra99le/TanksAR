@@ -24,7 +24,7 @@ class ImageBuf {
     func setSize(width: Int, height: Int) {
         self.width = width
         self.height = height
-        pixels = [Pixel](repeating: Pixel(r: 1, g: 1, b: 1, a: 1), count: width*height)
+        pixels = [Pixel](repeating: Pixel(r: 0, g: 0, b: 0, a: 1), count: width*height)
     }
     
     func getPixel(x: Int, y: Int) -> Pixel {
@@ -120,6 +120,13 @@ class ImageBuf {
         var count = 0
         //var values: [Float] = []
 
+        // check for already computed values
+        let curr = getPixel(x: x, y: y).r
+        if curr != 0 {
+            return
+        }
+
+        
         for offsets in pattern {
             let nx = x + size * offsets[0]
             let ny = y + size * offsets[1]
@@ -137,7 +144,7 @@ class ImageBuf {
         
         let avg = sum / CGFloat(count)
 
-        let randomScale = CGFloat(size) / CGFloat(width)
+        let randomScale = 10 * CGFloat(size) / CGFloat(width)
         let noise = randomScale * CGFloat(drand48()) - (randomScale/2)
         //let noise = CGFloat(0)
         let value = avg + noise
