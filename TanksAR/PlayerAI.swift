@@ -12,7 +12,6 @@ import SceneKit
 // inputs and resulting distance to an individual opponent
 struct Sample {
     // input
-    // NOTE: features should probably be component vectors of muzzle velocity
     var azimuth: Float
     var altitude: Float
     var velocity: Float
@@ -30,8 +29,9 @@ struct Sample {
 
 class PlayerAI {
     var gameModel:GameModel? = nil
+    var nelderMead = NelderMead(dimensions: 3)
     var data: [Sample] = []
-    var lastFour: [Sample] = []
+    var firstShot = true
     
     init(model: GameModel) {
         reset(model: model)
@@ -40,12 +40,15 @@ class PlayerAI {
     // needs to be called between rounds (i.e. when tanks move)
     func reset(model: GameModel) {
         data = []
+        nelderMead = NelderMead(dimensions: 3)
         gameModel = model
+        firstShot = true
     }
     
     func fromSpherical(azi: Float, alt: Float, velocity: Float) -> (x: Float, y: Float, z: Float) {
         let azimuth = azi * (Float.pi / 180)
         let altitude = alt * (Float.pi / 180)
+        
         let xVel = -velocity * sin(azimuth) * cos(altitude)
         let yVel = velocity * sin(altitude)
         let zVel = -velocity * cos(azimuth) * cos(altitude)
@@ -55,6 +58,7 @@ class PlayerAI {
 
     func toSpherical(xVel: Float, yVel: Float, zVel: Float) -> (azimuth: Float, altitude: Float, velocity: Float) {
         let horiz = sqrt( xVel*xVel + zVel*zVel )
+        
         let retAzi = (180 / Float.pi) * atan2(-xVel, -zVel)
         let retAlt = (180 / Float.pi) * atan2(yVel, horiz)
         let retVel = sqrt( horiz*horiz + yVel*yVel )
@@ -62,18 +66,39 @@ class PlayerAI {
         return (retAzi, retAlt, retVel)
     }
     
+    func getNextPlayerID() -> Int {
+        guard let model = gameModel else { return 0 }
+
+        let currentPlayer = model.board.currentPlayer
+        var nextPlayer = (currentPlayer + 1) % model.board.players.count
+        while model.board.players[nextPlayer].hitPoints <= 0 {
+            nextPlayer = (nextPlayer + 1) % model.board.players.count
+        }
+        return nextPlayer
+    }
+    
     func recordResult(azimuth: Float, altitude: Float, velocity: Float,
                       impactX: Float, impactY: Float, impactZ: Float) {
         let (xVel, yVel, zVel) = fromSpherical(azi: azimuth, alt: altitude, velocity: velocity)
         let (azi2, alt2, vel2) = toSpherical(xVel: xVel, yVel: yVel, zVel: zVel)
         NSLog("\(#function): \(azimuth),\(altitude),\(velocity) -> linear -> \(azi2),\(alt2),\(vel2)")
+
         let newSample = Sample(azimuth: azimuth, altitude: altitude, velocity: velocity,
                                velocityX: xVel, velocityY: yVel, velocityZ: zVel,
                                impactX: impactX, impactY: impactY, impactZ: impactZ)
         data.append(newSample)
 
-        // update recent buffer
-        lastFour.append(newSample)
+        // compute next point
+        // pick target player
+        guard let model = gameModel else { return }
+        let nextPlayer = getNextPlayerID()
+        let targetPlayer = model.board.players[nextPlayer]
+        let targetTank = targetPlayer.tank
+        
+        // get dist to target
+        let dist = distToTank(from: newSample, toTank: targetTank!)
+        NSLog("\(#function): last round for AI was \(dist) units from target")
+        nelderMead.addResult(parameters:[xVel,yVel,zVel], value: dist)
     }
     
     func fireParameters(players: [Player]) -> (azimuth: Float, altitude: Float, velocity: Float) {
@@ -82,62 +107,34 @@ class PlayerAI {
         // also: http://www.scholarpedia.org/article/Nelder-Mead_algorithm
         
         // fill initial simplex
-        print("lastFour: \(lastFour)")
-        if lastFour.count < 4 {
-            let azimuth = Float(drand48() * 360)
+        NSLog("\(#function): data: \(data)")
+        if firstShot {
+            var azimuth = Float(drand48() * 360)
+            if let model = gameModel {
+                let nextPlayer = getNextPlayerID()
+                let targetTank = model.board.players[nextPlayer].tank!
+                let myTank = model.board.players[model.board.currentPlayer].tank!
+                
+                let targetDir = atan2(myTank.position.x - targetTank.position.x,
+                                      myTank.position.z - targetTank.position.z) * (180 / Float.pi)
+                azimuth = Float(targetDir + Float(drand48() * 20) - 10)
+            }
             let altitude = Float(drand48() * 50) + 30
             let power = Float(drand48() * 70) + 30
+            NSLog("\(#function): firing at random, azi,alt,pow: (\(azimuth),\(altitude),\(power))")
             
-            NSLog("\(#function): firing at random, (\(lastFour.count) samples), (\(azimuth),\(altitude),\(power))")
-            return (azimuth, altitude, power)
+            let (xVel, yVel, zVel) = fromSpherical(azi: azimuth, alt: altitude, velocity: power)
+            nelderMead.setSeed([xVel,yVel,zVel])
+            firstShot = false
         }
         
-        // compute next point
-        // pick target player
-        guard let model = gameModel else { return (0, 45, 25) }
-        let currentPlayer = model.board.currentPlayer
-        let nextPlayer = (currentPlayer + 1) % model.board.players.count
-        let targetPlayer = model.board.players[nextPlayer]
-        
-        // find furthest sample
-        var maxDist = Float(-1)
-        var furthestIndex = 0
-        for i in 0..<lastFour.count {
-            let dist = distToTank(from: lastFour[i], toTank: targetPlayer.tank)
-            if( dist > maxDist ) {
-                maxDist = dist
-                furthestIndex = i
-            }
-        }
-        let furthest = lastFour.remove(at: furthestIndex)
-
-        // compute simplex relative target player
-        // take three closest and average them
-        var sumX = Float(0)
-        var sumY = Float(0)
-        var sumZ = Float(0)
-        for sample in lastFour {
-            sumX += sample.velocityX
-            sumY += sample.velocityY
-            sumZ += sample.velocityZ
-        }
-        let meanX = sumX / 3
-        let meanY = sumY / 3
-        let meanZ = sumZ / 3
-
-        // take furthest and form a vector
-        let deltaX = meanX - furthest.velocityX
-        let deltaY = meanY - furthest.velocityY
-        let deltaZ = meanZ - furthest.velocityZ
-
-        // find new x,y,z to sample by following vector 2x from furthest
-        let retX = furthest.velocityX + 2 * deltaX
-        let retY = furthest.velocityY + 2 * deltaY
-        let retZ = furthest.velocityZ + 2 * deltaZ
-        print("next sample (x,y,z) = (\(retX),\(retY),\(retZ))")
+        // get next sample point
+        let ret = nelderMead.nextPoint()
         
         // convert new sample to polar coordinates
-        let (retAzi, retAlt, retVel) = toSpherical(xVel: retX, yVel: retY, zVel: retZ)
+        let (retAzi, retAlt, retVel) = toSpherical(xVel: ret[0], yVel: ret[1], zVel: ret[2])
+        let (retXvel, retYvel, retZvel) = fromSpherical(azi: retAzi, alt: retAlt, velocity: retVel)
+        NSLog("returning firing parameters (azi,alt,vel) = \(retAzi),\(retAlt),\(retVel), or as vectors (x,y,z) = \(retXvel),\(retYvel),\(retZvel))")
         
         return (retAzi, retAlt, retVel)
     }
