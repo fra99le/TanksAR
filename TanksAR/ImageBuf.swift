@@ -9,37 +9,32 @@
 import Foundation
 import UIKit
 
-struct Pixel {
-    var r: CGFloat
-    var g: CGFloat
-    var b: CGFloat
-    var a: CGFloat
-}
-
 class ImageBuf {
     var width: Int = 0
     var height: Int = 0
-    var pixels: [Pixel] = []
+    var pixels: [CGFloat] = []
+    //var noiseLevel: Float = 10
+    let noiseLevel: Float = 1
     
     func setSize(width: Int, height: Int) {
         self.width = width
         self.height = height
-        pixels = [Pixel](repeating: Pixel(r: 0, g: 0, b: 0, a: 1), count: width*height)
+        pixels = [CGFloat](repeating: CGFloat(0), count: width*height)
     }
     
-    func getPixel(x: Int, y: Int) -> Pixel {
+    func getPixel(x: Int, y: Int) -> CGFloat {
         let offset = x + y*width
-        guard offset >= 0 && offset < pixels.count else { return Pixel(r: 0, g: 0, b: 0, a: 0) }
-        guard x < width && x >= 0 else { return Pixel(r: 0, g: 0, b: 0, a: 0) }
+        guard offset >= 0 && offset < pixels.count else { return 0 }
+        guard x < width && x >= 0 else { return 0 }
 
         return pixels[offset]
     }
     
-    func setPixel(x: Int, y: Int, r: Double, g: Double, b: Double, a: Double) {
-        setPixel(x: x, y: y, value: Pixel(r: CGFloat(r), g: CGFloat(g), b: CGFloat(b), a: CGFloat(a)))
+    func setPixel(x: Int, y: Int, value: Double) {
+        setPixel(x: x, y: y, value: CGFloat(value))
     }
  
-    func setPixel(x: Int, y: Int, value: Pixel) {
+    func setPixel(x: Int, y: Int, value: CGFloat) {
         let offset = x + y*width
         guard offset >= 0 && offset < pixels.count else { return }
         guard x < width && x >= 0 else { return }
@@ -68,10 +63,10 @@ class ImageBuf {
         NSLog("\(#function) started")
 
         // randomly assign corners
-        setPixel(x: 0, y: 0, r: drand48(), g: 0, b: 0, a: 1.0)
-        setPixel(x: 0, y: height-1, r: drand48(), g: 0, b: 0, a: 1.0)
-        setPixel(x: width-1, y: 0, r: drand48(), g: 0, b: 0, a: 1.0)
-        setPixel(x: width-1, y: height-1, r: drand48(), g: 0, b: 0, a: 1.0)
+        setPixel(x: 0, y: 0, value: drand48())
+        setPixel(x: 0, y: height-1, value: drand48())
+        setPixel(x: width-1, y: 0, value: drand48())
+        setPixel(x: width-1, y: height-1, value: drand48())
 
         // make recursive call
         doDiamondSquare(left: 0, right: width-1, top: 0, bottom: height-1)
@@ -115,17 +110,27 @@ class ImageBuf {
         }
     }
     
-    func diamondSquareStep(x: Int, y: Int, size: Int, pattern: [[Int]]) {
+    enum DiamondSquare {
+        case diamond, square
+    }
+    
+    func diamondSquareStep(x: Int, y: Int, size: Int, mode: DiamondSquare) {
         var sum: CGFloat = 0.0
         var count = 0
         //var values: [Float] = []
 
+        var pattern: [[Int]] = []
+        switch mode {
+        case .diamond:
+            pattern = [[-1, -1], [1,-1], [-1,1], [1,1]]
+        case .square:
+            pattern = [[0, -1], [-1, 0], [0, 1], [1,0]]
+        }
         // check for already computed values
-        let curr = getPixel(x: x, y: y).r
+        let curr = getPixel(x: x, y: y)
         if curr != 0 {
             return
         }
-
         
         for offsets in pattern {
             let nx = x + size * offsets[0]
@@ -136,31 +141,28 @@ class ImageBuf {
             guard ny >= 0 else { continue }
             guard ny < height else { continue }
             
-            let r = getPixel(x: nx, y: ny).r
+            let value = getPixel(x: nx, y: ny)
             //values.append(Float(r))
-            sum += r
+            sum += value
             count += 1
         }
         
         let avg = sum / CGFloat(count)
 
-        let randomScale = 10 * CGFloat(size) / CGFloat(width)
+        let randomScale = CGFloat(noiseLevel) * CGFloat(size) / CGFloat(width)
         let noise = randomScale * CGFloat(drand48()) - (randomScale/2)
         //let noise = CGFloat(0)
         let value = avg + noise
-        //let value = CGFloat(median(of: values)) + noise
         
-        setPixel(x: x, y: y, value: Pixel(r: value, g: 0, b: 0, a: value))
+        setPixel(x: x, y: y, value: value)
     }
     
     func diamondStep(x: Int, y: Int, size: Int) {
-        diamondSquareStep(x: x, y: y, size: size,
-                    pattern: [[-1, -1], [1,-1], [-1,1], [1,1]]);
+        diamondSquareStep(x: x, y: y, size: size, mode: .diamond);
     }
 
     func squareStep(x: Int, y: Int, size: Int) {
-        diamondSquareStep(x: x, y: y, size: size,
-                    pattern: [[0, -1], [-1, 0], [0, 1], [1,0]]);
+        diamondSquareStep(x: x, y: y, size: size, mode: .square);
     }
 
     func fillUsingDiamondSquare(withMinimum: Float, andMaximum: Float) {
@@ -174,12 +176,12 @@ class ImageBuf {
 
         // find min/max values
         let pixel = getPixel(x: 0, y: 0)
-        var minValue = pixel.r
-        var maxValue = pixel.r
+        var minValue = pixel
+        var maxValue = pixel
         for i in 0..<pixels.count {
-            let r = pixels[i].r
-            minValue = (minValue>r) ? r : minValue
-            maxValue = (maxValue<r) ? r : maxValue
+            let value = pixels[i]
+            minValue = (minValue>value) ? value : minValue
+            maxValue = (maxValue<value) ? value : maxValue
         }
 
         // rescale to min/max values
@@ -187,10 +189,10 @@ class ImageBuf {
             minValue<CGFloat(withMinimum) &&
             maxValue>CGFloat(andMaximum) {
             for i in 0..<pixels.count {
-                let r = pixels[i].r
+                let r = pixels[i]
                 
                 let nv = ( CGFloat(andMaximum - withMinimum) / CGFloat(maxValue-minValue) ) * CGFloat(r-minValue) + CGFloat(withMinimum)
-                pixels[i] = Pixel(r: nv, g: 0, b: 0, a: nv)
+                pixels[i] = nv
             }
         }
 
@@ -210,7 +212,7 @@ class ImageBuf {
                 for j in 0 ..< height {
                     let pixel = getPixel(x: i, y: j)
 
-                    context.setFillColor(red: pixel.r, green: pixel.g, blue: pixel.b, alpha: pixel.a)
+                    context.setFillColor(red: pixel, green: pixel, blue: pixel, alpha: 1.0)
 
                     context.fill(CGRect(x: CGFloat(i), y: CGFloat(j), width: 1, height: 1))
                 }
