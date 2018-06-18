@@ -583,55 +583,23 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             shell.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
             // convert back to view coordinates
             shell.position = fromModelSpace(firstPosition)
-            shell.opacity = 0.0
+            shell.isHidden = true
             board.addChildNode(shellNode!)
 
-            // see: https://stackoverflow.com/questions/11737658/how-to-chain-different-caanimation-in-an-ios-application
-            var animations: [CABasicAnimation] = []
-
             // make shell appear
-            let animation0 = CABasicAnimation(keyPath: "opacity")
-            animation0.fromValue = 0
-            animation0.toValue = 1
-            animation0.beginTime = 0
-            animation0.duration = 0
-            animations.append(animation0)
+            var shellActions: [SCNAction] = [.unhide()]
 
-            var prevPosition = firstPosition
+            // make shell move
             let timeStep = CFTimeInterval(fireResult.timeStep / Float(timeScaling))
             for currPosition in fireResult.trajectory {
-                //NSLog("trajectory position: \(currPosition) at time \(currTime)")
                 // convert currPostion to AR space
                 let arPosition = fromModelSpace(currPosition)
-                
-                // add animations for shell here
-                let animation = CABasicAnimation(keyPath: "position")
-                animation.fromValue = prevPosition
-                animation.toValue = arPosition
-                animation.beginTime = currTime
-                animation.duration = timeStep
-                animations.append(animation)
-
-                prevPosition = arPosition
-                currTime += timeStep
+                shellActions.append(contentsOf: [.move(to: arPosition, duration: timeStep)])
             }
-            
-            // make shell disappear
-            let animation3 = CABasicAnimation(keyPath: "opacity")
-            animation3.fromValue = 1
-            animation3.toValue = 0
-            animation3.beginTime = currTime
-            animation3.duration = 0
-            animations.append(animation3)
-
-            let group = CAAnimationGroup()
-            group.beginTime = 0
-            group.duration = currTime
-            group.repeatCount = 1
-            group.isRemovedOnCompletion = true
-            group.animations = animations
-            shell.addAnimation(group, forKey: "balistics")
-            finalAnimation = group
+            currTime = timeStep * CFTimeInterval(fireResult.trajectory.count)
+            shellActions.append(contentsOf: [.hide()])
+            let shellAnimation = SCNAction.sequence(shellActions)
+            shellNode?.runAction(shellAnimation)
         }
         NSLog("shell landed at time \(currTime).")
         
@@ -645,60 +613,22 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             explosion.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
             // convert back to view coordinates
             explosion.position = fromModelSpace(lastPosition)
-            explosion.opacity = 0
+            explosion.isHidden = true
             board.addChildNode(explosion)
             
-            var animations: [CABasicAnimation] = []
-            
-            // make explosion disappear
-            let animation0 = CABasicAnimation(keyPath: "opacity")
-            animation0.fromValue = 0
-            animation0.toValue = 1
-            animation0.beginTime = currTime
-            animation0.duration = 0
-            animations.append(animation0)
-
-            // add expansion animation
-            let animation1 = CABasicAnimation(keyPath: "geometry.radius")
-            animation1.fromValue = 1
-            animation1.toValue = fireResult.explosionRadius
-            animation1.beginTime = currTime
-            animation1.duration = CFTimeInterval(1.0)
-            animations.append(animation1)
-            currTime += 1.0
-
-            // add collapse animation
-            let animation2 = CABasicAnimation(keyPath: "geometry.radius")
-            animation2.fromValue = fireResult.explosionRadius
-            animation2.toValue = 0
-            animation2.beginTime = currTime
-            animation2.duration = CFTimeInterval(1.0)
-            animations.append(animation2)
-            currTime += 1.0
-            
-            // make explosion disappear
-            let animation3 = CABasicAnimation(keyPath: "opacity")
-            animation3.fromValue = 1
-            animation3.toValue = 0
-            animation3.beginTime = currTime
-            animation3.duration = 0
-            animations.append(animation3)
-
-            let group = CAAnimationGroup()
-            group.beginTime = 0
-            group.duration = currTime
-            group.repeatCount = 1
-            group.isRemovedOnCompletion = true
-            group.animations = animations
-            group.delegate = self
-            explosion.addAnimation(group, forKey: "explosion")
-            finalAnimation = group
+            let explosionActions = SCNAction.sequence([.wait(duration: currTime),
+                                                       .unhide(),
+                                                       .scale(to: CGFloat(fireResult.explosionRadius), duration: 1),
+                                                       .scale(to: 1, duration: 1),
+                                                       .hide()])
+            explosionNode?.runAction(explosionActions)
         }
+        currTime += 1
         NSLog("explosion ended at time \(currTime).")
 
         // animate board update
         var dropNeeded = false
-        let dropTime: Double = 3
+        let dropTime: Double = 1
         for block in dropBlocks {
             block.removeFromParentNode()
         }
@@ -722,6 +652,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 let bottom = gameModel.getElevation(fromMap: fireResult.bottom,
                                                     longitude: Int(modelPos.x), latitude: Int(modelPos.y))
                 
+                // check to see if drop block is needed
                 if top > middle && middle > bottom {
                     dropNeeded = true
                     //NSLog("(\(i),\(j)) will drop, top: \(top), middle: \(middle), bottom: \(bottom)")
@@ -731,89 +662,55 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                                                              length: blockGeometry.length, chamferRadius: 0))
                     dropBlock.position = boardBlock.position
                     dropBlock.position.y = (top+middle)/2
-                    dropBlock.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+                    dropBlock.geometry?.firstMaterial = blockGeometry.firstMaterial
+                    dropBlock.isHidden = true
                     board.addChildNode(dropBlock)
                     dropBlocks.append(dropBlock)
 
                     var finalPosition = dropBlock.position
                     finalPosition.y = bottom + (top-middle)/2
                     
-                    var animations: [CAAnimation] = []
-                    
-                    // make block appear
-                    let animation1 = CABasicAnimation(keyPath: "opacity")
-                    animation1.fromValue = 0
-                    animation1.toValue = 1
-                    animation1.beginTime = currTime - 1 // at peak explosion
-                    animation1.duration = 0
-                    animations.append(animation1)
-                    
-                    // animate drop
-                    let animation2 = CABasicAnimation(keyPath: "position")
-                    animation2.fromValue = dropBlock.position
-                    animation2.toValue = finalPosition
-                    animation2.beginTime = currTime
-                    animation2.duration = CFTimeInterval(dropTime)
-                    animations.append(animation2)
-                    
-                    let group = CAAnimationGroup()
-                    group.beginTime = 0
-                    group.duration = currTime + dropTime
-                    group.repeatCount = 1
-                    group.isRemovedOnCompletion = true
-                    group.animations = animations
-                    dropBlock.addAnimation(group, forKey: "block \(i),\(j) drop")
-                    finalAnimation = group
+                    let dropAction = SCNAction.sequence([.wait(duration: currTime),
+                                                         .unhide(),
+                                                         .move(to: finalPosition, duration: dropTime)])
+                    dropBlock.runAction(dropAction)
                 }
                 
+                // check to see if shortening is needed
                 if  bottom != current {
-                    // heigth adjustment needed
+                    // height adjustment needed
                     //NSLog("(\(i),\(j)) height change needed, \(current) -> \(bottom), top: \(top), middle: \(middle), bottom: \(bottom)")
                     
                     // create new block
                     let shortBlock = SCNNode(geometry: SCNBox(width: blockGeometry.width, height: CGFloat(bottom), length: blockGeometry.length, chamferRadius: 0))
                     shortBlock.position = boardBlock.position
                     shortBlock.position.y = bottom / 2
-                    shortBlock.opacity = 0
-                    shortBlock.runAction(SCNAction.sequence([.wait(duration: currTime), .unhide()]))
-                    shortBlock.geometry?.firstMaterial?.diffuse.contents = UIColor.brown
+                    shortBlock.isHidden = true
+                    shortBlock.geometry?.firstMaterial = blockGeometry.firstMaterial
                     dropBlocks.append(shortBlock)
                     board.addChildNode(shortBlock)
                     
-                    // tell block to appear
-                    let animation1 = CABasicAnimation(keyPath: "opacity")
-                    animation1.beginTime = currTime - 1 // at peak explosion
-                    animation1.duration = 0
-                    animation1.fromValue = 0
-                    animation1.toValue = 1
-                    animation1.isRemovedOnCompletion = true
-                    shortBlock.addAnimation(animation1, forKey: "short block \(i),\(j)")
+                    let shortenAction = SCNAction.sequence([.wait(duration: currTime),
+                                                            .unhide()])
+                    shortBlock.runAction(shortenAction)
                     
-                    // tell existing block to hide
-                    //boardBlocks[i][j].runAction(SCNAction.sequence([.wait(duration: currTime), .hide()]))
-                    let animation2 = CABasicAnimation(keyPath: "opacity")
-                    animation2.beginTime = currTime - 1 // at peak explosion
-                    animation2.duration = 0
-                    animation2.fromValue = 1
-                    animation2.toValue = 0.1
-                    animation2.fadeInDuration = 0
-                    animation2.isRemovedOnCompletion = true
-                    boardBlocks[i][j].addAnimation(animation2, forKey: "hide regular block \(i),\(j)")
-
+                    let hideTallAction = SCNAction.sequence([.wait(duration: currTime),
+                                                            .hide()])
+                    boardBlocks[i][j].runAction(hideTallAction)
                 }
             }
         }
-        NSLog("short block appear at time \(currTime)")
+        NSLog("drop/short blocks appear at time \(currTime)")
         if dropNeeded {
             currTime += dropTime
         }
         NSLog("board settled at time \(currTime).")
-        
-        // a do-nothing animation to call the delegate
-        NSLog("animation should stop at time \(currTime)")
-        NSLog("final animiation starts at \(String(describing: finalAnimation?.beginTime))s and goes for \(String(describing: finalAnimation?.duration))s.")
-        finalAnimation?.delegate = self
-        
+
+        // wait for animations to end
+        let delay = SCNAction.sequence([.wait(duration: currTime)])
+        sceneView.scene.rootNode.runAction(delay,
+                                           completionHandler: { DispatchQueue.main.async { self.finishTurn() } })
+
         NSLog("\(#function) finished")
     }
     
@@ -824,6 +721,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     func animationDidStop(_ animation: CAAnimation, finished: Bool) {
         NSLog("Animation stopped (finished: \(finished))\n\n\n")
         //NSLog("\tbegan at: \(animation.beginTime), with duration: \(animation.duration)")
+
+        finishTurn()
+    }
+    
+    func finishTurn() {
         
         // do AI stuff if next player is an AI
         if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
