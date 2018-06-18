@@ -16,7 +16,7 @@ struct UserConfig {
     var tank: SCNNode?
 }
 
-class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelegate {
+class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelegate, UIGestureRecognizerDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
@@ -72,6 +72,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         //mapImage.image = gameModel.board.surface.asUIImage()
 
         unplaceBoard()
+        rotateGesture.delegate = self
+        rescaleGesture.delegate = self
         
         sceneView.autoenablesDefaultLighting = true
     }
@@ -251,7 +253,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     @IBOutlet var rescaleGesture: UIPinchGestureRecognizer!
     @IBAction func rescaleGesture(_ sender: UIPinchGestureRecognizer) {
         let player = gameModel.board.currentPlayer
-        let newScale = CGFloat(boardScaleFactor) * sender.scale
+        let newScale = CGFloat(boardScaleFactor) * CGFloat(users[player].scaleFactor) * sender.scale
         board.scale = SCNVector3(newScale,newScale,newScale)
 
         if sender.state == .ended {
@@ -265,15 +267,23 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     @IBAction func rotateGesture(_ sender: UIRotationGestureRecognizer) {
         let player = gameModel.board.currentPlayer
         board.eulerAngles.y = Float(CGFloat(users[player].rotation) - sender.rotation)
-
+        
         if sender.state == .ended {
             //NSLog("rotate gesture: \(sender.rotation) ended or player \(player)")
             users[player].rotation -= Float(sender.rotation)
             //NSLog("rotation for user \(player) set to \(users[player].rotation)")
         }
     }
-    
 
+    // see: https://stackoverflow.com/questions/30829973/simultaneous-gesture-recognition-for-specific-gestures
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if (gestureRecognizer is UIPanGestureRecognizer || gestureRecognizer is UIRotationGestureRecognizer) {
+            return true
+        } else {
+            return false
+        }
+    }
+    
     // MARK: - UI element actions
     // make this a target for unwinding segues
     @IBAction func unwindToGameScreen(unwindSegue: UIStoryboardSegue) {
