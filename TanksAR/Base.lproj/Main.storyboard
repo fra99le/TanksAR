@@ -379,6 +379,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                         <outlet property="backupPlaceBoardGesture" destination="5hr-VT-zKA" id="oEq-9l-kHp"/>
                         <outlet property="fireButton" destination="Rqa-bG-wWn" id="9ul-PN-kLT"/>
                         <outlet property="hudStackView" destination="C7J-4d-iJW" id="a6n-CY-KsZ"/>
+                        <outlet property="manualTrainButton" destination="qRc-zd-bfR" id="9ba-qv-LUU"/>
                         <outlet property="mapImage" destination="xA9-IZ-spM" id="aZg-42-6Ed"/>
                         <outlet property="placeBoardGesture" destination="NvL-x5-eHp" id="T9y-nK-hH1"/>
                         <outlet property="powerLabel" destination="Vhx-eP-M1c" id="wCr-8P-Tg3"/>

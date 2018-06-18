@@ -46,6 +46,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     @IBOutlet var powerLabel: UILabel!
     @IBOutlet weak var hudStackView: UIStackView!
     
+    
+    @IBOutlet weak var manualTrainButton: UIButton!
     @IBOutlet weak var azimuthLabel: UILabel!
     @IBOutlet weak var altitudeLabel: UILabel!
     @IBOutlet weak var velocityLabel: UILabel!
@@ -296,6 +298,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         fireButton.isEnabled = false
         powerSlider.isEnabled = false
         screenDraggingGesture.isEnabled = false
+        manualTrainButton.isEnabled = false
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -752,6 +755,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             fireButton.isEnabled = true
             powerSlider.isEnabled = true
             screenDraggingGesture.isEnabled = true
+            manualTrainButton.isEnabled = true
             updateUI()
         }
         
