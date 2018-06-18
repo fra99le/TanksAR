@@ -731,6 +731,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                                                              length: blockGeometry.length, chamferRadius: 0))
                     dropBlock.position = boardBlock.position
                     dropBlock.position.y = (top+middle)/2
+                    dropBlock.geometry?.firstMaterial?.diffuse.contents = UIColor.red
                     board.addChildNode(dropBlock)
                     dropBlocks.append(dropBlock)
 
@@ -775,6 +776,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                     shortBlock.position.y = bottom / 2
                     shortBlock.opacity = 0
                     shortBlock.runAction(SCNAction.sequence([.wait(duration: currTime), .unhide()]))
+                    shortBlock.geometry?.firstMaterial?.diffuse.contents = UIColor.brown
                     dropBlocks.append(shortBlock)
                     board.addChildNode(shortBlock)
                     
@@ -784,6 +786,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                     animation1.duration = 0
                     animation1.fromValue = 0
                     animation1.toValue = 1
+                    animation1.isRemovedOnCompletion = true
                     shortBlock.addAnimation(animation1, forKey: "short block \(i),\(j)")
                     
                     // tell existing block to hide
@@ -792,7 +795,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                     animation2.beginTime = currTime - 1 // at peak explosion
                     animation2.duration = 0
                     animation2.fromValue = 1
-                    animation2.toValue = 0
+                    animation2.toValue = 0.1
+                    animation2.fadeInDuration = 0
+                    animation2.isRemovedOnCompletion = true
                     boardBlocks[i][j].addAnimation(animation2, forKey: "hide regular block \(i),\(j)")
 
                 }
