@@ -571,7 +571,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         // time for use in animations
         var currTime = CFTimeInterval(0)
-        var finalAnimation: CAAnimation? = nil
         
         // create shell object
         if let oldShell = shellNode {
@@ -628,7 +627,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         // animate board update
         var dropNeeded = false
-        let dropTime: Double = 1
+        let dropTime: Double = 1.5
         for block in dropBlocks {
             block.removeFromParentNode()
         }

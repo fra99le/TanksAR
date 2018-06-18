@@ -140,7 +140,7 @@ class NelderMead {
                 shrinkTemp = r
             } else {
                 // replace h&2
-                NSLog("Replacing h&s, shrinkTemp=\(shrinkTemp)")
+                NSLog("Replacing h&s, shrinkTemp=\(shrinkTemp!)")
                 ordered.removeLast()
                 ordered.removeLast()
                 ordered.append(r)
