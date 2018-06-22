@@ -185,13 +185,16 @@ class ImageBuf {
         }
 
         // rescale to min/max values
+        let min = CGFloat(withMinimum)
+        let max = CGFloat(andMaximum)
         if maxValue-minValue >= 1 &&
             minValue<CGFloat(withMinimum) &&
             maxValue>CGFloat(andMaximum) {
             for i in 0..<pixels.count {
                 let r = pixels[i]
                 
-                let nv = ( CGFloat(andMaximum - withMinimum) / CGFloat(maxValue-minValue) ) * CGFloat(r-minValue) + CGFloat(withMinimum)
+                let nv = ( ( (r-minValue) / (maxValue-minValue) ) * (max-min) ) + min
+                //let nv = ( CGFloat(andMaximum - withMinimum) / CGFloat(maxValue-minValue) ) * CGFloat(r-minValue) + CGFloat(withMinimum)
                 pixels[i] = nv
             }
         }
