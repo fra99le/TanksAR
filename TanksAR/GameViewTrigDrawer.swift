@@ -102,9 +102,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         geometry.firstMaterial?.diffuse.contents = UIColor.green
         
         // add surface to scene
-        if let oldSurface = surface {
-            oldSurface.removeFromParentNode()
-        }
+        surface.removeFromParentNode()
         surface = SCNNode(geometry: geometry)
         board.addChildNode(surface)
         

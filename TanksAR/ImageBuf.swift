@@ -63,10 +63,10 @@ class ImageBuf {
         NSLog("\(#function) started")
 
         // randomly assign corners
-        setPixel(x: 0, y: 0, value: drand48())
-        setPixel(x: 0, y: height-1, value: drand48())
-        setPixel(x: width-1, y: 0, value: drand48())
-        setPixel(x: width-1, y: height-1, value: drand48())
+        setPixel(x: 0, y: 0, value: drand48() * Double(noiseLevel))
+        setPixel(x: 0, y: height-1, value: drand48() * Double(noiseLevel))
+        setPixel(x: width-1, y: 0, value: drand48() * Double(noiseLevel))
+        setPixel(x: width-1, y: height-1, value: drand48() * Double(noiseLevel))
 
         // make recursive call
         doDiamondSquare(left: 0, right: width-1, top: 0, bottom: height-1)
