@@ -18,6 +18,15 @@
 		533032A320CF00990014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
 		533032A420CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
 		533032A520CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
+		53522CA820DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
+		53522CA920DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
+		53522CAA20DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
+		53522CAC20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
+		53522CAD20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
+		53522CAE20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
+		53522CB020DCC41B00DDB71B /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
+		53522CB120DCC41B00DDB71B /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
+		53522CB220DCC41B00DDB71B /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
 		53527CE220D1DB36005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		53527CE320D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		53527CE420D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
@@ -62,6 +71,9 @@
 		5314E47B20C8BFA00070481A /* ImageBuf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBuf.swift; sourceTree = "<group>"; };
 		5318F3E520D38B4F00377161 /* NelderMead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NelderMead.swift; sourceTree = "<group>"; };
 		533032A220CF00990014A16D /* WeaponsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponsViewController.swift; sourceTree = "<group>"; };
+		53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewTrigDrawer.swift; sourceTree = "<group>"; };
+		53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewBlockDrawer.swift; sourceTree = "<group>"; };
+		53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewDrawer.swift; sourceTree = "<group>"; };
 		53527CE120D1DB36005F5FFF /* GameOverViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverViewController.swift; sourceTree = "<group>"; };
 		5373BF0620CB5B8D00817E4B /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		5396120D20D0CAB7006D0E6C /* PlayerAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAI.swift; sourceTree = "<group>"; };
@@ -137,6 +149,9 @@
 				53EEDB6720C83C3E00B8B71D /* AppDelegate.swift */,
 				53EEDB6920C83C3F00B8B71D /* art.scnassets */,
 				53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */,
+				53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */,
+				53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */,
+				53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */,
 				53EEDB9720C841EE00B8B71D /* MenuViewController.swift */,
 				53EEDB9920C8420500B8B71D /* InstructionsViewController.swift */,
 				53EEDB9B20C8421900B8B71D /* ScoresViewController.swift */,
@@ -307,15 +322,18 @@
 			files = (
 				5314E47C20C8BFA00070481A /* ImageBuf.swift in Sources */,
 				53EEDB6C20C83C3F00B8B71D /* GameViewController.swift in Sources */,
+				53522CA820DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */,
 				533032A320CF00990014A16D /* WeaponsViewController.swift in Sources */,
 				5396120E20D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
 				53527CE220D1DB36005F5FFF /* GameOverViewController.swift in Sources */,
 				53EEDB9C20C8421900B8B71D /* ScoresViewController.swift in Sources */,
+				53522CAC20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
 				53EEDB9820C841EE00B8B71D /* MenuViewController.swift in Sources */,
 				53EEDB9A20C8420500B8B71D /* InstructionsViewController.swift in Sources */,
 				53EEDB6820C83C3E00B8B71D /* AppDelegate.swift in Sources */,
 				53EEDB9E20C84A3E00B8B71D /* GameModel.swift in Sources */,
 				5318F3E620D38B4F00377161 /* NelderMead.swift in Sources */,
+				53522CB020DCC41B00DDB71B /* GameViewDrawer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,8 +344,11 @@
 				5396120F20D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
 				5314E47F20C8CC970070481A /* GameViewController.swift in Sources */,
 				53EEDB7F20C83C4700B8B71D /* TanksARTests.swift in Sources */,
+				53522CB120DCC41B00DDB71B /* GameViewDrawer.swift in Sources */,
+				53522CAD20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
 				53EEDB9F20C84A3E00B8B71D /* GameModel.swift in Sources */,
 				5318F3E720D38B4F00377161 /* NelderMead.swift in Sources */,
+				53522CA920DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */,
 				53527CE320D1DDAD005F5FFF /* GameOverViewController.swift in Sources */,
 				533032A420CF822F0014A16D /* WeaponsViewController.swift in Sources */,
 				5314E47D20C8C4B20070481A /* ImageBuf.swift in Sources */,
@@ -341,8 +362,11 @@
 				5396121020D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
 				5314E48020C8CC980070481A /* GameViewController.swift in Sources */,
 				53EEDB8A20C83C4700B8B71D /* TanksARUITests.swift in Sources */,
+				53522CB220DCC41B00DDB71B /* GameViewDrawer.swift in Sources */,
+				53522CAE20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
 				53EEDBA020C84A3E00B8B71D /* GameModel.swift in Sources */,
 				5318F3E820D38B4F00377161 /* NelderMead.swift in Sources */,
+				53522CAA20DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */,
 				53527CE420D1DDAD005F5FFF /* GameOverViewController.swift in Sources */,
 				533032A520CF822F0014A16D /* WeaponsViewController.swift in Sources */,
 				5314E47E20C8C4B20070481A /* ImageBuf.swift in Sources */,

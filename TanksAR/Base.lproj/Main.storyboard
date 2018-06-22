@@ -101,7 +101,8 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                         <state key="normal" title="Play Game"/>
                                         <connections>
-                                            <segue destination="BV1-FR-VrT" kind="show" id="wub-XO-yWA"/>
+                                            <action selector="playGameTapped:" destination="cEh-LH-kqS" eventType="touchUpInside" id="25i-Rr-1qV"/>
+                                            <segue destination="BV1-FR-VrT" kind="show" id="niD-Ws-avX"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="swB-4g-0ly">

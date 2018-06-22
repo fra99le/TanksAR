@@ -52,6 +52,8 @@ class MenuViewController: UIViewController {
             dest.numHumans = humans;
             dest.numAIs = ais;
             dest.numRounds = rounds
+            //dest.useBlocks = true // should be configurable
+            dest.useBlocks = false // for testing
             NSLog("\(#function) starting \(dest.numRounds) round game.")
         } else {
             super.prepare(for: segue, sender: sender)
@@ -81,6 +83,9 @@ class MenuViewController: UIViewController {
         updateUI()
     }
     
+    @IBAction func playGameTapped(_ sender: UIButton) {
+        
+    }
 
     func updateUI() {
         humansStepper.value = Double(humans)
@@ -90,4 +95,5 @@ class MenuViewController: UIViewController {
         aisNumLabel.text = "\(ais)"
         roundsNumLabel.text = "\(rounds)"
     }
+    
 }
