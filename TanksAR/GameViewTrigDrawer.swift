@@ -36,69 +36,65 @@ class GameViewTrigDrawer : GameViewDrawer {
         //var normals: [SCNVector3] = []
         var indices: [CInt] = []
         var pos: CInt = 0
-        for i in 0..<numPerSide {
+        for i in 0...numPerSide {
             let isEven = ((i % 2) == 0)
             
             if !isEven {
                 let x = CGFloat(i)*edgeSize
-                let z = CGFloat(0)*edgeSize
-                let y = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(z)))
-                
-                vertices.append(SCNVector3(x - CGFloat(gameModel.board.boardSize/2),
-                                           y,
-                                           z - CGFloat(gameModel.board.boardSize/2)))
+                let y = CGFloat(0)*edgeSize
+                let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+                vertices.append(fromModelSpace(SCNVector3(x,y,z)))
                 // No indices added!
                 pos += 1
             }
             
-            for j in 0..<numPerSide {
+            for j in 0...numPerSide {
                 
                 let x = CGFloat(i)*edgeSize
-                var z: CGFloat = 0
+                var y: CGFloat = 0
                 if isEven {
                     y = CGFloat(j)*edgeSize
                 } else {
-                    z = (CGFloat(j)+0.5)*edgeSize
+                    y = (CGFloat(j)+0.5)*edgeSize
                 }
-                let y = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(z)))
+                let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
 
-                vertices.append(SCNVector3(x - CGFloat(gameModel.board.boardSize/2),
-                                           y,
-                                           z - CGFloat(gameModel.board.boardSize/2)))
+                vertices.append(fromModelSpace(SCNVector3(x,y,z)))
                 
-                if isEven {
-                    indices.append(pos)
-                    indices.append(pos+1)
-                    indices.append(pos+CInt(numPerSide)+2)
-
-                    indices.append(pos)
-                    indices.append(pos+CInt(numPerSide)+2)
-                    indices.append(pos+CInt(numPerSide)+1)
-                } else {
-                    indices.append(pos-1)
-                    indices.append(pos)
-                    indices.append(pos+CInt(numPerSide))
-                    
-                    indices.append(pos)
-                    indices.append(pos+CInt(numPerSide)+1)
-                    indices.append(pos+CInt(numPerSide))
+                if i < numPerSide && j < numPerSide {
+                    if isEven {
+                        indices.append(pos)
+                        indices.append(pos+1)
+                        indices.append(pos+CInt(numPerSide)+2)
+                        
+                        indices.append(pos)
+                        indices.append(pos+CInt(numPerSide)+2)
+                        indices.append(pos+CInt(numPerSide)+1)
+                    } else {
+                        indices.append(pos-1)
+                        indices.append(pos)
+                        indices.append(pos+CInt(numPerSide)+1)
+                        
+                        indices.append(pos-1)
+                        indices.append(pos+CInt(numPerSide)+1)
+                        indices.append(pos+CInt(numPerSide))
+                    }
                 }
                 pos += 1
             }
             
             if isEven {
                 let x = CGFloat(i)*edgeSize
-                let z = CGFloat(numPerSide)*edgeSize
-                let y = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(z)))
+                let y = CGFloat(numPerSide)*edgeSize
+                let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
                 
-                vertices.append(SCNVector3(x - CGFloat(gameModel.board.boardSize/2),
-                                           y,
-                                           z - CGFloat(gameModel.board.boardSize/2)))
+                vertices.append(fromModelSpace(SCNVector3(x,y,z)))
                 // no indices added here!
                 pos += 1
             }
         }
-        
+        NSLog("\(vertices.count) surface vertices, \(indices.count) surface indices, pos=\(pos)")
+
         // create geometry for surface
         let vertexSource = SCNGeometrySource(vertices: vertices)
         let elements = SCNGeometryElement(indices: indices, primitiveType: .triangles)
@@ -124,8 +120,6 @@ class GameViewTrigDrawer : GameViewDrawer {
             var z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
             topVerts.append(fromModelSpace(SCNVector3(x,y,0)))
             topVerts.append(fromModelSpace(SCNVector3(x,y,z)))
-            
-            NSLog("i=\(i), x,y,z=\(x),\(y),\(z), vert: \(topVerts.last!)")
             
             // bottom edge (y=0)
             x = CGFloat(i)*edgeSize
