@@ -64,7 +64,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             boardDrawer.numPerSide = 50
         } else {
             boardDrawer = GameViewTrigDrawer()
-            boardDrawer.numPerSide = 200
+            boardDrawer.numPerSide = 100
         }
         boardDrawer.gameModel = gameModel
         boardDrawer.board = board
