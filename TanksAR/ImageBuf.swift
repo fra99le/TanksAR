@@ -13,8 +13,8 @@ class ImageBuf {
     var width: Int = 0
     var height: Int = 0
     var pixels: [CGFloat] = []
-    let noiseLevel: Float = 10
-    //let noiseLevel: Float = 1
+    let noiseLevel: Float = 5
+    //let noiseLevel: Float = 0
     
     func setSize(width: Int, height: Int) {
         self.width = width
