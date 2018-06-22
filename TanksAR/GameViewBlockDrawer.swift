@@ -99,60 +99,10 @@ class GameViewBlockDrawer : GameViewDrawer {
         NSLog("\(#function) started")
         
         // time for use in animations
-        var currTime = CFTimeInterval(0)
+        var currTime: CFTimeInterval = 0
         
-        // create shell object
-        if let oldShell = shellNode {
-            oldShell.removeFromParentNode()
-        }
-        shellNode = SCNNode(geometry: SCNSphere(radius: 10))
-        if let shell = shellNode,
-            let firstPosition = fireResult.trajectory.first {
-            shell.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
-            // convert back to view coordinates
-            shell.position = fromModelSpace(firstPosition)
-            shell.isHidden = true
-            board.addChildNode(shellNode!)
-            
-            // make shell appear
-            var shellActions: [SCNAction] = [.unhide()]
-            
-            // make shell move
-            let timeStep = CFTimeInterval(fireResult.timeStep / Float(timeScaling))
-            for currPosition in fireResult.trajectory {
-                // convert currPostion to AR space
-                let arPosition = fromModelSpace(currPosition)
-                shellActions.append(contentsOf: [.move(to: arPosition, duration: timeStep)])
-            }
-            currTime = timeStep * CFTimeInterval(fireResult.trajectory.count)
-            shellActions.append(contentsOf: [.hide()])
-            let shellAnimation = SCNAction.sequence(shellActions)
-            shellNode?.runAction(shellAnimation)
-        }
-        NSLog("shell landed at time \(currTime).")
-        
-        // animate explosion
-        if let oldExplosion = explosionNode {
-            oldExplosion.removeFromParentNode()
-        }
-        explosionNode = SCNNode(geometry: SCNSphere(radius: 1))
-        if let explosion = explosionNode,
-            let lastPosition = fireResult.trajectory.last {
-            explosion.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
-            // convert back to view coordinates
-            explosion.position = fromModelSpace(lastPosition)
-            explosion.isHidden = true
-            board.addChildNode(explosion)
-            
-            let explosionActions = SCNAction.sequence([.wait(duration: currTime),
-                                                       .unhide(),
-                                                       .scale(to: CGFloat(fireResult.explosionRadius), duration: 1),
-                                                       .scale(to: 1, duration: 1),
-                                                       .hide()])
-            explosionNode?.runAction(explosionActions)
-        }
-        currTime += 1
-        NSLog("explosion ended at time \(currTime).")
+        currTime = animateShell(fireResult: fireResult, at: currTime)
+        currTime = animateExplosion(fireResult: fireResult, at: currTime)
         
         // animate board update
         var dropNeeded = false
