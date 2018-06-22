@@ -64,7 +64,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             boardDrawer.numPerSide = 50
         } else {
             boardDrawer = GameViewTrigDrawer()
-            boardDrawer.numPerSide = 20
+            boardDrawer.numPerSide = 200
         }
         boardDrawer.gameModel = gameModel
         boardDrawer.board = board
@@ -76,7 +76,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0, tank: nil),
                              count: gameModel.board.players.count)
         addTanks()
-        //mapImage.image = gameModel.board.surface.asUIImage()
+        mapImage.image = gameModel.board.surface.asUIImage()
 
         unplaceBoard()
         rotateGesture.delegate = self
@@ -362,7 +362,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // set size, orientation, and color of board base
         let geometry = SCNPlane(width: CGFloat(gameModel.board.boardSize),
                                 height: CGFloat(gameModel.board.boardSize))
-        geometry.firstMaterial?.diffuse.contents = UIColor.green
+        geometry.firstMaterial?.diffuse.contents = UIColor.red
 
         let boardBaseNode = SCNNode()
         boardBaseNode.geometry = geometry
@@ -468,6 +468,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         muzzleVelocity = boardDrawer.toModelScale(velocity)
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
+        mapImage.image = fireResult.old.asUIImage()
 
         // record result for AIs
         if let ai = gameModel.board.players[fireResult.playerID].ai {
@@ -523,7 +524,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         guard boardPlaced else { return }
 
         //NSLog("\(#function) started")
-        //mapImage.image = fireResult.mapUpdate.asUIImage()
         if roundChanged {
             NSLog("round change detected")
             if gameModel.board.currentRound > gameModel.board.totalRounds {

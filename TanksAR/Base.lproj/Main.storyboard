@@ -367,12 +367,6 @@ If no surfaces can be found, double tap to place board in the air.</string>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="xJs-TJ-zrJ"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Z0Y-yR-u5V"/>
-                        <variation key="default">
-                            <mask key="subviews">
-                                <exclude reference="xA9-IZ-spM"/>
-                                <exclude reference="Zlt-bF-eIw"/>
-                            </mask>
-                        </variation>
                     </view>
                     <connections>
                         <outlet property="altitudeLabel" destination="TGR-OU-lTp" id="kd8-9s-1ZR"/>

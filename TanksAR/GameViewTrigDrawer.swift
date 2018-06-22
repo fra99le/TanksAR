@@ -43,6 +43,8 @@ class GameViewTrigDrawer : GameViewDrawer {
                 vertices.append(SCNVector3(x - CGFloat(gameModel.board.boardSize/2),
                                            y,
                                            z - CGFloat(gameModel.board.boardSize/2)))
+                // No indices added!
+                pos += 1
             }
             
             for j in 0..<numPerSide {
@@ -60,26 +62,36 @@ class GameViewTrigDrawer : GameViewDrawer {
                                            y,
                                            z - CGFloat(gameModel.board.boardSize/2)))
                 
-                if i < numPerSide-1 {
+                if isEven {
                     indices.append(pos)
                     indices.append(pos+1)
                     indices.append(pos+CInt(numPerSide)+2)
-                    
+
                     indices.append(pos)
                     indices.append(pos+CInt(numPerSide)+2)
                     indices.append(pos+CInt(numPerSide)+1)
-                    pos += 1
+                } else {
+                    indices.append(pos-1)
+                    indices.append(pos)
+                    indices.append(pos+CInt(numPerSide))
+                    
+                    indices.append(pos)
+                    indices.append(pos+CInt(numPerSide)+1)
+                    indices.append(pos+CInt(numPerSide))
                 }
+                pos += 1
             }
             
             if isEven {
                 let x = CGFloat(i)*edgeSize
-                let z = CGFloat(numPerSide-1)*edgeSize
+                let z = CGFloat(numPerSide)*edgeSize
                 let y = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(z)))
                 
                 vertices.append(SCNVector3(x - CGFloat(gameModel.board.boardSize/2),
                                            y,
                                            z - CGFloat(gameModel.board.boardSize/2)))
+                // no indices added here!
+                pos += 1
             }
         }
         
@@ -90,6 +102,9 @@ class GameViewTrigDrawer : GameViewDrawer {
         geometry.firstMaterial?.diffuse.contents = UIColor.green
         
         // add surface to scene
+        if let oldSurface = surface {
+            oldSurface.removeFromParentNode()
+        }
         surface = SCNNode(geometry: geometry)
         board.addChildNode(surface)
         

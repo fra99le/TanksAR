@@ -83,10 +83,6 @@ struct FireResult {
     var newRound: Bool
 }
 
-enum ElevationMode {
-    case top, middle, bottom, old, actual
-}
-
 // Note: For the model x,y are surface image coordinates, and z is elevation
 // In GameViewController y and z are swapped.
 
@@ -95,7 +91,7 @@ class GameModel {
     var board: GameBoard = GameBoard()
     let tankSize: Float = 30
     let maxPower: Float = 100
-    let elevationScale: Float = 4.0
+    let elevationScale: Float = 2.0
     
     var weaponsList = [
         Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 35, cost: 10)], style: .explosive),
@@ -173,7 +169,7 @@ class GameModel {
         }
     }
     
-    func getElevation(longitude: Int, latitude: Int, forMode: ElevationMode = .actual) -> Float {
+    func getElevation(longitude: Int, latitude: Int) -> Float {
         return getElevation(fromMap: board.surface, longitude: longitude, latitude: latitude)
     }
 
@@ -185,12 +181,13 @@ class GameModel {
 
         let pixel = fromMap.getPixel(x: longitude, y: latitude)
         let elevation = Float(pixel*255)
+        //let elevation = Float(10*( (longitude+latitude)%2 ) + 50)
         
         //print("Elevation at \(longitude),\(latitude) is \(elevation).")
         return elevation * elevationScale
     }
 
-    func setElevation(longitude: Int, latitude: Int, to: Float, forMode: ElevationMode = .actual) {
+    func setElevation(longitude: Int, latitude: Int, to: Float) {
         setElevation(forMap: board.surface, longitude: longitude, latitude: latitude, to: to)
     }
     
