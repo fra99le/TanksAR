@@ -13,7 +13,7 @@ class ImageBuf {
     var width: Int = 0
     var height: Int = 0
     var pixels: [CGFloat] = []
-    let noiseLevel: Float = 5
+    let noiseLevel: Float = 10
     //let noiseLevel: Float = 0
     
     func setSize(width: Int, height: Int) {
@@ -147,14 +147,15 @@ class ImageBuf {
             count += 1
         }
         
-        let avg = sum / CGFloat(count)
+        let avg = Double(sum) / Double(count)
 
-        let randomScale = CGFloat(noiseLevel) * CGFloat(size) / CGFloat(width)
-        let noise = randomScale * CGFloat(drand48()) - (randomScale/2)
+        let sizeRatio = Double(size) / Double(width)
+        let randomScale = Double(noiseLevel) * pow(sizeRatio, 4.0)
+        let noise = randomScale * (drand48()*randomScale - randomScale/2)
         //let noise = CGFloat(0)
         let value = avg + noise
         
-        setPixel(x: x, y: y, value: value)
+        setPixel(x: x, y: y, value: CGFloat(value))
     }
     
     func diamondStep(x: Int, y: Int, size: Int) {
@@ -175,31 +176,40 @@ class ImageBuf {
         doDiamondSquare()
 
         // find min/max values
-        let pixel = getPixel(x: 0, y: 0)
-        var minValue = pixel
-        var maxValue = pixel
+        var minValue = getPixel(x: 0, y: 0)
+        var maxValue = minValue
         for i in 0..<pixels.count {
             let value = pixels[i]
             minValue = (minValue>value) ? value : minValue
             maxValue = (maxValue<value) ? value : maxValue
         }
+        NSLog("\(#function): min/max values are \(minValue) and \(maxValue)")
+        NSLog("\(#function): requested min/max values are \(withMinimum) and \(andMaximum)")
 
         // rescale to min/max values
         let min = CGFloat(withMinimum)
         let max = CGFloat(andMaximum)
-        if maxValue-minValue >= 1 &&
-            minValue<CGFloat(withMinimum) &&
-            maxValue>CGFloat(andMaximum) {
+        if maxValue-minValue >= 0.01 {
             for i in 0..<pixels.count {
                 let r = pixels[i]
                 
-                let nv = ( ( (r-minValue) / (maxValue-minValue) ) * (max-min) ) + min
+                let normalized = (r-minValue) / (maxValue-minValue)
+                let nv = ( normalized * (max-min) ) + min
                 //let nv = ( CGFloat(andMaximum - withMinimum) / CGFloat(maxValue-minValue) ) * CGFloat(r-minValue) + CGFloat(withMinimum)
                 pixels[i] = nv
             }
         }
 
-        NSLog("\(#function) started")
+        minValue = getPixel(x: 0, y: 0)
+        maxValue = minValue
+        for i in 0..<pixels.count {
+            let value = pixels[i]
+            minValue = (minValue>value) ? value : minValue
+            maxValue = (maxValue<value) ? value : maxValue
+        }
+        NSLog("\(#function) after: min/max values are \(minValue) and \(maxValue)")
+        
+        NSLog("\(#function) finished")
     }
     
     func asUIImage() -> UIImage {
@@ -214,7 +224,9 @@ class ImageBuf {
             for i in 0 ..< width {
                 for j in 0 ..< height {
                     let pixel = getPixel(x: i, y: j)
-
+//                    if pixel > 1.0 {
+//                        NSLog("pixel value for \(i),\(j) is \(pixel)")
+//                    }
                     context.setFillColor(red: pixel, green: pixel, blue: pixel, alpha: 1.0)
 
                     context.fill(CGRect(x: CGFloat(i), y: CGFloat(j), width: 1, height: 1))
