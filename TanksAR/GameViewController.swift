@@ -76,7 +76,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0, tank: nil),
                              count: gameModel.board.players.count)
         addTanks()
-        mapImage.image = gameModel.board.surface.asUIImage()
 
         unplaceBoard()
         rotateGesture.delegate = self
@@ -468,7 +467,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         muzzleVelocity = boardDrawer.toModelScale(velocity)
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
-        mapImage.image = fireResult.old.asUIImage()
 
         // record result for AIs
         if let ai = gameModel.board.players[fireResult.playerID].ai {
@@ -622,5 +620,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     
     @IBAction func toggleMap(_ sender: UIButton) {
         mapImage.isHidden = !mapImage.isHidden
+        if !mapImage.isHidden {
+            mapImage.image = gameModel.board.surface.asUIImage()
+        }
     }
 }
