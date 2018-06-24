@@ -29,7 +29,8 @@ class GameViewTrigDrawer : GameViewDrawer {
     }
 
     override func updateBoard() {
-        
+        NSLog("\(#function) started")
+
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
 
         // draw board surface
@@ -158,6 +159,12 @@ class GameViewTrigDrawer : GameViewDrawer {
         board.addChildNode(rightNode)
 
         // remove any temporary animation objects
+        dropSurface.removeFromParentNode()
+        if let morpher = surface.morpher {
+            morpher.targets = [surface.geometry!]
+        }
+        
+        NSLog("\(#function) finished")
     }
 
     override func animateResult(fireResult: FireResult, from: GameViewController) {
@@ -422,10 +429,10 @@ class GameViewTrigDrawer : GameViewDrawer {
                                    SCNAction.customAction(duration: dropTime, action: {node, time in
                                     if (node.morpher?.targets.count)! >= 2 {
                                         // must used setWeight, array notation will crash
-                                        node.morpher?.setWeight(time/CGFloat(self.dropTime), forTargetAt: 1)
+                                        let progress = time/CGFloat(self.dropTime)
+                                        node.morpher?.setWeight(pow(progress,2), forTargetAt: 1)
                                     }
-                                   }),
-                                   .hide()]
+                                   })]
             let collapse = SCNAction.sequence(collapseActions)
             dropSurface.runAction(collapse)
         }
