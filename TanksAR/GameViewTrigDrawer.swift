@@ -375,6 +375,8 @@ class GameViewTrigDrawer : GameViewDrawer {
         }
         NSLog("\(bottomVertices.count) bottom vertices, \(bottomIndices.count) bottom indices")
         
+        // animate the appearance and morphing of dropSurface
+        
         // setup reveal of the new bottom surface
         let bottomSource = SCNGeometrySource(vertices: bottomVertices)
         let bottomElements = SCNGeometryElement(indices: bottomIndices, primitiveType: .triangles)
@@ -427,47 +429,6 @@ class GameViewTrigDrawer : GameViewDrawer {
             let collapse = SCNAction.sequence(collapseActions)
             dropSurface.runAction(collapse)
         }
-        
-        // animate the appearance and morphing of dropSurface
-        
-//        // surface morphs to bottom surface
-//        let animation1 = CABasicAnimation(keyPath: "morpher.weights[1]")
-//        animation1.beginTime = currTime
-//        animation1.fromValue = 0.0
-//        animation1.toValue = 1.0
-//        animation1.duration = 0.0
-//        animation1.isRemovedOnCompletion = true
-//        surface.addAnimation(animation1, forKey: "show bottom")
-//
-//        if dropNeeded {
-//            // drop animation
-//            var dropAnimations: [CAAnimation] = []
-//
-//            // drop surface appears
-//            let animation2 = CABasicAnimation(keyPath: "opacity")
-//            animation2.beginTime = currTime
-//            animation2.fromValue = 0.0
-//            animation2.toValue = 1.0
-//            animation2.duration = 0.0
-//            dropAnimations.append(animation2)
-//
-//            // drop surface morphs to second form
-//            let animation3 = CABasicAnimation(keyPath: "morpher.weights[1]")
-//            animation3.beginTime = currTime
-//            animation3.fromValue = 0.0
-//            animation3.toValue = 1.0
-//            animation3.duration = dropTime
-//            dropAnimations.append(animation3)
-//
-//            let dropAnimation = CAAnimationGroup()
-//            dropAnimation.animations = dropAnimations
-//            dropAnimation.beginTime = 0
-//            dropAnimation.duration = currTime + dropTime
-//            dropAnimation.isRemovedOnCompletion = true
-//            dropSurface.addAnimation(dropAnimation, forKey: "drop surface")
-//        }
-        
-        
         NSLog("drop/bottom surface appear at time \(currTime)")
         if dropNeeded {
             currTime += dropTime
