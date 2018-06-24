@@ -159,6 +159,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         board.addChildNode(rightNode)
 
         // remove any temporary animation objects
+        dropSurface.isHidden = true
         dropSurface.removeFromParentNode()
         if let morpher = surface.morpher {
             morpher.targets = [surface.geometry!]
