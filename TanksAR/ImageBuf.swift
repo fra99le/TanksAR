@@ -63,10 +63,10 @@ class ImageBuf {
         NSLog("\(#function) started")
 
         // randomly assign corners
-        setPixel(x: 0, y: 0, value: drand48() * Double(noiseLevel))
-        setPixel(x: 0, y: height-1, value: drand48() * Double(noiseLevel))
-        setPixel(x: width-1, y: 0, value: drand48() * Double(noiseLevel))
-        setPixel(x: width-1, y: height-1, value: drand48() * Double(noiseLevel))
+        setPixel(x: 0, y: 0, value: drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
+        setPixel(x: 0, y: height-1, value: drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
+        setPixel(x: width-1, y: 0, value: drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
+        setPixel(x: width-1, y: height-1, value: drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
 
         // make recursive call
         doDiamondSquare(left: 0, right: width-1, top: 0, bottom: height-1)
@@ -149,8 +149,8 @@ class ImageBuf {
         
         let avg = Double(sum) / Double(count)
 
-        let sizeRatio = Double(size) / Double(width)
-        let randomScale = Double(noiseLevel) * pow(sizeRatio, 4.0)
+        let sizeRatio = 2 * Double(size) / Double(width)
+        let randomScale = Double(noiseLevel) * pow(sizeRatio, 1)
         let noise = randomScale * (drand48()*randomScale - randomScale/2)
         //let noise = CGFloat(0)
         let value = avg + noise
@@ -176,9 +176,9 @@ class ImageBuf {
         doDiamondSquare()
 
         // find min/max values
-        var minValue = getPixel(x: 0, y: 0)
+        var minValue = pixels[0]
         var maxValue = minValue
-        for i in 0..<pixels.count {
+        for i in 1..<pixels.count {
             let value = pixels[i]
             minValue = (minValue>value) ? value : minValue
             maxValue = (maxValue<value) ? value : maxValue
@@ -200,15 +200,6 @@ class ImageBuf {
             }
         }
 
-        minValue = getPixel(x: 0, y: 0)
-        maxValue = minValue
-        for i in 0..<pixels.count {
-            let value = pixels[i]
-            minValue = (minValue>value) ? value : minValue
-            maxValue = (maxValue<value) ? value : maxValue
-        }
-        NSLog("\(#function) after: min/max values are \(minValue) and \(maxValue)")
-        
         NSLog("\(#function) finished")
     }
     
