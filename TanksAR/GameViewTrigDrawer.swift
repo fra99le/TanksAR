@@ -398,10 +398,10 @@ class GameViewTrigDrawer : GameViewDrawer {
         let bottomSource = SCNGeometrySource(vertices: bottomVertices)
         let bottomElements = SCNGeometryElement(indices: bottomIndices, primitiveType: .triangles)
         let bottomGeometry = SCNGeometry(sources: [bottomSource], elements: [bottomElements])
+        bottomGeometry.firstMaterial = surface.geometry?.firstMaterial
         surface.morpher = SCNMorpher()
         surface.morpher?.targets = [surface.geometry!, bottomGeometry]
 
-        
         // animate the appearance and morphing of dropSurface
         
         // surface morphs to bottom surface
@@ -413,10 +413,10 @@ class GameViewTrigDrawer : GameViewDrawer {
         animation1.isRemovedOnCompletion = true
         surface.addAnimation(animation1, forKey: "show bottom")
 
-        // drop animation
-        var dropAnimations: [CAAnimation] = []
-        
         if dropNeeded {
+            // drop animation
+            var dropAnimations: [CAAnimation] = []
+            
             // drop surface appears
             let animation2 = CABasicAnimation(keyPath: "opacity")
             animation2.beginTime = currTime
@@ -441,7 +441,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             dropSurface.addAnimation(dropAnimation, forKey: "drop surface")
         }
         
-        NSLog("drop/short surface appear at time \(currTime)")
+        NSLog("drop/bottom surface appear at time \(currTime)")
         if dropNeeded {
             currTime += dropTime
         }
