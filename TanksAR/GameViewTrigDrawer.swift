@@ -345,7 +345,8 @@ class GameViewTrigDrawer : GameViewDrawer {
                 }
             }
         }
-        
+        NSLog("\(dropVertices0.count) drop vertices, \(dropIndices.count) drop indices")
+
         // draw new static bottom surface
         var bottomVertices: [SCNVector3] = []
         var bottomIndices: [CInt] = []
@@ -372,8 +373,28 @@ class GameViewTrigDrawer : GameViewDrawer {
                 pos += 1
             }
         }
-        NSLog("\(dropVertices0.count) drop vertices, \(dropIndices.count) drop indices")
+        NSLog("\(bottomVertices.count) bottom vertices, \(bottomIndices.count) bottom indices")
         
+        // setup reveal of the new bottom surface
+        let bottomSource = SCNGeometrySource(vertices: bottomVertices)
+        let bottomElements = SCNGeometryElement(indices: bottomIndices, primitiveType: .triangles)
+        let bottomGeometry = SCNGeometry(sources: [bottomSource], elements: [bottomElements])
+        bottomGeometry.firstMaterial = surface.geometry?.firstMaterial
+        surface.name = "The Surface"
+        surface.morpher = SCNMorpher()
+        surface.morpher?.targets = [surface.geometry!, bottomGeometry]
+        
+        let resurfaceActions = [.wait(duration: currTime),
+                                SCNAction.customAction(duration: 0, action: {node, time in
+                                    if time == 0 && (node.morpher?.targets.count)! >= 2 {
+                                        // must used setWeight, array notation will crash
+                                        node.morpher?.setWeight(1, forTargetAt: 1)
+                                    }
+                                })]
+        let resurface = SCNAction.sequence(resurfaceActions)
+        surface.runAction(resurface)
+
+        // setup dropping surface
         if dropNeeded {
             // create geometry for surface
             let dropSource0 = SCNGeometrySource(vertices: dropVertices0)
@@ -381,65 +402,71 @@ class GameViewTrigDrawer : GameViewDrawer {
             let elements = SCNGeometryElement(indices: dropIndices, primitiveType: .triangles)
             let dropGeometry0 = SCNGeometry(sources: [dropSource0], elements: [elements])
             let dropGeometry1 = SCNGeometry(sources: [dropSource1], elements: [elements])
-            dropGeometry0.firstMaterial?.diffuse.contents = UIColor.red
+            dropGeometry0.firstMaterial?.diffuse.contents = UIColor.green
             dropGeometry1.firstMaterial?.diffuse.contents = UIColor.blue
             
             // add drop surface to scene
             dropSurface.removeFromParentNode()
             dropSurface = SCNNode(geometry: dropGeometry0)
-            dropSurface.opacity = 0
+            dropSurface.isHidden = true
+            dropSurface.name = "The Drop Surface"
             dropSurface.morpher = SCNMorpher()
             dropSurface.morpher?.targets = [dropGeometry0, dropGeometry1]
             board.addChildNode(dropSurface)
+            
+            // animate collapse
+            let collapseActions = [.wait(duration: currTime),
+                                   .unhide(),
+                                   SCNAction.customAction(duration: dropTime, action: {node, time in
+                                    if (node.morpher?.targets.count)! >= 2 {
+                                        // must used setWeight, array notation will crash
+                                        node.morpher?.setWeight(time/CGFloat(self.dropTime), forTargetAt: 1)
+                                    }
+                                   }),
+                                   .hide()]
+            let collapse = SCNAction.sequence(collapseActions)
+            dropSurface.runAction(collapse)
         }
         
-        NSLog("\(bottomVertices.count) bottom vertices, \(bottomIndices.count) bottom indices")
-
-        let bottomSource = SCNGeometrySource(vertices: bottomVertices)
-        let bottomElements = SCNGeometryElement(indices: bottomIndices, primitiveType: .triangles)
-        let bottomGeometry = SCNGeometry(sources: [bottomSource], elements: [bottomElements])
-        bottomGeometry.firstMaterial = surface.geometry?.firstMaterial
-        surface.morpher = SCNMorpher()
-        surface.morpher?.targets = [surface.geometry!, bottomGeometry]
-
         // animate the appearance and morphing of dropSurface
         
-        // surface morphs to bottom surface
-        let animation1 = CABasicAnimation(keyPath: "morpher.weights[1]")
-        animation1.beginTime = currTime
-        animation1.fromValue = 0.0
-        animation1.toValue = 1.0
-        animation1.duration = 0.0
-        animation1.isRemovedOnCompletion = true
-        surface.addAnimation(animation1, forKey: "show bottom")
-
-        if dropNeeded {
-            // drop animation
-            var dropAnimations: [CAAnimation] = []
-            
-            // drop surface appears
-            let animation2 = CABasicAnimation(keyPath: "opacity")
-            animation2.beginTime = currTime
-            animation2.fromValue = 0.0
-            animation2.toValue = 1.0
-            animation2.duration = 0.0
-            dropAnimations.append(animation2)
-            
-            // drop surface morphs to second form
-            let animation3 = CABasicAnimation(keyPath: "morpher.weights[1]")
-            animation3.beginTime = currTime
-            animation3.fromValue = 0.0
-            animation3.toValue = 1.0
-            animation3.duration = dropTime
-            dropAnimations.append(animation3)
-            
-            let dropAnimation = CAAnimationGroup()
-            dropAnimation.animations = dropAnimations
-            dropAnimation.beginTime = 0
-            dropAnimation.duration = currTime + dropTime
-            dropAnimation.isRemovedOnCompletion = true
-            dropSurface.addAnimation(dropAnimation, forKey: "drop surface")
-        }
+//        // surface morphs to bottom surface
+//        let animation1 = CABasicAnimation(keyPath: "morpher.weights[1]")
+//        animation1.beginTime = currTime
+//        animation1.fromValue = 0.0
+//        animation1.toValue = 1.0
+//        animation1.duration = 0.0
+//        animation1.isRemovedOnCompletion = true
+//        surface.addAnimation(animation1, forKey: "show bottom")
+//
+//        if dropNeeded {
+//            // drop animation
+//            var dropAnimations: [CAAnimation] = []
+//
+//            // drop surface appears
+//            let animation2 = CABasicAnimation(keyPath: "opacity")
+//            animation2.beginTime = currTime
+//            animation2.fromValue = 0.0
+//            animation2.toValue = 1.0
+//            animation2.duration = 0.0
+//            dropAnimations.append(animation2)
+//
+//            // drop surface morphs to second form
+//            let animation3 = CABasicAnimation(keyPath: "morpher.weights[1]")
+//            animation3.beginTime = currTime
+//            animation3.fromValue = 0.0
+//            animation3.toValue = 1.0
+//            animation3.duration = dropTime
+//            dropAnimations.append(animation3)
+//
+//            let dropAnimation = CAAnimationGroup()
+//            dropAnimation.animations = dropAnimations
+//            dropAnimation.beginTime = 0
+//            dropAnimation.duration = currTime + dropTime
+//            dropAnimation.isRemovedOnCompletion = true
+//            dropSurface.addAnimation(dropAnimation, forKey: "drop surface")
+//        }
+        
         
         NSLog("drop/bottom surface appear at time \(currTime)")
         if dropNeeded {
