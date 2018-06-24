@@ -106,7 +106,6 @@ class GameViewBlockDrawer : GameViewDrawer {
         
         // animate board update
         var dropNeeded = false
-        let dropTime: Double = 1.5
         for block in dropBlocks {
             block.removeFromParentNode()
         }

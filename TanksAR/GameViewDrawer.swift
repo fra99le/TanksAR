@@ -18,6 +18,7 @@ class GameViewDrawer {
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     let timeScaling = 3
+    let dropTime: Double = 1.5
 
 //    func GameViewDrawer(model: GameModel, boardNode: SCNNode, size: Int) {
 //        gameModel = model
