@@ -43,12 +43,16 @@ class ImageBuf {
     }
     
     func copy(_ source: ImageBuf) {
-        setSize(width: source.width, height: source.width)
-    
-        for i in 0..<source.pixels.count {
-                pixels[i] = source.pixels[i]
-        }
+        width = source.width
+        height = source.height
+        pixels = source.pixels
     }
+    
+    func smooth() {
+        
+    }
+    
+    // see: http://www.lighthouse3d.com/opengl/terrain/index.php?mpd2
     
     func isPowerOfTwo(_ number: Int) -> Bool {
         return (number&(number-1)) == 0
