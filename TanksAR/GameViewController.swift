@@ -210,6 +210,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         let position = SCNVector3(0, -0.5, -2.0)
         let scaleFactor = 1.0 / Float(gameModel.board.boardSize)
         placeBoard(atLocation: position, withScaleFactor: scaleFactor)
+        updateUI()
     }
     
 
@@ -298,11 +299,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     
     @IBAction func fireButtonPressed(_ sender: UIButton) {
         NSLog("Fire button pressed")
+        disableUI()
         launchProjectile()
-        fireButton.isEnabled = false
-        powerSlider.isEnabled = false
-        screenDraggingGesture.isEnabled = false
-        manualTrainButton.isEnabled = false
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -375,14 +373,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         placeBoardGesture.isEnabled = false
         backupPlaceBoardGesture.isEnabled = false
         tapToSelectLabel.isHidden = true
-        fireButton.isEnabled = true
-        fireButton.isHidden = false
-        screenDraggingGesture.isEnabled = true
-        powerLabel.isHidden = false
-        powerSlider.isHidden = false
-        hudStackView.isHidden = false
+        enableUI()
 
         boardDrawer.updateBoard()
+        
+        finishTurn()
         
         NSLog("\(#function) finished")
     }
@@ -501,6 +496,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // do AI stuff if next player is an AI
         if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
             // player is an AI
+            disableUI()
             let (azi, alt, vel) = ai.fireParameters(players: gameModel.board.players)
             NSLog("ai firing parameters, azi,alt,vel: (\(azi),\(alt),\(vel))")
             gameModel.setTankAim(azimuth: azi, altitude: alt)
@@ -511,14 +507,33 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             launchProjectile()
         } else {
             // return control to human player
-            fireButton.isEnabled = true
-            powerSlider.isEnabled = true
-            screenDraggingGesture.isEnabled = true
-            manualTrainButton.isEnabled = true
             updateUI()
+            enableUI()
         }
 
         NSLog("\(#function) finished")
+    }
+    
+    func enableUI() {
+        fireButton.isHidden = false
+        fireButton.isEnabled = true
+        powerSlider.isHidden = false
+        powerSlider.isEnabled = true
+        powerLabel.isHidden = false
+        screenDraggingGesture.isEnabled = true
+        manualTrainButton.isEnabled = true
+        hudStackView.isHidden = false
+    }
+    
+    func disableUI() {
+        fireButton.isHidden = true
+        fireButton.isEnabled = false
+        powerSlider.isHidden = true
+        powerSlider.isEnabled = false
+        powerLabel.isHidden = true
+        screenDraggingGesture.isEnabled = false
+        manualTrainButton.isEnabled = false
+        manualTrainButton.isHidden = true
     }
     
     func updateUI() {
