@@ -168,6 +168,13 @@ class GameViewTrigDrawer : GameViewDrawer {
         NSLog("\(#function) finished")
     }
 
+    override func animateExplosion(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {
+        var adjustedResult = fireResult
+        // make explosion slightly larger to obscure terrain modification
+        adjustedResult.explosionRadius *= 1.05
+        return super.animateExplosion(fireResult: adjustedResult, at: at)
+    }
+
     override func animateResult(fireResult: FireResult, from: GameViewController) {
         NSLog("\(#function) started")
         var currTime: CFTimeInterval = 0
@@ -226,6 +233,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                     var noDropIdxs: [Int] = []
                     var displaceIdxs: [Int] = []
                     var noDisplaceIdxs: [Int] = []
+                    var neitherIdxs: [Int] = []
                     for idx in p {
                         if dropArr[idx] {
                             dropIdxs.append(idx)
@@ -236,6 +244,9 @@ class GameViewTrigDrawer : GameViewDrawer {
                             displaceIdxs.append(idx)
                         } else {
                             noDisplaceIdxs.append(idx)
+                        }
+                        if !dropArr[idx] && !displaceArr[idx] {
+                            neitherIdxs.append(idx)
                         }
                     }
                     
@@ -345,10 +356,44 @@ class GameViewTrigDrawer : GameViewDrawer {
                         } else {
                             // two vertices are displaced, so leave unattached.
                             // this entire case is handled by the deformation of the final surface (i.e. bottom) layer.
-                        }
+                       }
 
                     } else if numDropping == 1  && numDisplaced == 1 {
-                        NSLog("i,j=\(i),\(j): numDropping=\(numDropping) and numDisplaced=\(numDisplaced), don't know how to handle this")
+                        // one of each type, use new position for displaced vertex, and animate dropping vertex
+                        let idx1 = displaceIdxs[0]
+                        let idx2 = neitherIdxs[0]
+                        let idx3 = dropIdxs[0]
+
+                        // use new position for displaced vertex, and animate dropping vertex
+                        // add top triangle
+                        var index = CInt(dropVertices0.count)
+                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], topArr[idx3])))
+                        
+                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3],
+                                                                    bottomArr[idx3] + (topArr[idx3]-middleArr[idx3]))))
+                        
+                        dropIndices.append(index)
+                        dropIndices.append(index+2)
+                        dropIndices.append(index+1)
+                        
+                        // add bottom triangle
+                        index = CInt(dropVertices0.count)
+                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], middleArr[idx3])))
+                        
+                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], bottomArr[idx3])))
+                        
+                        dropIndices.append(index)
+                        dropIndices.append(index+2)
+                        dropIndices.append(index+1)
+
                     }
                 }
             }
@@ -413,7 +458,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             let dropGeometry0 = SCNGeometry(sources: [dropSource0], elements: [elements])
             let dropGeometry1 = SCNGeometry(sources: [dropSource1], elements: [elements])
             dropGeometry0.firstMaterial?.diffuse.contents = UIColor.green
-            dropGeometry1.firstMaterial?.diffuse.contents = UIColor.blue
+            dropGeometry1.firstMaterial?.diffuse.contents = UIColor.green
             
             // add drop surface to scene
             dropSurface.removeFromParentNode()
