@@ -31,6 +31,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     var gameModel = GameModel()
     var users: [UserConfig] = []
     var numHumans: Int = 0
+    var humanLeft: Int = 0
     var numAIs: Int = 0
     var numRounds: Int = 0
     var roundChanged: Bool = false
@@ -472,6 +473,19 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
         }
 
+        // count human players left
+        humanLeft = 0
+        for player in gameModel.board.players {
+            if let _ = player.ai {
+                // player is an AI
+            } else {
+                if player.hitPoints > 0 {
+                    humanLeft += 1
+                    boardDrawer.timeScaling = 3
+                }
+            }
+        }
+        
         boardDrawer.animateResult(fireResult: fireResult, from: self)
         roundChanged = fireResult.newRound
         
@@ -495,6 +509,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
         // do AI stuff if next player is an AI
         if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
+            if humanLeft == 0 {
+                boardDrawer.timeScaling *= 1.01
+                NSLog("timeScaling now \(boardDrawer.timeScaling)")
+            }
             // player is an AI
             disableUI()
             let (azi, alt, vel) = ai.fireParameters(players: gameModel.board.players)
@@ -507,6 +525,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             launchProjectile()
         } else {
             // return control to human player
+            boardDrawer.timeScaling = 3
             updateUI()
             enableUI()
         }
