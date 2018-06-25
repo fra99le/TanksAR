@@ -361,13 +361,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // set size, orientation, and color of board base
         let geometry = SCNPlane(width: CGFloat(gameModel.board.boardSize),
                                 height: CGFloat(gameModel.board.boardSize))
-        geometry.firstMaterial?.diffuse.contents = UIColor.red
+        geometry.firstMaterial?.diffuse.contents = UIColor.green
 
         let boardBaseNode = SCNNode()
         boardBaseNode.geometry = geometry
         boardBaseNode.eulerAngles.x = -Float.pi / 2
         boardBaseNode.opacity = 1.0
-        boardBaseNode.position = SCNVector3(0,-0.01,0)
+        boardBaseNode.position = SCNVector3(0,-1,0)
         board.addChildNode(boardBaseNode)
 
         // disable selection of a board location
