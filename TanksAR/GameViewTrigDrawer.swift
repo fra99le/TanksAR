@@ -10,14 +10,14 @@ import Foundation
 import SceneKit
 
 class GameViewTrigDrawer : GameViewDrawer {
- 
+    
     var surface = SCNNode()
     var dropSurface = SCNNode()
     var topNode = SCNNode()
     var bottomNode = SCNNode()
     var leftNode = SCNNode()
     var rightNode = SCNNode()
-
+    
     override func addBoard() {
         updateBoard()
     }
@@ -27,12 +27,12 @@ class GameViewTrigDrawer : GameViewDrawer {
         board.removeFromParentNode()
         NSLog("\(#function) finished")
     }
-
+    
     override func updateBoard() {
         NSLog("\(#function) started")
-
+        
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
-
+        
         // draw board surface
         var vertices: [SCNVector3] = []
         //var normals: [SCNVector3] = []
@@ -44,23 +44,23 @@ class GameViewTrigDrawer : GameViewDrawer {
                 let x = CGFloat(i)*edgeSize
                 let y = CGFloat(j)*edgeSize
                 let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
-
+                
                 vertices.append(fromModelSpace(SCNVector3(x,y,z)))
                 
                 if i < numPerSide && j < numPerSide {
-                        indices.append(pos)
-                        indices.append(pos+1)
-                        indices.append(pos+CInt(numPerSide)+2)
-                        
-                        indices.append(pos)
-                        indices.append(pos+CInt(numPerSide)+2)
-                        indices.append(pos+CInt(numPerSide)+1)
+                    indices.append(pos)
+                    indices.append(pos+1)
+                    indices.append(pos+CInt(numPerSide)+2)
+                    
+                    indices.append(pos)
+                    indices.append(pos+CInt(numPerSide)+2)
+                    indices.append(pos+CInt(numPerSide)+1)
                 }
                 pos += 1
             }
         }
         NSLog("\(vertices.count) surface vertices, \(indices.count) surface indices, pos=\(pos)")
-
+        
         // create geometry for surface
         let vertexSource = SCNGeometrySource(vertices: vertices)
         let elements = SCNGeometryElement(indices: indices, primitiveType: .triangles)
@@ -93,21 +93,21 @@ class GameViewTrigDrawer : GameViewDrawer {
             z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
             bottomVerts.append(fromModelSpace(SCNVector3(x,y,0)))
             bottomVerts.append(fromModelSpace(SCNVector3(x,y,z)))
-
+            
             // left edge (x=0)
             x = CGFloat(0)*edgeSize
             y = CGFloat(numPerSide-i)*edgeSize
             z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
             leftVerts.append(fromModelSpace(SCNVector3(x,y,0)))
             leftVerts.append(fromModelSpace(SCNVector3(x,y,z)))
-
+            
             // right edge (+x)
             x = CGFloat(numPerSide)*edgeSize
             y = CGFloat(i)*edgeSize
             z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
             rightVerts.append(fromModelSpace(SCNVector3(x,y,0)))
             rightVerts.append(fromModelSpace(SCNVector3(x,y,z)))
-
+            
             // create indices
             if i < numPerSide {
                 edgeIndices.append(pos)
@@ -129,17 +129,17 @@ class GameViewTrigDrawer : GameViewDrawer {
         let bottomSource = SCNGeometrySource(vertices: bottomVerts)
         let leftSource = SCNGeometrySource(vertices: leftVerts)
         let rightSource = SCNGeometrySource(vertices: rightVerts)
-
+        
         let topGeometry = SCNGeometry(sources: [topSource], elements: [edgeElements])
         let bottomGeometry = SCNGeometry(sources: [bottomSource], elements: [edgeElements])
         let leftGeometry = SCNGeometry(sources: [leftSource], elements: [edgeElements])
         let rightGeometry = SCNGeometry(sources: [rightSource], elements: [edgeElements])
-
+        
         topGeometry.firstMaterial?.diffuse.contents = UIColor.green
         bottomGeometry.firstMaterial?.diffuse.contents = UIColor.green
         leftGeometry.firstMaterial?.diffuse.contents = UIColor.green
         rightGeometry.firstMaterial?.diffuse.contents = UIColor.green
-
+        
         // remove old edges
         topNode.removeFromParentNode()
         bottomNode.removeFromParentNode()
@@ -151,13 +151,13 @@ class GameViewTrigDrawer : GameViewDrawer {
         bottomNode = SCNNode(geometry: bottomGeometry)
         leftNode = SCNNode(geometry: leftGeometry)
         rightNode = SCNNode(geometry: rightGeometry)
-
+        
         // add new edges
         board.addChildNode(topNode)
         board.addChildNode(bottomNode)
         board.addChildNode(leftNode)
         board.addChildNode(rightNode)
-
+        
         // remove any temporary animation objects
         dropSurface.isHidden = true
         dropSurface.removeFromParentNode()
@@ -167,14 +167,14 @@ class GameViewTrigDrawer : GameViewDrawer {
         
         NSLog("\(#function) finished")
     }
-
+    
     override func animateExplosion(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {
         var adjustedResult = fireResult
         // make explosion slightly larger to obscure terrain modification
         adjustedResult.explosionRadius *= 1.05
         return super.animateExplosion(fireResult: adjustedResult, at: at)
     }
-
+    
     override func animateResult(fireResult: FireResult, from: GameViewController) {
         NSLog("\(#function) started")
         var currTime: CFTimeInterval = 0
@@ -209,20 +209,17 @@ class GameViewTrigDrawer : GameViewDrawer {
                     let top = gameModel.getElevation(fromMap: fireResult.top, longitude: Int(x), latitude: Int(y))
                     let middle = gameModel.getElevation(fromMap: fireResult.middle, longitude: Int(x), latitude: Int(y))
                     let bottom = gameModel.getElevation(fromMap: fireResult.bottom, longitude: Int(x), latitude: Int(y))
-                    //NSLog("k: \(k), current: \(current), top: \(top), middle: \(middle), bottom: \(bottom)")
-
+                    // NSLog("\(#function) i,j: \(i),\(j), k: \(k), current: \(current), top: \(top), middle: \(middle), bottom: \(bottom)")
+                    
                     // record elevations for each point
                     currentArr.append(CGFloat(current))
                     topArr.append(CGFloat(top))
                     middleArr.append(CGFloat(middle))
                     bottomArr.append(CGFloat(bottom))
-
+                    
                     // record booleans for different animation conditions
                     dropArr.append(top > middle && middle > bottom)
                     displaceArr.append(bottom != current)
-                }
-                if dropArr.count > 0 {
-                    dropNeeded = true
                 }
                 
                 // check for and add complete triangle for dropping portion
@@ -248,6 +245,9 @@ class GameViewTrigDrawer : GameViewDrawer {
                         if !dropArr[idx] && !displaceArr[idx] {
                             neitherIdxs.append(idx)
                         }
+                    }
+                    if dropIdxs.count > 0 {
+                        dropNeeded = true
                     }
                     
                     let numDropping = dropIdxs.count
@@ -302,7 +302,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                             dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], middleArr[idx1])))
                             dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
                             dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], middleArr[idx2])))
-
+                            
                             dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1] + (topArr[idx1]-middleArr[idx1]))))
                             dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
                             dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], bottomArr[idx2] + (topArr[idx2]-middleArr[idx2]))))
@@ -311,7 +311,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                             dropIndices.append(index)
                             dropIndices.append(index+2)
                             dropIndices.append(index+1)
-
+                            
                             dropIndices.append(index)
                             dropIndices.append(index+2)
                             dropIndices.append(index+3)
@@ -329,16 +329,16 @@ class GameViewTrigDrawer : GameViewDrawer {
                             dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], topArr[idx1])))
                             dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
                             dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], topArr[idx3])))
-
+                            
                             dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], topArr[idx1])))
                             dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
                             dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3],
                                                                            bottomArr[idx3] + (topArr[idx3]-middleArr[idx3]))))
-
+                            
                             dropIndices.append(index)
                             dropIndices.append(index+2)
                             dropIndices.append(index+1)
-
+                            
                             // add bottom triangle
                             index = CInt(dropVertices0.count)
                             dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], topArr[idx1])))
@@ -352,29 +352,29 @@ class GameViewTrigDrawer : GameViewDrawer {
                             dropIndices.append(index)
                             dropIndices.append(index+2)
                             dropIndices.append(index+1)
-
+                            
                         } else {
                             // two vertices are displaced, so leave unattached.
                             // this entire case is handled by the deformation of the final surface (i.e. bottom) layer.
-                       }
-
+                        }
+                        
                     } else if numDropping == 1  && numDisplaced == 1 {
                         // one of each type, use new position for displaced vertex, and animate dropping vertex
                         let idx1 = displaceIdxs[0]
                         let idx2 = neitherIdxs[0]
                         let idx3 = dropIdxs[0]
-
+                        
                         // use new position for displaced vertex, and animate dropping vertex
                         // add top triangle
                         var index = CInt(dropVertices0.count)
-                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
-                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
-                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], topArr[idx3])))
+                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], topArr[idx3])))
                         
-                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
-                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
-                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3],
-                                                                    bottomArr[idx3] + (topArr[idx3]-middleArr[idx3]))))
+                        dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                        dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                        dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3],
+                                                                       bottomArr[idx3] + (topArr[idx3]-middleArr[idx3]))))
                         
                         dropIndices.append(index)
                         dropIndices.append(index+2)
@@ -382,24 +382,24 @@ class GameViewTrigDrawer : GameViewDrawer {
                         
                         // add bottom triangle
                         index = CInt(dropVertices0.count)
-                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
-                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
-                    dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], middleArr[idx3])))
+                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], middleArr[idx3])))
                         
-                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
-                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
-                    dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], bottomArr[idx3])))
+                        dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                        dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                        dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], bottomArr[idx3])))
                         
                         dropIndices.append(index)
                         dropIndices.append(index+2)
                         dropIndices.append(index+1)
-
+                        
                     }
                 }
             }
         }
         NSLog("\(dropVertices0.count) drop vertices, \(dropIndices.count) drop indices")
-
+        
         // draw new static bottom surface
         var bottomVertices: [SCNVector3] = []
         var bottomIndices: [CInt] = []
@@ -407,7 +407,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         var pos: CInt = 0
         for i in 0...numPerSide {
             for j in 0...numPerSide {
-
+                
                 // consruct new bottom surface
                 let x = CGFloat(i)*edgeSize
                 let y = CGFloat(j)*edgeSize
@@ -448,7 +448,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                                 })]
         let resurface = SCNAction.sequence(resurfaceActions)
         surface.runAction(resurface)
-
+        
         // setup dropping surface
         if dropNeeded {
             // create geometry for surface
@@ -488,7 +488,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         }
         NSLog("board settled at time \(currTime).")
         
-
+        
         // wait for animations to end
         let delay = SCNAction.sequence([.wait(duration: currTime)])
         board.runAction(delay,
@@ -496,5 +496,5 @@ class GameViewTrigDrawer : GameViewDrawer {
         
         NSLog("\(#function) finished")
     }
-
+    
 }
