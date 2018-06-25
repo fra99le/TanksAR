@@ -91,7 +91,7 @@ class GameViewDrawer {
             explosionNode?.runAction(explosionActions)
         }
         currTime += 1
-        NSLog("explosion ended at time \(currTime).")
+        NSLog("explosion reached maximum radius at time \(currTime) and ended at \(currTime+1).")
         return currTime
     
     }
