@@ -367,6 +367,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         boardBaseNode.geometry = geometry
         boardBaseNode.eulerAngles.x = -Float.pi / 2
         boardBaseNode.opacity = 1.0
+        boardBaseNode.position = SCNVector3(0,-0.01,0)
         board.addChildNode(boardBaseNode)
 
         // disable selection of a board location
@@ -495,7 +496,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
     
     func finishTurn() {
-        
+        NSLog("\(#function) started")
+
         // do AI stuff if next player is an AI
         if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
             // player is an AI
@@ -515,7 +517,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             manualTrainButton.isEnabled = true
             updateUI()
         }
-        
+
+        NSLog("\(#function) finished")
     }
     
     func updateUI() {
