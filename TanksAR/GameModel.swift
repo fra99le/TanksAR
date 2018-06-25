@@ -353,7 +353,7 @@ class GameModel {
                 guard board.players[i].hitPoints > 0 else  { continue }
                 
                 let dist = distance(from: tank.position, to: position)
-                if dist < (weaponSize + tankSize) {
+                if dist < tankSize {
                     // hit a tank
                     airborn = false
                 }
