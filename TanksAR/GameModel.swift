@@ -89,8 +89,8 @@ struct FireResult {
 class GameModel {
     // game board
     var board: GameBoard = GameBoard()
-    let tankSize: Float = 30
-    let maxPower: Float = 100
+    let tankSize: Float = 10
+    let maxPower: Float = 150
     let elevationScale: Float = 2.0
     
     var weaponsList = [
@@ -101,6 +101,7 @@ class GameModel {
         Weapon(name: "Dirty Bomb", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
                                      WeaponSize(name: "regular", size: 150, cost: 2000),
                                      WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .generative)
+        // still need MIRVs and liquid weapons
         ]
     
     // high-score data
@@ -203,20 +204,59 @@ class GameModel {
         //print("Elevation at \(longitude),\(latitude) is now \(newElevation*255).")
     }
     
-    func placeTanks(withMargin: Int = 50, minDist: Int = 10) {
+    func placeTanks(withMargin: Int = 50, minDist: Int = 100) {
         NSLog("\(#function) started")
-        for i in 0..<board.players.count {
-            let x = Float(drand48() * Double(board.surface.width-withMargin*2) + Double(withMargin))
-            let y = Float(drand48() * Double(board.surface.height-withMargin*2) + Double(withMargin))
-
-            let tankElevation = getElevation(longitude: Int(x), latitude: Int(y))
-            board.players[i].tank = Tank(position: SCNVector3(x: x, y: y, z: tankElevation),
-                                         azimuth: 0, altitude: Float(Double.pi/4), velocity: 50)
+        var tanksPlaced = 0
+        var attemptsLeft = 10
         
+        while tanksPlaced < board.players.count && attemptsLeft > 0 {
+            tanksPlaced = 0
+            attemptsLeft -= 1
+
+            for i in 0..<board.players.count {
+                
+                var x: Float = 0
+                var y: Float = 0
+                var tankElevation: Float = 0
+                var remainingAttempts = 20
+                var validLocation = false
+                while !validLocation && remainingAttempts > 0 {
+                    x = Float(drand48() * Double(board.surface.width-withMargin*2) + Double(withMargin))
+                    y = Float(drand48() * Double(board.surface.height-withMargin*2) + Double(withMargin))
+                    tankElevation = getElevation(longitude: Int(x), latitude: Int(y))
+                    
+                    // measure distance to other tanks
+                    var closestTank = Float(minDist + 1)
+                    for j in 0..<i {
+                        let tankDist = distance(from: SCNVector3(x,y,tankElevation),
+                                                to: board.players[j].tank.position)
+                        if tankDist < closestTank {
+                            closestTank = tankDist
+                        }
+                    }
+                    
+                    // check validity of location
+                    if closestTank > Float(minDist) {
+                        validLocation = true
+                    } else {
+                        remainingAttempts -= 1
+                    }
+                }
+                
+                if validLocation {
+                    board.players[i].tank = Tank(position: SCNVector3(x: x, y: y, z: tankElevation),
+                                                 azimuth: 0, altitude: Float(Double.pi/4), velocity: 50)
+                    tanksPlaced += 1
+                }
+            }
+        }
+
+        for i in 0..<board.players.count {
             // flatten area around tanks
             let tank = board.players[i].tank!
-            flattenAreaAt(longitude: Int(tank.position.x), latitude: Int(tank.position.y), withRadius: 100)
+            flattenAreaAt(longitude: Int(tank.position.x), latitude: Int(tank.position.y), withRadius: 20)
         }
+    
         NSLog("\(#function) started")
     }
     
@@ -337,8 +377,18 @@ class GameModel {
         old.copy(board.surface)
         let (top, middle, bottom) = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
         damageCheck(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
-        
         let roundEnded = roundCheck()
+        
+        if !roundEnded {
+            // update tank elevations
+            for i in 0..<board.players.count {
+                let oldPos = board.players[i].tank.position
+                let newElevation = getElevation(longitude: Int(oldPos.x), latitude: Int(oldPos.y))
+                if newElevation < oldPos.z {
+                    board.players[i].tank.position = SCNVector3(oldPos.x,oldPos.y, newElevation)
+                }
+            }
+        }
         
         let result: FireResult = FireResult(playerID: board.currentPlayer,
                                             timeStep: timeStep,
