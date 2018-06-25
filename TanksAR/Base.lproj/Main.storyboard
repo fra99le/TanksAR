@@ -168,6 +168,7 @@
                         <outlet property="humansNumLabel" destination="Y8j-vc-RXG" id="9mn-bL-HZ6"/>
                         <outlet property="humansStepper" destination="ySh-PU-Q9y" id="wlY-CK-j9Q"/>
                         <outlet property="modeButton" destination="fqD-uJ-JIp" id="O2S-pT-vID"/>
+                        <outlet property="playGameButton" destination="FWR-NA-CWw" id="4SG-fX-xIj"/>
                         <outlet property="roundsNumLabel" destination="F7a-j8-P41" id="42j-ws-23e"/>
                         <outlet property="roundsStepper" destination="DJg-nu-2tW" id="WCm-mi-KbS"/>
                     </connections>

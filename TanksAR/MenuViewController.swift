@@ -69,7 +69,8 @@ class MenuViewController: UIViewController {
     @IBOutlet weak var roundsStepper: UIStepper!
 
     @IBOutlet weak var modeButton: UIButton!
-    
+    @IBOutlet weak var playGameButton: UIButton!
+
     @IBAction func humansStepperTapped(_ sender: UIStepper) {
         humans = Int(sender.value)
         updateUI()
@@ -104,6 +105,13 @@ class MenuViewController: UIViewController {
         aisNumLabel.text = "\(ais)"
         roundsNumLabel.text = "\(rounds)"
         modeButton.setTitle(useBlocks ? "Super-Retro" : "Retro", for: .normal)
+        
+        // require more than one player
+        if humans + ais <= 1 {
+            playGameButton.isEnabled = false
+        } else {
+            playGameButton.isEnabled = true
+        }
     }
     
 }
