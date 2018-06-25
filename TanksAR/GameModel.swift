@@ -447,7 +447,7 @@ class GameModel {
                 if style == .explosive  {
                     let top = currElevation
                     let middle = expTop
-                    let bottom = expBottom
+                    let bottom = min(currElevation, expBottom)
                     
                     setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
                     setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
