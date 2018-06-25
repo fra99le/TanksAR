@@ -107,7 +107,7 @@ class PlayerAI {
         // also: http://www.scholarpedia.org/article/Nelder-Mead_algorithm
         
         // fill initial simplex
-        NSLog("\(#function): data: \(data)")
+        //NSLog("\(#function): data: \(data)")
         if firstShot {
             var azimuth = Float(drand48() * 360)
             if let model = gameModel {
