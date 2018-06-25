@@ -318,20 +318,20 @@ class GameViewTrigDrawer : GameViewDrawer {
                         }
                     } else if numDropping == 1  && numDisplaced == 0 {
                         // check to see if dropping vertex should be connected
-                        let idx1 = noDisplaceIdxs[0]
-                        let idx2 = noDisplaceIdxs[1]
+                        let idx1 = noDropIdxs[0]
+                        let idx2 = noDropIdxs[1]
                         let idx3 = dropIdxs[0]
                         if !displaceArr[idx1] && !displaceArr[idx2] {
                             // two vertices are unaffected, so attach other one via a triangle
                             
                             // add top triangle
                             var index = CInt(dropVertices0.count)
-                            dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], topArr[idx1])))
-                            dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                            dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                            dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                             dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], topArr[idx3])))
                             
-                            dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], topArr[idx1])))
-                            dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                            dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                            dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                             dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3],
                                                                            bottomArr[idx3] + (topArr[idx3]-middleArr[idx3]))))
                             
@@ -341,12 +341,12 @@ class GameViewTrigDrawer : GameViewDrawer {
                             
                             // add bottom triangle
                             index = CInt(dropVertices0.count)
-                            dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], topArr[idx1])))
-                            dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                            dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                            dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                             dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], middleArr[idx3])))
                             
-                            dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], topArr[idx1])))
-                            dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                            dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
+                            dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                             dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], bottomArr[idx3])))
                             
                             dropIndices.append(index)
@@ -368,7 +368,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                         // add top triangle
                         var index = CInt(dropVertices0.count)
                         dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
-                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                         dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], topArr[idx3])))
                         
                         dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
@@ -383,11 +383,11 @@ class GameViewTrigDrawer : GameViewDrawer {
                         // add bottom triangle
                         index = CInt(dropVertices0.count)
                         dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
-                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                        dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                         dropVertices0.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], middleArr[idx3])))
                         
                         dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
-                        dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], topArr[idx2])))
+                        dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                         dropVertices1.append(fromModelSpace(SCNVector3(xArr[idx3], yArr[idx3], bottomArr[idx3])))
                         
                         dropIndices.append(index)
