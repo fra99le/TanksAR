@@ -13,6 +13,7 @@ class MenuViewController: UIViewController {
     var humans = 1
     var ais = 2
     var rounds = 2
+    var useBlocks = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,8 +53,7 @@ class MenuViewController: UIViewController {
             dest.numHumans = humans;
             dest.numAIs = ais;
             dest.numRounds = rounds
-            //dest.useBlocks = true // should be configurable
-            dest.useBlocks = false // for testing
+            dest.useBlocks = useBlocks
             NSLog("\(#function) starting \(dest.numRounds) round game.")
         } else {
             super.prepare(for: segue, sender: sender)
@@ -68,6 +68,8 @@ class MenuViewController: UIViewController {
     @IBOutlet weak var aisStepper: UIStepper!
     @IBOutlet weak var roundsStepper: UIStepper!
 
+    @IBOutlet weak var modeButton: UIButton!
+    
     @IBAction func humansStepperTapped(_ sender: UIStepper) {
         humans = Int(sender.value)
         updateUI()
@@ -87,6 +89,13 @@ class MenuViewController: UIViewController {
         
     }
 
+    @IBAction func modeTapped(_ sender: UIButton) {
+        useBlocks = !useBlocks
+        NSLog("useBlocks: \(useBlocks)")
+        updateUI()
+    }
+    
+    
     func updateUI() {
         humansStepper.value = Double(humans)
         aisStepper.value = Double(ais)
@@ -94,6 +103,7 @@ class MenuViewController: UIViewController {
         humansNumLabel.text = "\(humans)"
         aisNumLabel.text = "\(ais)"
         roundsNumLabel.text = "\(rounds)"
+        modeButton.setTitle(useBlocks ? "Super-Retro" : "Retro", for: .normal)
     }
     
 }

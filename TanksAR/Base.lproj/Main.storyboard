@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="30" translatesAutoresizingMaskIntoConstraints="NO" id="EWi-5U-v3d">
-                                <rect key="frame" x="76.5" y="184" width="222.5" height="300"/>
+                                <rect key="frame" x="76.5" y="148" width="222.5" height="372"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ARtillery" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Eph-xi-hCC">
                                         <rect key="frame" x="40.5" y="0.0" width="141.5" height="48"/>
@@ -96,8 +96,27 @@
                                             </stepper>
                                         </subviews>
                                     </stackView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="IBH-nf-2gl">
+                                        <rect key="frame" x="43" y="258" width="137" height="42"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OYq-1l-IIX">
+                                                <rect key="frame" x="0.0" y="0.0" width="69" height="42"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fqD-uJ-JIp">
+                                                <rect key="frame" x="79" y="0.0" width="58" height="42"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                                                <state key="normal" title="Retro"/>
+                                                <connections>
+                                                    <action selector="modeTapped:" destination="cEh-LH-kqS" eventType="touchUpInside" id="jd2-VL-oEc"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                    </stackView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FWR-NA-CWw">
-                                        <rect key="frame" x="53.5" y="258" width="116" height="42"/>
+                                        <rect key="frame" x="53.5" y="330" width="116" height="42"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                         <state key="normal" title="Play Game"/>
                                         <connections>
@@ -148,6 +167,7 @@
                         <outlet property="aisStepper" destination="dVX-T7-K5p" id="kCn-6h-auB"/>
                         <outlet property="humansNumLabel" destination="Y8j-vc-RXG" id="9mn-bL-HZ6"/>
                         <outlet property="humansStepper" destination="ySh-PU-Q9y" id="wlY-CK-j9Q"/>
+                        <outlet property="modeButton" destination="fqD-uJ-JIp" id="O2S-pT-vID"/>
                         <outlet property="roundsNumLabel" destination="F7a-j8-P41" id="42j-ws-23e"/>
                         <outlet property="roundsStepper" destination="DJg-nu-2tW" id="WCm-mi-KbS"/>
                     </connections>
@@ -367,6 +387,12 @@ If no surfaces can be found, double tap to place board in the air.</string>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="xJs-TJ-zrJ"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Z0Y-yR-u5V"/>
+                        <variation key="default">
+                            <mask key="subviews">
+                                <exclude reference="xA9-IZ-spM"/>
+                                <exclude reference="Zlt-bF-eIw"/>
+                            </mask>
+                        </variation>
                     </view>
                     <connections>
                         <outlet property="altitudeLabel" destination="TGR-OU-lTp" id="kd8-9s-1ZR"/>
