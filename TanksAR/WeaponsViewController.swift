@@ -68,6 +68,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
     }
     
     @IBOutlet weak var scoreLabel: UILabel!
+    @IBOutlet weak var creditLabel: UILabel!
     
     @IBOutlet weak var azimuthTextField: UITextField!
     @IBOutlet weak var altitudeTextField: UITextField!
@@ -124,6 +125,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var weaponTypeLabel: UILabel!
     @IBOutlet weak var weaponSizeLabel: UILabel!
     @IBOutlet weak var weaponCostLabel: UILabel!
+    @IBOutlet weak var availablePointsLabel: UILabel!
     
     @IBOutlet weak var weaponTypeStepper: UIStepper!
     @IBOutlet weak var weaponSizeStepper: UIStepper!
@@ -173,6 +175,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
 
         // update score label
         scoreLabel.text = "Score: \(player.score)"
+        creditLabel.text = "Credit: \(player.credit)"
         
         // update name
         playerNameField.text = board.players[board.currentPlayer].name
@@ -192,12 +195,13 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         weaponTypeLabel.text = weapon.name
         weaponSizeLabel.text = weaponSize.name
         weaponCostLabel.text = "\(weaponSize.cost) points"
+        availablePointsLabel.text = "\(player.credit + player.score) points"
         weaponCostLabel.textColor = UIColor.black
         
         // disable done button and give a reason if weapon is invalid
         doneButton.isEnabled = true
         reasonLabel.isHidden = true
-        if weaponID > 0 && weaponSize.cost > player.score {
+        if weaponID > 0 && weaponSize.cost > (player.credit + player.score) {
             reasonLabel.text = "Insufficient points for selected weapon!"
             reasonLabel.isHidden = false
             weaponCostLabel.textColor = UIColor.red

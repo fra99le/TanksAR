@@ -22,6 +22,7 @@ struct Tank {
 struct Player {
     var tank: Tank!
     var name: String = "Unknown"
+    var credit: Int64 = 5000
     var score: Int64 = 0
     var weaponID: Int = 0
     var weaponSizeID: Int = 0
@@ -316,7 +317,12 @@ class GameModel {
         let weapon = weaponsList[player.weaponID]
         let weaponSize = weapon.sizes[player.weaponSizeID].size
         let weaponCost = weapon.sizes[player.weaponSizeID].cost
-        board.players[board.currentPlayer].score -= Int64(weaponCost)
+        if weaponCost >= player.credit {
+            board.players[board.currentPlayer].score -= Int64(weaponCost) - player.credit
+            board.players[board.currentPlayer].credit = 0
+        } else {
+            board.players[board.currentPlayer].credit -= Int64(weaponCost)
+        }
         
         // compute trajectory
         var trajectory: [SCNVector3] = []
@@ -389,6 +395,9 @@ class GameModel {
                 }
             }
         }
+        
+        // check to see if current weapon is affordable
+        adjustWeapon()
         
         let result: FireResult = FireResult(playerID: board.currentPlayer,
                                             timeStep: timeStep,
@@ -559,6 +568,30 @@ class GameModel {
         }
         
         return newRound
+    }
+    
+    func adjustWeapon() {
+        // adjust weapon if current one is unaffordable
+        let player = board.players[board.currentPlayer]
+        let score = player.score
+        let credit = player.credit
+
+        var weaponID = player.weaponID
+        var weaponSizeID = player.weaponSizeID
+        var weapon = weaponsList[weaponID]
+        
+        while weaponSizeID > 0 && weapon.sizes[weaponSizeID].cost > (score + credit) {
+            NSLog("Player can no longer afford current weapon size.")
+            weaponSizeID -= 1
+        }
+        
+        if weaponID > 0 && weapon.sizes[weaponSizeID].cost > (score + credit) {
+            NSLog("Player can no longer afford current weapon.")
+            weaponID = 0
+        }
+        
+        board.players[board.currentPlayer].weaponID = weaponID
+        board.players[board.currentPlayer].weaponSizeID = weaponSizeID
     }
     
     func getWinner() -> (name: String, score: Int64) {
