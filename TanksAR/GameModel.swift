@@ -363,10 +363,11 @@ class GameModel {
     }
     
     func applyExplosion(at: SCNVector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> (ImageBuf, ImageBuf, ImageBuf) {
-        //NSLog("\(#function) started")
+        NSLog("\(#function) started")
         let topBuf = ImageBuf()
         let middleBuf = ImageBuf()
         let bottomBuf = ImageBuf()
+        NSLog("starting image buffer copies")
         topBuf.copy(board.surface)
         middleBuf.copy(board.surface)
         bottomBuf.copy(board.surface)
@@ -436,7 +437,7 @@ class GameModel {
             }
 
         }
-        //NSLog("\(#function) finished")
+        NSLog("\(#function) finished")
 
         return (topBuf, middleBuf, bottomBuf)
     }
