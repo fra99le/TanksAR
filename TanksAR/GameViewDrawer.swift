@@ -14,6 +14,7 @@ class GameViewDrawer {
 
     var gameModel: GameModel! = nil
     var board: SCNNode = SCNNode()
+    var tankNodes: [SCNNode] = []
     var numPerSide: Int = 0
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
@@ -39,7 +40,7 @@ class GameViewDrawer {
         if let oldShell = shellNode {
             oldShell.removeFromParentNode()
         }
-        shellNode = SCNNode(geometry: SCNSphere(radius: 10))
+        shellNode = SCNNode(geometry: SCNSphere(radius: 5))
         if let shell = shellNode,
             let firstPosition = fireResult.trajectory.first {
             shell.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
@@ -89,11 +90,22 @@ class GameViewDrawer {
                                                        .scale(to: 1, duration: 1),
                                                        .hide()])
             explosionNode?.runAction(explosionActions)
+
+            // check for tanks that need to be hidden
+            for i in 0..<gameModel.board.players.count {
+                let player = gameModel.board.players[i]
+                if player.hitPoints <= 0 {
+                    let tankNode = tankNodes[i]
+                    let hideAction = SCNAction.sequence([.wait(duration: currTime+1),
+                                                         .hide()])
+                    tankNode.runAction(hideAction)
+                }
+            }
         }
         currTime += 1
         NSLog("explosion reached maximum radius at time \(currTime) and ended at \(currTime+1).")
+        
         return currTime
-    
     }
     
     

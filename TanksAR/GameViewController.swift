@@ -25,10 +25,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     var boardPlaced = false
     var boardSize: Float = 1.0
     var boardScaleFactor: Float = 1.0
+    let tankScale = 10
     var candidatePlanes: [SCNNode] = []
     var board = SCNNode()
     var gameModel = GameModel()
-    var tankNodes: [SCNNode] = []
     var users: [UserConfig] = []
     var numHumans: Int = 0
     var numAIs: Int = 0
@@ -217,13 +217,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     @IBOutlet var screenDraggingGesture: UIPanGestureRecognizer!
     @IBAction func screenDragged(_ sender: UIGestureRecognizer) {
         guard let gesture = sender as? UIPanGestureRecognizer else { return }
-        guard tankNodes.count > 0 else { return }
+        guard boardDrawer.tankNodes.count > 0 else { return }
         
         //NSLog("Screen dragged \(gesture).")
         //NSLog("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
         // determine player
         let player = gameModel.board.currentPlayer
-        let tankNode = tankNodes[player]
+        let tankNode = boardDrawer.tankNodes[player]
         
         // get tank aiming values from model
         let tank = gameModel.getTank(forPlayer: player)
@@ -414,7 +414,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     // Tank drawing methods
     func addTanks() {
         NSLog("\(#function) started")
-        tankNodes = [SCNNode](repeating: SCNNode(), count: gameModel.board.players.count)
+        boardDrawer.tankNodes = [SCNNode](repeating: SCNNode(), count: gameModel.board.players.count)
         
         for i in 0..<gameModel.board.players.count {
             let player = gameModel.board.players[i]
@@ -423,13 +423,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             
             guard let tank = player.tank else { continue }
             tankNode.position = boardDrawer.fromModelSpace(tank.position)
-            tankNode.scale = SCNVector3(30,30,30)
+            tankNode.scale = SCNVector3(tankScale,tankScale,tankScale)
             //tankNode.eulerAngles.x = Float.pi / 2
             users[i].tank = tankNode
             
             NSLog("Adding tank at \(tankNode.position)")
             board.addChildNode(tankNode)
-            tankNodes[i] = tankNode
+            boardDrawer.tankNodes[i] = tankNode
         }
         NSLog("\(#function) finished")
     }
@@ -444,7 +444,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         NSLog("\(#function) started")
 
         // get location of muzzle
-        let tankNode = tankNodes[gameModel.board.currentPlayer]
+        let tankNode = boardDrawer.tankNodes[gameModel.board.currentPlayer]
         guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true) else { return }
         let position = muzzleNode.convertPosition(muzzleNode.position, to: board)
         
@@ -541,6 +541,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         
         // make sure power slider matches player
         let currentPower = gameModel.board.players[gameModel.board.currentPlayer].tank.velocity
+        powerSlider.minimumValue = 0
+        powerSlider.maximumValue = gameModel.maxPower
         powerSlider.setValue(currentPower, animated: false)
         
         // update scale and rotation for player
@@ -575,6 +577,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
 
             if player.hitPoints <= 0 {
                 tankNode.removeFromParentNode()
+            } else {
+                let newPos = boardDrawer.fromModelSpace(player.tank.position)
+                let oldPos = tankNode.position
+                if newPos.x != oldPos.x || newPos.y != oldPos.y || newPos.z != oldPos.z {
+                    let tankMove = SCNAction.move(to: newPos, duration: 1.0)
+                    tankNode.runAction(tankMove)
+                }
             }
             
             guard let tank = player.tank else { continue }
