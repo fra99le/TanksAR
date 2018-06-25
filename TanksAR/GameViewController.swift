@@ -57,7 +57,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         sceneView.delegate = self
         
         // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
+        sceneView.showsStatistics = false
         
         // create the game board
         if useBlocks {
