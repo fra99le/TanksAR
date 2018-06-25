@@ -459,11 +459,7 @@ class GameModel {
                 } else if style == .generative {
                     let top = expTop
                     let middle = expBottom
-                    let bottom = currElevation
-
-                    setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
-                    setElevation(forMap: middleBuf, longitude: i, latitude: j, to: bottom)
-                    setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: currElevation)
+                    var bottom = currElevation
                     
                     // update actual map
                     var newElevation = currElevation
@@ -471,6 +467,7 @@ class GameModel {
                         newElevation = currElevation + (top - middle) // new chunk is elevated
                     } else if top > currElevation {
                         newElevation = top // new chunk crosses old surface
+                        bottom = top // top is new final surface
                     } else if top <= currElevation {
                         newElevation = currElevation // new chunk below old surface
                     } else {
@@ -480,6 +477,9 @@ class GameModel {
 //                    if( newElevation != currElevation) {
 //                        NSLog("generative level change: \(currElevation) -> \(newElevation) at \(i),\(j)")
 //                    }
+                    setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
+                    setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
+                    setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
                     setElevation(longitude: i, latitude: j, to: newElevation)
                 } else {
                     NSLog("\(#function) doesn't handle \(andStyle) style.")
