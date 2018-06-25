@@ -541,6 +541,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         powerLabel.isHidden = false
         screenDraggingGesture.isEnabled = true
         manualTrainButton.isEnabled = true
+        manualTrainButton.isHidden = false
         hudStackView.isHidden = false
     }
     
