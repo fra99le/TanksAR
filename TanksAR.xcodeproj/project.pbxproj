@@ -30,7 +30,6 @@
 		53527CE220D1DB36005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		53527CE320D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		53527CE420D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
-		5373BF0720CB5B8D00817E4B /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5373BF0620CB5B8D00817E4B /* Default-568h@2x.png */; };
 		5396120E20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
 		5396120F20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
 		5396121020D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
@@ -75,7 +74,6 @@
 		53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewBlockDrawer.swift; sourceTree = "<group>"; };
 		53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewDrawer.swift; sourceTree = "<group>"; };
 		53527CE120D1DB36005F5FFF /* GameOverViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverViewController.swift; sourceTree = "<group>"; };
-		5373BF0620CB5B8D00817E4B /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		5396120D20D0CAB7006D0E6C /* PlayerAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAI.swift; sourceTree = "<group>"; };
 		53EEDB6420C83C3E00B8B71D /* TanksAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TanksAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		53EEDB6720C83C3E00B8B71D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -125,7 +123,6 @@
 		53EEDB5B20C83C3E00B8B71D = {
 			isa = PBXGroup;
 			children = (
-				5373BF0620CB5B8D00817E4B /* Default-568h@2x.png */,
 				53EEDB6620C83C3E00B8B71D /* TanksAR */,
 				53EEDB7D20C83C4700B8B71D /* TanksARTests */,
 				53EEDB8820C83C4700B8B71D /* TanksARUITests */,
@@ -294,7 +291,6 @@
 				53EEDB6A20C83C3F00B8B71D /* art.scnassets in Resources */,
 				53EEDB7420C83C4700B8B71D /* LaunchScreen.storyboard in Resources */,
 				53EEDB7120C83C4600B8B71D /* Assets.xcassets in Resources */,
-				5373BF0720CB5B8D00817E4B /* Default-568h@2x.png in Resources */,
 				53EEDB6F20C83C3F00B8B71D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
