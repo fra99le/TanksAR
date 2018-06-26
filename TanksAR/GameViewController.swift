@@ -279,7 +279,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         if sender.state == .ended {
             //NSLog("rotate gesture: \(sender.rotation) ended or player \(player)")
             users[player].rotation -= Float(sender.rotation)
-            //NSLog("rotation for user \(player) set to \(users[player].rotation)")
+            
+            NSLog("rotation for user \(player) set to \(users[player].rotation)")
+            let angle = users[player].rotation
+            users[player].rotation = atan2(sin(angle),cos(angle))
+            NSLog("rotation for user \(player) adjusted to to \(users[player].rotation)")
         }
     }
 
