@@ -537,6 +537,21 @@ class GameModel {
                         board.players[board.currentPlayer].score += 1000
                     }
                     NSLog("\tplayer \(board.currentPlayer) score now \(board.players[board.currentPlayer].score)")
+                } else {
+                    // player killed themself, distribute poinrts across other players
+                    var playersLeft: Float = 0
+                    for player in board.players {
+                        if player.hitPoints > 0 {
+                            playersLeft += 1
+                        }
+                    }
+                    
+                    let pointsPer = damage / playersLeft
+                    for i in 0..<board.players.count {
+                        if board.players[i].hitPoints > 0 {
+                            board.players[i].score += Int64(pointsPer)
+                        }
+                    }
                 }
             }
         }
