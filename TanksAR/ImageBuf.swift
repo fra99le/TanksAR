@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class ImageBuf {
+class ImageBuf : Codable {
     var width: Int = 0
     var height: Int = 0
     var pixels: [CGFloat] = []
@@ -236,5 +236,9 @@ class ImageBuf {
         NSLog("\(#function) finished")
 
         return image
+    }
+    
+    func asPNG() -> Data? {
+        return UIImagePNGRepresentation(asUIImage())
     }
 }
