@@ -11,8 +11,8 @@ import UIKit
 class MenuViewController: UIViewController {
 
     var humans = 1
-    var ais = 2
-    var rounds = 2
+    var ais = 1
+    var rounds = 3
     var useBlocks = false
     
     override func viewDidLoad() {
