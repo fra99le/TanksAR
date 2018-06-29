@@ -82,6 +82,7 @@ struct FireResult {
     var bottom: ImageBuf
 
     var newRound: Bool
+    var roundWinner: String?
 }
 
 // Note: For the model x,y are surface image coordinates, and z is elevation
@@ -378,6 +379,15 @@ class GameModel {
         old.copy(board.surface)
         let (top, middle, bottom) = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
         damageCheck(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
+        
+        // check for round winner before checking/starting new round
+        var roundWinner: String? = nil
+        for player in board.players {
+            if player.hitPoints > 0 {
+                roundWinner = player.name
+            }
+        }
+
         let roundEnded = roundCheck()
         
         if !roundEnded {
@@ -402,7 +412,8 @@ class GameModel {
                                             top: top,
                                             middle: middle,
                                             bottom: bottom,
-                                            newRound: roundEnded)
+                                            newRound: roundEnded,
+                                            roundWinner: roundWinner)
         
         board.currentPlayer = (board.currentPlayer + 1) % board.players.count
         while !roundEnded && board.players[board.currentPlayer].hitPoints <= 0 {

@@ -27,11 +27,12 @@ class GameViewDrawer {
 //        numPerSide = size
 //    }
     
-    // these should be abstract methods
-    func addBoard() {    }
-    func removeBoard() {    }
-    func updateBoard() {    }
-    func animateResult(fireResult: FireResult, from: GameViewController) {    }
+    // these should be abstract methods, or equivilant
+    func addBoard() { preconditionFailure("This method must be overridden") }
+    func removeBoard() { preconditionFailure("This method must be overridden") }
+    func updateBoard() { preconditionFailure("This method must be overridden") }
+    func animateResult(fireResult: FireResult, from: GameViewController)
+        { preconditionFailure("This method must be overridden") }
     
     func animateShell(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {
         var currTime = at
@@ -108,6 +109,76 @@ class GameViewDrawer {
         return currTime
     }
     
+    func animateRoundResult(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {
+        if !fireResult.newRound {
+            // nothing to animate
+            return at
+        }
+        
+        var currTime = at
+        var message = "Round Ended"
+        var winner = "Unknown"
+        var points: Int64 = -1
+        if gameModel.board.currentRound > gameModel.board.totalRounds {
+            // find winner
+            for player in gameModel.board.players {
+                if player.score > points {
+                    points = player.score
+                    winner = player.name
+                }
+            }
+
+            message = "Game Over!\n\(winner) Wins\nwith \(points) points."
+        } else {
+
+            // get round number
+            let lastRound = gameModel.board.currentRound - 1
+
+            if let winner = fireResult.roundWinner {
+                message = "\(winner) won round \(lastRound)!"
+            } else {
+                // if no winning player, get current leader
+                for player in gameModel.board.players {
+                    if player.score > points {
+                        winner = player.name
+                    }
+                }
+                message = "No winner in round \(lastRound)\n\(winner) currently winning."
+            }
+        }
+
+        // create message and add it to board
+        let textGeometry = SCNText(string: message, extrusionDepth: 2)
+        textGeometry.alignmentMode = kCAAlignmentCenter
+        let msgNode = SCNNode(geometry: textGeometry)
+        let (min: min, max: max) = msgNode.boundingBox
+        NSLog("bounding box: \(min) -> \(max)")
+        msgNode.position = SCNVector3( -(max.x-min.x)/2, (max.y-min.y)/2, (max.z-min.z)/2)
+        msgNode.geometry?.firstMaterial?.diffuse.contents = UIColor.cyan
+        
+        let spinNode = SCNNode()
+        spinNode.position = SCNVector3(0,350,0)
+        spinNode.scale = SCNVector3(8,8,8)
+        spinNode.isHidden = true
+
+        spinNode.addChildNode(msgNode)
+        board.addChildNode(spinNode)
+        
+        // animate message
+        let actions = SCNAction.sequence([.wait(duration: currTime),
+                                          .scale(to: 0, duration: 0),
+                                          .unhide(),
+                                          .scale(to: 8, duration: 1),
+                                          .rotateBy(x: 0, y: CGFloat(Float.pi * 6), z: 0, duration: 6),
+                                          .scale(to: 0, duration: 1),
+                                          .hide()])
+        spinNode.runAction(actions)
+        
+        currTime += 5
+        NSLog("round transition ends at time \(currTime).")
+
+        return currTime
+    }
     
     // helper methods
     func toModelSpace(_ position: SCNVector3) -> SCNVector3 {

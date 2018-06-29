@@ -183,10 +183,12 @@ class GameViewBlockDrawer : GameViewDrawer {
         }
         NSLog("board settled at time \(currTime).")
         
+        // deal with round transitions
+        currTime = animateRoundResult(fireResult: fireResult, at: currTime)
+        
         // wait for animations to end
         let delay = SCNAction.sequence([.wait(duration: currTime)])
-        board.runAction(delay,
-                                           completionHandler: { DispatchQueue.main.async { from.finishTurn() } })
+        board.runAction(delay, completionHandler: { DispatchQueue.main.async { from.finishTurn() } })
         
         NSLog("\(#function) finished")
     }
