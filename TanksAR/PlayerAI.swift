@@ -115,9 +115,13 @@ class PlayerAI {
                 let targetTank = model.board.players[nextPlayer].tank!
                 let myTank = model.board.players[model.board.currentPlayer].tank!
                 
+                NSLog("tank at \(myTank.position), target at \(targetTank.position).")
+                // tank positions are in model space
                 let targetDir = atan2(myTank.position.x - targetTank.position.x,
-                                      myTank.position.z - targetTank.position.z) * (180 / Float.pi)
-                azimuth = Float(targetDir + Float(drand48() * 20) - 10)
+                                      myTank.position.y - targetTank.position.y) * (180 / Float.pi)
+                NSLog("targetDir = \(targetDir)")
+                //azimuth = Float(targetDir + Float(drand48() * 10) - 5)
+                azimuth = targetDir
             }
             let altitude = Float(drand48() * 50) + 30
             let power = Float(drand48() * 70) + 30
