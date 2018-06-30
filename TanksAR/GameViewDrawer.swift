@@ -153,11 +153,11 @@ class GameViewDrawer {
         let msgNode = SCNNode(geometry: textGeometry)
         let (min: min, max: max) = msgNode.boundingBox
         NSLog("bounding box: \(min) -> \(max)")
-        msgNode.position = SCNVector3( -(max.x-min.x)/2, (max.y-min.y)/2, (max.z-min.z)/2)
+        msgNode.position = SCNVector3( -(max.x-min.x)/2, -(max.y-min.y)/2, -(max.z-min.z)/2)
         msgNode.geometry?.firstMaterial?.diffuse.contents = UIColor.cyan
         
         let spinNode = SCNNode()
-        spinNode.position = SCNVector3(0,350,0)
+        spinNode.position = SCNVector3(0,500,0)
         spinNode.scale = SCNVector3(8,8,8)
         spinNode.isHidden = true
 
@@ -169,7 +169,7 @@ class GameViewDrawer {
                                           .scale(to: 0, duration: 0),
                                           .unhide(),
                                           .scale(to: 8, duration: 1),
-                                          .rotateBy(x: 0, y: CGFloat(Float.pi * 6), z: 0, duration: 6),
+                                          .rotateBy(x: 0, y: CGFloat(Float.pi * 4), z: 0, duration: 8),
                                           .scale(to: 0, duration: 1),
                                           .hide()])
         spinNode.runAction(actions)
