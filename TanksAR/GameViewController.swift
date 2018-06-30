@@ -462,10 +462,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         let velocity = SCNVector3(xVel, yVel, zVel)
         
         // convert to model coordinate space
-        var muzzlePosition = position
-        var muzzleVelocity = velocity
-        muzzlePosition = boardDrawer.toModelSpace(position)
-        muzzleVelocity = boardDrawer.toModelScale(velocity)
+        let muzzlePosition = boardDrawer.toModelSpace(position)
+        let muzzleVelocity = boardDrawer.toModelScale(velocity)
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
 
