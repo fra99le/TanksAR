@@ -19,14 +19,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         altitudeTextField.delegate = self
         velocityTextField.delegate = self
 
-        if let model = gameModel {
-            let player = model.board.players[model.board.currentPlayer]
-            playerNameField.text = "\(player.name)"
-            azimuthTextField.text = "\(player.tank.azimuth)º"
-            altitudeTextField.text = "\(player.tank.altitude)º"
-            velocityTextField.text = "\(player.tank.velocity) m/s"
-        }
-        
+        updateUI()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -74,6 +67,10 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var altitudeTextField: UITextField!
     @IBOutlet weak var velocityTextField: UITextField!
     
+    @IBOutlet weak var azimuthStepper: UIStepper!
+    @IBOutlet weak var altitudeStepper: UIStepper!
+    @IBOutlet weak var velocityStepper: UIStepper!
+    
     // see: https://medium.com/@KaushElsewhere/how-to-dismiss-keyboard-in-a-view-controller-of-ios-3b1bfe973ad1
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
@@ -103,21 +100,54 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         let player = model.board.players[model.board.currentPlayer]
         
         if sender == azimuthTextField {
-            model.setTankAim(azimuth: Float(newValue) * (Float.pi/180), altitude: player.tank.altitude)
-            azimuthTextField.text = "\(Float(newValue))º"
+            model.setTankAim(azimuth: Float(newValue), altitude: player.tank.altitude)
         } else if sender == altitudeTextField {
-            model.setTankAim(azimuth: player.tank.azimuth, altitude: Float(newValue) * (Float.pi/180))
-            altitudeTextField.text = "\(Float(newValue))º"
+            model.setTankAim(azimuth: player.tank.azimuth, altitude: Float(newValue))
         } else if sender == velocityTextField {
             model.setTankPower(power: Float(newValue))
-            velocityTextField.text = "\(Float(newValue)) m/s"
         } else  {
             NSLog("\(#function): Unknown sender \(sender)")
         }
         
         // re-add degree symbol
         NSLog("new value: \(sender.text!)")
+        
+        updateUI()
     }
+    
+    @IBAction func aimStepperTapped(_ sender: UIStepper) {
+        guard let model = gameModel else { return }
+        let board = model.board
+        let player = board.players[board.currentPlayer]
+        guard let tank = player.tank else { return }
+        
+        // get current values
+        var newAzimuth = tank.azimuth
+        var newAltitude = tank.altitude
+        var newVelocity = tank.velocity
+        
+        let newValue = Float(sender.value)
+        NSLog("\(#function): stepper changed by \(newValue)")
+        
+        // update appropriate value
+        if sender == azimuthStepper {
+            newAzimuth = newValue
+        } else if sender == altitudeStepper {
+            newAltitude = newValue
+        } else if sender == velocityStepper {
+            newVelocity = newValue
+        } else {
+            NSLog("Unknown sender \(sender) to \(#function)")
+        }
+        
+        // pass new values to models
+        model.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
+        model.setTankPower(power: newVelocity)
+
+        // update the display
+        updateUI()
+    }
+    
     
     @IBOutlet weak var doneButton: UIButton!
     @IBOutlet weak var reasonLabel: UILabel!
@@ -169,6 +199,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         let board = model.board
         var players = board.players
         let player = players[board.currentPlayer]
+        let tank = player.tank!
         let weaponID = player.weaponID
         let weapon = model.weaponsList[weaponID]
         let weaponSize = weapon.sizes[player.weaponSizeID]
@@ -180,6 +211,17 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         // update name
         playerNameField.text = board.players[board.currentPlayer].name
         
+        // update aiming information
+        velocityStepper.minimumValue = 0
+        velocityStepper.maximumValue = Double(model.maxPower)
+        azimuthStepper.value = Double(tank.azimuth)
+        altitudeStepper.value = Double(tank.altitude)
+        velocityStepper.value = Double(tank.velocity)
+        azimuthTextField.text = "\(tank.azimuth)º"
+        altitudeTextField.text = "\(tank.altitude)º"
+        velocityTextField.text = "\(tank.velocity) m/s"
+        NSLog("aim: \(azimuthTextField.text!),\(altitudeTextField.text!) @ \(velocityTextField.text!)")
+
         // update limits on steppers
         weaponTypeStepper.minimumValue = 0
         weaponTypeStepper.maximumValue = Double(model.weaponsList.count) - 1
