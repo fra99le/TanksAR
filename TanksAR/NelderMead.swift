@@ -44,17 +44,18 @@ func nmVectorLength(_ a: NMVector) -> Float {
     return sqrt(sum)
 }
 
-struct NMSample {
+struct NMSample : Codable {
     var parameters: NMVector
     var value: Float
 }
 
-enum NMState {
+// see: https://littlebitesofcocoa.com/318-codable-enums
+enum NMState : String, Codable {
     case initial, reflect, expand, contract_out, contract_in, shrink
 }
 
 // see: http://www.scholarpedia.org/article/Nelder-Mead_algorithm
-class NelderMead {
+class NelderMead : Codable {
     // maintain search state
     var dimensions: Int
     var simplex: [NMSample] = []

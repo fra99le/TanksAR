@@ -12,14 +12,39 @@ import Foundation
 import UIKit
 import SceneKit
 
-struct Tank {
-    var position: SCNVector3
-    var azimuth: Float // in degrees
-    var altitude: Float // in degrees
-    var velocity: Float
+struct Vector3 : Codable {
+    var x: Float
+    var y: Float
+    var z: Float
+
+    init() {
+        self.x = 0
+        self.y = 0
+        self.z = 0
+    }
+
+    init(_ x: Float, _ y: Float, _ z: Float) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+    init(_ x: CGFloat, _ y: CGFloat, _ z: CGFloat) {
+        self.x = Float(x)
+        self.y = Float(y)
+        self.z = Float(z)
+    }
+
 }
 
-struct Player {
+struct Tank : Codable {
+    var position: Vector3
+    var azimuth: Float // in degrees
+    var altitude: Float // in degrees
+    var velocity: Float // in m/s
+}
+
+struct Player : Codable {
     var tank: Tank!
     var name: String = "Unknown"
     var credit: Int64 = 5000
@@ -31,13 +56,13 @@ struct Player {
     // need to add shielding info
 }
 
-struct GameBoard {
+struct GameBoard : Codable {
     var boardSize: Int = 0
     var surface: ImageBuf = ImageBuf()
     var bedrock: ImageBuf = ImageBuf()
     
     // vector to encode windspeed
-    var wind: SCNVector3 = SCNVector3(0, 0, 0)
+    var wind: Vector3 = Vector3()
     
     // player
     var players: [Player] = []
@@ -48,21 +73,21 @@ struct GameBoard {
     var currentRound = 1
 }
 
-struct HighScore {
+struct HighScore : Codable {
     var name: String = "Unknown"
     var score: Int64 = 0
 }
 
-enum WeaponStyle {
+enum WeaponStyle : String, Codable {
     case explosive, generative, mud, napalm, mirv
 }
 
-struct WeaponSize {
+struct WeaponSize : Codable {
     var name: String
     var size: Float
     var cost: Int
 }
-struct Weapon {
+struct Weapon : Codable {
     var name: String
     var sizes: [WeaponSize]
     var style: WeaponStyle
@@ -72,7 +97,7 @@ struct FireResult {
     var playerID: Int = 0
     
     var timeStep: Float = 1
-    var trajectory: [SCNVector3] = []
+    var trajectory: [Vector3] = []
     var explosionRadius: Float = 100
     
     // need data to update map
@@ -88,7 +113,7 @@ struct FireResult {
 // Note: For the model x,y are surface image coordinates, and z is elevation
 // In GameViewController y and z are swapped.
 
-class GameModel {
+class GameModel : Codable {
     // game board
     var board: GameBoard = GameBoard()
     let tankSize: Float = 10
@@ -230,7 +255,7 @@ class GameModel {
                     // measure distance to other tanks
                     var closestTank = Float(minDist + 1)
                     for j in 0..<i {
-                        let tankDist = distance(from: SCNVector3(x,y,tankElevation),
+                        let tankDist = distance(from: Vector3(x,y,tankElevation),
                                                 to: board.players[j].tank.position)
                         if tankDist < closestTank {
                             closestTank = tankDist
@@ -246,7 +271,7 @@ class GameModel {
                 }
                 
                 if validLocation {
-                    board.players[i].tank = Tank(position: SCNVector3(x: x, y: y, z: tankElevation),
+                    board.players[i].tank = Tank(position: Vector3(x, y, tankElevation),
                                                  azimuth: 0, altitude: Float(Double.pi/4), velocity: 50)
                     tanksPlaced += 1
                 }
@@ -302,7 +327,7 @@ class GameModel {
         board.players[board.currentPlayer].tank.velocity = min(power,maxPower)
     }
 
-    func fire(muzzlePosition: SCNVector3, muzzleVelocity: SCNVector3) -> FireResult {
+    func fire(muzzlePosition: Vector3, muzzleVelocity: Vector3) -> FireResult {
         NSLog("\(#function) started")
 
         let timeStep = Float(1)/Float(60)
@@ -321,7 +346,7 @@ class GameModel {
         }
         
         // compute trajectory
-        var trajectory: [SCNVector3] = []
+        var trajectory: [Vector3] = []
         var airborn = true
         var position = muzzlePosition
         var velocity = muzzleVelocity
@@ -396,7 +421,7 @@ class GameModel {
                 let oldPos = board.players[i].tank.position
                 let newElevation = getElevation(longitude: Int(oldPos.x), latitude: Int(oldPos.y))
                 if newElevation < oldPos.z {
-                    board.players[i].tank.position = SCNVector3(oldPos.x,oldPos.y, newElevation)
+                    board.players[i].tank.position = Vector3(oldPos.x,oldPos.y, newElevation)
                 }
             }
         }
@@ -427,7 +452,7 @@ class GameModel {
         return result
     }
     
-    func applyExplosion(at: SCNVector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> (ImageBuf, ImageBuf, ImageBuf) {
+    func applyExplosion(at: Vector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> (ImageBuf, ImageBuf, ImageBuf) {
         NSLog("\(#function) started")
         let topBuf = ImageBuf()
         let middleBuf = ImageBuf()
@@ -507,7 +532,7 @@ class GameModel {
         return (topBuf, middleBuf, bottomBuf)
     }
     
-    func distance(from: SCNVector3, to: SCNVector3) -> Float {
+    func distance(from: Vector3, to: Vector3) -> Float {
         let xDiff = from.x - to.x
         let yDiff = from.y - to.y
         let zDiff = from.z - to.z
@@ -515,7 +540,7 @@ class GameModel {
         return sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff)
     }
     
-    func damageCheck(at: SCNVector3, fromWeapon: Weapon, withSize: Int) {
+    func damageCheck(at: Vector3, fromWeapon: Weapon, withSize: Int) {
         NSLog("\(#function) started")
 
         for i in 0..<board.players.count {

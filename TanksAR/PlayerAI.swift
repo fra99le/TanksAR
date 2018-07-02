@@ -10,7 +10,7 @@ import Foundation
 import SceneKit
 
 // inputs and resulting distance to an individual opponent
-struct Sample {
+struct Sample : Codable {
     // input
     var azimuth: Float
     var altitude: Float
@@ -27,7 +27,7 @@ struct Sample {
     var impactZ: Float
 }
 
-class PlayerAI {
+class PlayerAI : Codable {
     var gameModel:GameModel? = nil
     var nelderMead = NelderMead(dimensions: 3)
     var data: [Sample] = []
