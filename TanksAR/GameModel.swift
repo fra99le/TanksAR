@@ -272,7 +272,7 @@ class GameModel : Codable {
                 
                 if validLocation {
                     board.players[i].tank = Tank(position: Vector3(x, y, tankElevation),
-                                                 azimuth: 0, altitude: Float(Double.pi/4), velocity: 50)
+                                                 azimuth: 0, altitude: 45, velocity: 50)
                     tanksPlaced += 1
                 }
             }
@@ -316,6 +316,7 @@ class GameModel : Codable {
         if cleanAzimuth < 0 {
             cleanAzimuth = 360 + cleanAzimuth
         }
+        cleanAzimuth = Float(Int(cleanAzimuth * 100 + 0.5)) / Float(100)
         board.players[board.currentPlayer].tank.azimuth = cleanAzimuth
         board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
         //NSLog("tank for player \(board.currentPlayer) set to \(board.players[board.currentPlayer].tank.azimuth)º,\(board.players[board.currentPlayer].tank.altitude)º")
