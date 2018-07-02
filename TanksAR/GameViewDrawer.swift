@@ -169,7 +169,7 @@ class GameViewDrawer {
                                           .scale(to: 0, duration: 0),
                                           .unhide(),
                                           .scale(to: 8, duration: 1),
-                                          .rotateBy(x: 0, y: CGFloat(Float.pi * 4), z: 0, duration: 8),
+                                          .rotateBy(x: 0, y: -CGFloat(Float.pi * 4), z: 0, duration: 8),
                                           .scale(to: 0, duration: 1),
                                           .hide()])
         spinNode.runAction(actions)
