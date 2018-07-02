@@ -624,20 +624,40 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             }
             
             guard let tank = player.tank else { continue }
-            guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { return }
-            guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { return }
-            guard let barrelNode = tankNode.childNode(withName: "barrel", recursively: true) else { return }
+            guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { continue }
+            guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { continue }
+            guard let barrelNode = tankNode.childNode(withName: "barrel", recursively: true) else { continue }
             turretNode.eulerAngles.y = tank.azimuth * (Float.pi/180)
             hingeNode.eulerAngles.x = tank.altitude * (Float.pi/180)
 
             // set colors to highlight current player
             var color = UIColor.darkGray
+            var showAimGuide = false
             if gameModel.board.currentPlayer == i {
                 color = UIColor.gray
+                showAimGuide = true
             }
             tankNode.geometry?.firstMaterial?.diffuse.contents = color
             turretNode.geometry?.firstMaterial?.diffuse.contents = color
             barrelNode.geometry?.firstMaterial?.diffuse.contents = color
+            
+            // set up aim guide
+            guard let aimGuide = barrelNode.childNode(withName: "aimGuide", recursively: true) else { continue }
+            guard let lastBall = aimGuide.childNode(withName: "lastBall", recursively: true) else { continue }
+            if showAimGuide {
+                aimGuide.isHidden = false
+                let moveAction = SCNAction.repeatForever(.sequence([.move(to: SCNVector3(0,-1,0), duration: 1),
+                                                                    .move(to: SCNVector3(0,0,0), duration: 0)]))
+                aimGuide.runAction(moveAction)
+                
+                let fadeAction = SCNAction.repeatForever(.sequence([.fadeIn(duration: 0),
+                                                                    .fadeOut(duration: 1)]))
+                lastBall.runAction(fadeAction)
+            } else {
+                aimGuide.isHidden = true
+                aimGuide.removeAllActions()
+                lastBall.removeAllActions()
+            }
         }
         
         // update board
