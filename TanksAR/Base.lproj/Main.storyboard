@@ -210,23 +210,35 @@
                                     <outletCollection property="gestureRecognizers" destination="hW4-6f-hnA" appends="YES" id="JBo-bG-RpC"/>
                                 </connections>
                             </arscnView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YBO-zh-2lA">
-                                <rect key="frame" x="20" y="40" width="40" height="40"/>
-                                <accessibility key="accessibilityConfiguration" label="Exit Game">
-                                    <accessibilityTraits key="traits" image="YES"/>
-                                </accessibility>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="40" id="Cqi-2g-mY6"/>
-                                    <constraint firstAttribute="height" constant="40" id="UOB-GL-cy4"/>
-                                </constraints>
-                                <state key="normal" image="X"/>
-                                <connections>
-                                    <segue destination="FxJ-NK-Vbj" kind="unwind" unwindAction="unwindToMainMenuWithUnwindSegue:" id="tqN-KP-VWX"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rqa-bG-wWn">
-                                <rect key="frame" x="163" y="599" width="48" height="48"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QIh-1p-M8Z">
+                                <rect key="frame" x="16" y="20" width="343" height="122"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                <string key="text">Tap to place board on a horizontal surface (highligted in grey).  Device may need to be moved around to find a surface.
+
+If no surfaces can be found, double tap to place board in the air.</string>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Velocity" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vhx-eP-M1c" userLabel="Power Label">
+                                <rect key="frame" x="157" y="20" width="61" height="20.5"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minValue="0.0" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="dTU-l8-x8U">
+                                <rect key="frame" x="110" y="40" width="154" height="31"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="150" id="fS1-1f-Ivd"/>
+                                </constraints>
+                                <connections>
+                                    <action selector="powerChanged:" destination="BV1-FR-VrT" eventType="valueChanged" id="RjX-eR-dcZ"/>
+                                </connections>
+                            </slider>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rqa-bG-wWn">
+                                <rect key="frame" x="311" y="599" width="48" height="48"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512842465757" colorSpace="custom" customColorSpace="sRGB"/>
                                 <gestureRecognizers/>
                                 <fontDescription key="fontDescription" type="system" pointSize="30"/>
                                 <state key="normal" title="Fire"/>
@@ -234,35 +246,13 @@
                                     <action selector="fireButtonPressed:" destination="BV1-FR-VrT" eventType="touchUpInside" id="aic-Ea-ukb"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Velocity" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vhx-eP-M1c" userLabel="Power Label">
-                                <rect key="frame" x="157" y="20" width="61" height="20.5"/>
-                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.24657534246575341" colorSpace="custom" customColorSpace="sRGB"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xA9-IZ-spM">
-                                <rect key="frame" x="0.0" y="83.5" width="375" height="500"/>
-                                <color key="backgroundColor" red="0.99999600649999998" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
-                                <gestureRecognizers/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="500" id="jeu-V6-LS8"/>
-                                </constraints>
-                            </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Zlt-bF-eIw">
-                                <rect key="frame" x="329" y="617" width="30" height="30"/>
-                                <state key="normal" title="Map"/>
-                                <connections>
-                                    <action selector="toggleMap:" destination="BV1-FR-VrT" eventType="touchUpInside" id="Mqe-P1-AaZ"/>
-                                </connections>
-                            </button>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="C7J-4d-iJW">
-                                <rect key="frame" x="20" y="479" width="141.5" height="112"/>
+                                <rect key="frame" x="117" y="535" width="141.5" height="112"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qRc-zd-bfR">
                                         <rect key="frame" x="0.0" y="0.0" width="141.5" height="30"/>
                                         <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <state key="normal" title="Manual Training"/>
+                                        <state key="normal" title="Weapon Settings"/>
                                         <connections>
                                             <segue destination="dpu-8T-xq9" kind="presentation" identifier="Weapons" id="RvF-JA-zGV"/>
                                         </connections>
@@ -344,7 +334,7 @@
                                         </subviews>
                                     </stackView>
                                 </subviews>
-                                <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512842465757" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="qRc-zd-bfR" secondAttribute="trailing" id="4q5-KN-Sud"/>
                                     <constraint firstItem="TGR-OU-lTp" firstAttribute="width" secondItem="Uti-S3-6bo" secondAttribute="width" id="Fzm-1L-JBc"/>
@@ -356,58 +346,55 @@
                                     <constraint firstItem="vGF-fx-Cq1" firstAttribute="width" secondItem="Uti-S3-6bo" secondAttribute="width" id="rT0-Tl-3Nl"/>
                                 </constraints>
                             </stackView>
-                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minValue="0.0" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="dTU-l8-x8U">
-                                <rect key="frame" x="110" y="40" width="154" height="31"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="150" id="fS1-1f-Ivd"/>
-                                </constraints>
-                                <connections>
-                                    <action selector="powerChanged:" destination="BV1-FR-VrT" eventType="valueChanged" id="RjX-eR-dcZ"/>
-                                </connections>
-                            </slider>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QIh-1p-M8Z">
-                                <rect key="frame" x="16" y="88" width="343" height="122"/>
-                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                <string key="text">Tap to place board on a horizontal surface (highligted in grey).  Device may need to be moved around to find a surface.
-
-If no surfaces can be found, double tap to place board in the air.</string>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qwI-8x-BEQ">
+                                <rect key="frame" x="16" y="20" width="47" height="20.5"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512842465757" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Score: 0" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HtA-AN-53f">
+                                <rect key="frame" x="295" y="20" width="64" height="20.5"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512842465757" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aHz-n7-WR9">
+                                <rect key="frame" x="16" y="599" width="48" height="48"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                                <state key="normal" title="Exit"/>
+                                <connections>
+                                    <segue destination="FxJ-NK-Vbj" kind="unwind" unwindAction="unwindToMainMenuWithUnwindSegue:" id="WoS-h5-XcR"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="YBO-zh-2lA" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="0q8-ZV-c52"/>
-                            <constraint firstItem="xA9-IZ-spM" firstAttribute="centerY" secondItem="GEX-Hw-PMz" secondAttribute="centerY" id="5gK-eJ-Wlz"/>
-                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="Zlt-bF-eIw" secondAttribute="trailing" constant="16" id="5qY-Oo-gYQ"/>
+                            <constraint firstItem="HtA-AN-53f" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="0g9-HW-Jnz"/>
+                            <constraint firstItem="C7J-4d-iJW" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="2Gk-ap-4oN"/>
+                            <constraint firstItem="qwI-8x-BEQ" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="5g7-lm-PyQ"/>
                             <constraint firstItem="Vhx-eP-M1c" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="97o-R5-at8"/>
-                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="C7J-4d-iJW" secondAttribute="bottom" constant="76" id="B1J-MH-cTR"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="top" secondItem="GEX-Hw-PMz" secondAttribute="top" id="C9f-08-Ydg"/>
-                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="xA9-IZ-spM" secondAttribute="trailing" id="DgK-kz-HrG"/>
+                            <constraint firstItem="QIh-1p-M8Z" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="Gno-7t-9Yb"/>
                             <constraint firstItem="QIh-1p-M8Z" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="16" id="Kc8-l8-Gi8"/>
-                            <constraint firstItem="QIh-1p-M8Z" firstAttribute="top" secondItem="YBO-zh-2lA" secondAttribute="bottom" constant="8" id="KpG-0M-DQE"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="aHz-n7-WR9" secondAttribute="bottom" constant="20" id="Q7v-Ez-6aG"/>
                             <constraint firstItem="dTU-l8-x8U" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" constant="20" id="UdN-6r-dnw"/>
-                            <constraint firstItem="xA9-IZ-spM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="WrH-Pp-ZZq"/>
-                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Rqa-bG-wWn" secondAttribute="bottom" constant="20" id="bzU-jY-qDN"/>
-                            <constraint firstItem="Rqa-bG-wWn" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="cjR-RF-DNz"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="HtA-AN-53f" secondAttribute="trailing" constant="16" id="bxp-9O-6ha"/>
                             <constraint firstItem="dTU-l8-x8U" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="dzb-hW-aEZ"/>
                             <constraint firstItem="Vhx-eP-M1c" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="fL0-mF-0WM"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="QIh-1p-M8Z" secondAttribute="trailing" constant="16" id="fnV-FH-2Q1"/>
+                            <constraint firstItem="aHz-n7-WR9" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="16" id="gFA-GQ-jE8"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="bottom" secondItem="Z0Y-yR-u5V" secondAttribute="bottom" id="iuZ-hH-2hL"/>
-                            <constraint firstItem="C7J-4d-iJW" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="20" id="j4K-nh-PI8"/>
-                            <constraint firstItem="YBO-zh-2lA" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="20" id="jXm-4I-tiD"/>
-                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Zlt-bF-eIw" secondAttribute="bottom" constant="20" id="kQY-S4-SHO"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="Rqa-bG-wWn" secondAttribute="trailing" constant="16" id="kRg-96-ZQP"/>
+                            <constraint firstItem="qwI-8x-BEQ" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="16" id="pbq-Go-mco"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="trailing" secondItem="Z0Y-yR-u5V" secondAttribute="trailing" id="qQm-OX-dIS"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="C7J-4d-iJW" secondAttribute="bottom" constant="20" id="tYa-aX-Fzx"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="xJs-TJ-zrJ"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Rqa-bG-wWn" secondAttribute="bottom" constant="20" id="zED-YZ-OCe"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Z0Y-yR-u5V"/>
-                        <variation key="default">
-                            <mask key="subviews">
-                                <exclude reference="xA9-IZ-spM"/>
-                                <exclude reference="Zlt-bF-eIw"/>
-                            </mask>
-                        </variation>
                     </view>
                     <connections>
                         <outlet property="altitudeLabel" destination="TGR-OU-lTp" id="kd8-9s-1ZR"/>
@@ -416,8 +403,9 @@ If no surfaces can be found, double tap to place board in the air.</string>
                         <outlet property="fireButton" destination="Rqa-bG-wWn" id="9ul-PN-kLT"/>
                         <outlet property="hudStackView" destination="C7J-4d-iJW" id="a6n-CY-KsZ"/>
                         <outlet property="manualTrainButton" destination="qRc-zd-bfR" id="9ba-qv-LUU"/>
-                        <outlet property="mapImage" destination="xA9-IZ-spM" id="aZg-42-6Ed"/>
                         <outlet property="placeBoardGesture" destination="NvL-x5-eHp" id="T9y-nK-hH1"/>
+                        <outlet property="playerNameLabel" destination="qwI-8x-BEQ" id="sH1-sI-V0s"/>
+                        <outlet property="playerScoreLabel" destination="HtA-AN-53f" id="gNu-k5-HVb"/>
                         <outlet property="powerLabel" destination="Vhx-eP-M1c" id="wCr-8P-Tg3"/>
                         <outlet property="powerSlider" destination="dTU-l8-x8U" id="8DV-HN-nHY"/>
                         <outlet property="rescaleGesture" destination="Ryc-85-irL" id="Zgb-pY-Yux"/>
@@ -1031,7 +1019,4 @@ If no surfaces can be found, double tap to place board in the air.</string>
             <point key="canvasLocation" x="-879.20000000000005" y="1030.4347826086957"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="X" width="111" height="110"/>
-    </resources>
 </document>

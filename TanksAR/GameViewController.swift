@@ -325,6 +325,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         //NSLog("set tank power to \(sender.value)")
         updateHUD()
     }
+ 
+    @IBOutlet weak var playerNameLabel: UILabel!
+    @IBOutlet weak var playerScoreLabel: UILabel!
     
     // MARK: - Helper methods
     func clearAllPlanes() {
@@ -400,6 +403,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         screenDraggingGesture.isEnabled = false
         powerLabel.isHidden = true
         powerSlider.isHidden = true
+        playerNameLabel.isHidden = true
+        playerScoreLabel.isHidden = true
         hudStackView.isHidden = true
         
         // remove board and tanks
@@ -545,6 +550,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         manualTrainButton.isEnabled = true
         manualTrainButton.isHidden = false
         hudStackView.isHidden = false
+        playerNameLabel.isHidden = false
+        playerScoreLabel.isHidden = false
     }
     
     func disableUI() {
@@ -610,6 +617,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             //NSLog("scaling to \(rescaleAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
         }
         
+        playerNameLabel.text = "Name:\n\(player.name)"
+        playerScoreLabel.text = "Score:\n\(player.score)"
+        if gameBoard.totalRounds > 1 {
+            var currLabel = playerScoreLabel.text!
+            currLabel += "\nRound:\n\(gameBoard.currentRound) of \(gameBoard.totalRounds)"
+            playerScoreLabel.text = currLabel
+        }
+
         updateHUD()
         
         // update all tanks turrets and existence
