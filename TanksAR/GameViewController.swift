@@ -582,28 +582,34 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         powerSlider.maximumValue = gameModel.maxPower
         powerSlider.setValue(currentPower, animated: false)
         
-        // update scale and rotation for player
-        let scaleNode = board
-        let rotationAnimation = CABasicAnimation(keyPath: "eulerAngles.y")
-        rotationAnimation.fromValue = scaleNode.eulerAngles.y
-        rotationAnimation.toValue = users[gameModel.board.currentPlayer].rotation
-        rotationAnimation.beginTime = 0
-        rotationAnimation.duration = 1
-        scaleNode.addAnimation(rotationAnimation, forKey: "Player Rotation")
-        scaleNode.eulerAngles.y = users[gameModel.board.currentPlayer].rotation
-        //NSLog("rotating to \(rotationAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
+        let gameBoard = gameModel.board
+        let player = gameBoard.players[gameBoard.currentPlayer]
+        if let _ = player.ai {
+            // player is an AI
+        } else {
+            // update scale and rotation for player
+            let scaleNode = board
+            let rotationAnimation = CABasicAnimation(keyPath: "eulerAngles.y")
+            rotationAnimation.fromValue = scaleNode.eulerAngles.y
+            rotationAnimation.toValue = users[gameModel.board.currentPlayer].rotation
+            rotationAnimation.beginTime = 0
+            rotationAnimation.duration = 1
+            scaleNode.addAnimation(rotationAnimation, forKey: "Player Rotation")
+            scaleNode.eulerAngles.y = users[gameModel.board.currentPlayer].rotation
+            //NSLog("rotating to \(rotationAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
+            
+            let rescaleAnimation = CABasicAnimation(keyPath: "scale")
+            rescaleAnimation.fromValue = scaleNode.scale
+            let newFactor = boardScaleFactor * users[gameModel.board.currentPlayer].scaleFactor
+            let newScale = SCNVector3(newFactor,newFactor,newFactor)
+            rescaleAnimation.toValue = newScale
+            rescaleAnimation.beginTime = 0
+            rescaleAnimation.duration = 1
+            scaleNode.addAnimation(rescaleAnimation, forKey: "Player Scaling")
+            scaleNode.scale = newScale
+            //NSLog("scaling to \(rescaleAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
+        }
         
-        let rescaleAnimation = CABasicAnimation(keyPath: "scale")
-        rescaleAnimation.fromValue = scaleNode.scale
-        let newFactor = boardScaleFactor * users[gameModel.board.currentPlayer].scaleFactor
-        let newScale = SCNVector3(newFactor,newFactor,newFactor)
-        rescaleAnimation.toValue = newScale
-        rescaleAnimation.beginTime = 0
-        rescaleAnimation.duration = 1
-        scaleNode.addAnimation(rescaleAnimation, forKey: "Player Scaling")
-        scaleNode.scale = newScale
-        //NSLog("scaling to \(rescaleAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
-
         updateHUD()
         
         // update all tanks turrets and existence
