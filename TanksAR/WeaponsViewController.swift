@@ -119,7 +119,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         guard let model = gameModel else { return }
         let board = model.board
         let player = board.players[board.currentPlayer]
-        guard let tank = player.tank else { return }
+        let tank = player.tank
         
         // get current values
         var newAzimuth = tank.azimuth
@@ -199,7 +199,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         let board = model.board
         var players = board.players
         let player = players[board.currentPlayer]
-        let tank = player.tank!
+        let tank = player.tank
         let weaponID = player.weaponID
         let weapon = model.weaponsList[weaponID]
         let weaponSize = weapon.sizes[player.weaponSizeID]
