@@ -13,6 +13,7 @@ class ImageBuf : Codable {
     var width: Int = 0
     var height: Int = 0
     var pixels: [CGFloat] = []
+    var pngBuffer: Data?
     let noiseLevel: Float = 10
     //let noiseLevel: Float = 0
     
@@ -240,5 +241,10 @@ class ImageBuf : Codable {
     
     func asPNG() -> Data? {
         return UIImagePNGRepresentation(asUIImage())
+    }
+    
+    func compress() {
+        pngBuffer = asPNG()
+        pixels = []
     }
 }
