@@ -96,7 +96,7 @@ class PlayerAI : Codable {
         let targetTank = targetPlayer.tank
         
         // get dist to target
-        let dist = distToTank(from: newSample, toTank: targetTank!)
+        let dist = distToTank(from: newSample, toTank: targetTank)
         NSLog("\(#function): last round for AI was \(dist) units from target")
         nelderMead.addResult(parameters:[xVel,yVel,zVel], value: dist)
     }
@@ -112,8 +112,8 @@ class PlayerAI : Codable {
             var azimuth = Float(drand48() * 360)
             if let model = gameModel {
                 let nextPlayer = getNextPlayerID()
-                let targetTank = model.board.players[nextPlayer].tank!
-                let myTank = model.board.players[model.board.currentPlayer].tank!
+                let targetTank = model.board.players[nextPlayer].tank
+                let myTank = model.board.players[model.board.currentPlayer].tank
                 
                 NSLog("tank at \(myTank.position), target at \(targetTank.position).")
                 // tank positions are in model space
