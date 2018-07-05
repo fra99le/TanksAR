@@ -208,6 +208,15 @@ class ImageBuf : Codable {
         NSLog("\(#function) finished")
     }
     
+    func elevationToRGB(elevation: Float) -> (r: CGFloat, g: CGFloat, b: CGFloat) {
+        let value = elevation * 1000
+        let b = CGFloat(Int(value / 65536)) / 256
+        let g = CGFloat(Int(value / 256) % 256) / 256
+        let r = CGFloat(Int(value) % 256) / 256
+
+        return (r,g,b)
+    }
+    
     func asUIImage() -> UIImage {
         NSLog("\(#function) started")
 
@@ -237,6 +246,9 @@ class ImageBuf : Codable {
         NSLog("\(#function) finished")
 
         return image
+    }
+    
+    func fromPNG(data: Data) {
     }
     
     func asPNG() -> Data? {
