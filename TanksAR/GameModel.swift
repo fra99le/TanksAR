@@ -37,6 +37,18 @@ struct Vector3 : Codable {
 
 }
 
+func vectorAdd(_ v1: Vector3, _ v2: Vector3) -> Vector3 {
+    return Vector3(v1.x+v2.x, v1.y+v2.y, v1.z+v2.z)
+}
+
+func vectorDiff(_ v1: Vector3, _ v2: Vector3) -> Vector3 {
+    return Vector3(v1.x-v2.x, v1.y-v2.y, v1.z-v2.z)
+}
+
+func vectorScale(_ v1: Vector3, by: Float) -> Vector3 {
+    return Vector3(v1.x*by, v1.y*by, v1.z*by)
+}
+
 struct Tank : Codable {
     var position: Vector3
     var azimuth: Float // in degrees
@@ -62,7 +74,8 @@ struct GameBoard : Codable {
     var bedrock: ImageBuf = ImageBuf()
     
     // vector to encode windspeed
-    var wind: Vector3 = Vector3()
+    var windSpeed: Float = 0
+    var windDir: Float = 0
     
     // player
     var players: [Player] = []
@@ -117,7 +130,7 @@ class GameModel : Codable {
     // game board
     var board: GameBoard = GameBoard() // fails to encode
     let tankSize: Float = 10
-    let maxPower: Float = 150
+    let maxPower: Float = 250
     let elevationScale: Float = 2.0
     var gameStarted: Bool = false
     
@@ -148,6 +161,11 @@ class GameModel : Codable {
         
         board.surface.fillUsingDiamondSquare(withMinimum: 10.0/255.0, andMaximum: 255.0/255.0)
         //board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 10.0/255.0)
+        
+        // set wind
+        board.windDir = Float(drand48() * 360)
+        board.windSpeed = Float(pow(drand48(),2) * 20) // up to ~45 mph
+        
         NSLog("\(#function) finished")
     }
     
@@ -274,7 +292,7 @@ class GameModel : Codable {
                 
                 if validLocation {
                     board.players[i].tank = Tank(position: Vector3(x, y, tankElevation),
-                                                 azimuth: 0, altitude: 45, velocity: 50)
+                                                 azimuth: 0, altitude: 45, velocity: 100)
                     tanksPlaced += 1
                 }
             }
@@ -348,27 +366,55 @@ class GameModel : Codable {
             board.players[board.currentPlayer].credit -= Int64(weaponCost)
         }
         
+        // compute wind components
+        let windX = cos(board.windDir * (Float.pi / 180)) * board.windSpeed
+        let windY = sin(board.windDir * (Float.pi / 180)) * board.windSpeed
+        let terminalSpeed: Float = 100
+        NSLog("wind: \(board.windSpeed) m/s @ \(board.windDir)º, which is x,y = \(windX),\(windY) m/s")
+
         // compute trajectory
         var trajectory: [Vector3] = []
         var airborn = true
-        var position = muzzlePosition
-        var velocity = muzzleVelocity
+        let p0 = muzzlePosition // p_0
+        let v0 = muzzleVelocity // v_0
+        let vInf = Vector3(windX, windY, -terminalSpeed)
+        let k: Float = -0.5 * gravity / terminalSpeed
         NSLog("firing \(weapon.name) with size \(weaponSize) and style \(weapon.style).")
+        NSLog("p_0: \(p0), v_0: \(v0), vInf: \(vInf), k: \(k)")
         
         var iterCount = 0
+        var t: Float = 0
+        var prevPosition = p0
         while airborn {
+            
+            // For information on effects of wind,
+            // see: http://www.decarpentier.nl/downloads/AnalyticalBallisticTrajectoriesWithApproximatelyLinearDrag-GJPdeCarpentier.pdf
+            let vDiff = vectorDiff(v0, vInf)
+            let term1 = vectorScale(vDiff, by: 1/(2 * k) * (1 - exp(-2 * k * t)))
+
+            let term2 = vectorScale(vInf, by: t)
+            
+            let term3 = p0
+            
+            let position = vectorAdd(vectorAdd(term1, term2), term3)
+            
+            //print("computing trajectory: pos=\(position)")
+            let velocity = vectorScale(vectorDiff(position,prevPosition), by: 1/timeStep)
             //print("computing trajectory: pos=\(position), vel=\(velocity)")
+
             // record position
             trajectory.append(position)
             
-            // update position
-            // NOTE: the model should do all calculations in model space, not view space
-            position.x += velocity.x * timeStep
-            position.y += velocity.y * timeStep
-            position.z += velocity.z * timeStep + 0.5 * gravity * (timeStep*timeStep)
-
-            // update velocity
-            velocity.z += gravity * timeStep
+            t += timeStep
+            
+//            // update position
+//            // NOTE: the model should do all calculations in model space, not view space
+//            p0.x += v0.x * timeStep
+//            p0.y += v0.y * timeStep
+//            p0.z += v0.z * timeStep + 0.5 * gravity * (timeStep*timeStep)
+//
+//            // update velocity
+//            v0.z += gravity * timeStep
             
             // check for impact
             let distAboveLand = position.z - getElevation(longitude: Int(position.x), latitude: Int(position.y))
@@ -388,6 +434,8 @@ class GameModel : Codable {
                     airborn = false
                 }
             }
+            
+            prevPosition = position
 
             if iterCount > 10000 {
                 break
@@ -396,9 +444,10 @@ class GameModel : Codable {
             
         }
         NSLog("shell took \(timeStep*Float(iterCount))s (\(iterCount) iterations) to land")
+        //NSLog("trajectory: \(trajectory)")
         
         // deal with impact
-        let impactPosition = position
+        let impactPosition = trajectory.last!
         let blastRadius = weaponSize
         
         // update board with new values
