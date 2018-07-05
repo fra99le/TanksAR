@@ -45,7 +45,7 @@ struct Tank : Codable {
 }
 
 struct Player : Codable {
-    var tank: Tank!
+    var tank: Tank = Tank(position: Vector3(), azimuth: 0, altitude: 0, velocity: 0)
     var name: String = "Unknown"
     var credit: Int64 = 5000
     var score: Int64 = 0
@@ -115,10 +115,11 @@ struct FireResult {
 
 class GameModel : Codable {
     // game board
-    var board: GameBoard = GameBoard()
+    var board: GameBoard = GameBoard() // fails to encode
     let tankSize: Float = 10
     let maxPower: Float = 150
     let elevationScale: Float = 2.0
+    var gameStarted: Bool = false
     
     var weaponsList = [
         Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 35, cost: 10)], style: .explosive),
@@ -175,6 +176,7 @@ class GameModel : Codable {
         }
 
         startRound()
+        gameStarted = true
     }
 
     func resetAIs() {
@@ -280,7 +282,7 @@ class GameModel : Codable {
 
         for i in 0..<board.players.count {
             // flatten area around tanks
-            let tank = board.players[i].tank!
+            let tank = board.players[i].tank
             flattenAreaAt(longitude: Int(tank.position.x), latitude: Int(tank.position.y), withRadius: 20)
         }
     
@@ -377,7 +379,7 @@ class GameModel : Codable {
             for i in 0..<board.players.count {
                 let player = board.players[i]
                 
-                guard let tank = player.tank else { continue }
+                let tank = player.tank
                 guard board.players[i].hitPoints > 0 else  { continue }
                 
                 let dist = distance(from: tank.position, to: position)
@@ -547,7 +549,7 @@ class GameModel : Codable {
         for i in 0..<board.players.count {
             let player = board.players[i]
             
-            guard let tank = player.tank else { continue }
+            let tank = player.tank
             let tankPos = tank.position
             //NSLog("\ttank at \(tankPos)")
             
@@ -612,6 +614,8 @@ class GameModel : Codable {
             }
             board.currentRound += 1
             startRound()
+        } else {
+            gameStarted = false
         }
         
         return newRound
