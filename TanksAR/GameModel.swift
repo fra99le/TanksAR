@@ -435,7 +435,7 @@ class GameModel : Codable {
                 }
             }
             
-            prevPosition = position
+            //prevPosition = position
 
             if iterCount > 10000 {
                 break
