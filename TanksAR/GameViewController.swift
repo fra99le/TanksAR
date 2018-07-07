@@ -16,11 +16,18 @@ struct UserConfig {
     var tank: SCNNode?
 }
 
+struct GameConfig : Codable {
+    var numHumans: Int = 0
+    var numAIs: Int = 0
+    var numRounds: Int = 0
+    var useBlocks: Bool = false
+}
+
 class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelegate, UIGestureRecognizerDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
-    var useBlocks: Bool = false
+    var gameConfig = GameConfig()
     var boardDrawer: GameViewDrawer!
     var boardPlaced = false
     var boardSize: Float = 1.0
@@ -30,19 +37,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     var board = SCNNode()
     var gameModel = GameModel()
     var users: [UserConfig] = []
-    var numHumans: Int = 0
     var humanLeft: Int = 0
-    var numAIs: Int = 0
-    var numRounds: Int = 0
+    var saveStateController: UIViewController? = nil
     var roundChanged: Bool = false
     var gameOver = false
     
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
     @IBOutlet var powerSlider: UISlider!
-    @IBOutlet var powerLabel: UILabel!
     @IBOutlet weak var hudStackView: UIStackView!
-    
     
     @IBOutlet weak var manualTrainButton: UIButton!
     @IBOutlet weak var azimuthLabel: UILabel!
@@ -53,14 +56,19 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        NSLog("GameViewController loaded")
         // Set the view's delegate
         sceneView.delegate = self
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = false
         
+        // see: https://stackoverflow.com/questions/24046164/how-do-i-get-a-reference-to-the-app-delegate-in-swift
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.gameController = self
+        
         // create the game board
-        if useBlocks {
+        if gameConfig.useBlocks {
             boardDrawer = GameViewBlockDrawer()
             boardDrawer.numPerSide = 50
         } else {
@@ -69,15 +77,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         }
         boardDrawer.gameModel = gameModel
         boardDrawer.board = board
-
-        // start a game
-        NSLog("\(#function) starting \(numRounds) round game.")
-        gameModel.startGame(numPlayers: numHumans, numAIs: numAIs, rounds: numRounds)
-        boardDrawer.addBoard()
-        users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0, tank: nil),
-                             count: gameModel.board.players.count)
-        addTanks()
-
+        
         unplaceBoard()
         rotateGesture.delegate = self
         rescaleGesture.delegate = self
@@ -98,9 +98,30 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // this causes problems with the weapons view
         //unplaceBoard()
         //updateUI()
+    
+        if let saveStateController = saveStateController as? MenuViewController {
+            NSLog("Writing to saveStateController in GameViewController")
+            saveStateController.gameState = GameState(model: gameModel, config: gameConfig)
+        }
+        
+        // start a game
+        NSLog("\(#function) starting \(gameConfig.numRounds) round game. (gameStarted=\(gameModel.gameStarted))")
+        if !gameModel.gameStarted && !gameOver {
+            gameModel.startGame(numPlayers: gameConfig.numHumans, numAIs: gameConfig.numAIs, rounds: gameConfig.numRounds)
+            gameModel.gameStarted = true
+        }
+        boardDrawer.updateBoard()
+        NSLog("users.count = \(users.count); players.count = \(gameModel.board.players.count)")
+        if users.count != gameModel.board.players.count {
+            users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0, tank: nil),
+                             count: gameModel.board.players.count)
+        }
+        removeTanks()
+        addTanks()
         
         updateHUD()
-
+        updateUI()
+        
         placeBoardGesture.require(toFail: backupPlaceBoardGesture)
         
         // Run the view's session
@@ -302,6 +323,21 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         
     }
     
+    @IBAction func exitButtonTapped(_ sender: UIButton) {
+        NSLog("Exit button tapped")
+        gameModel.gameStarted = false
+        disableUI()
+        unplaceBoard()
+        gameModel = GameModel()
+        boardDrawer.gameModel = gameModel
+        gameOver = true
+        users = []
+        if let saveStateController = saveStateController as? MenuViewController {
+            saveStateController.gameState = nil
+            saveStateController.removeStateFile()
+        }
+    }
+    
     @IBAction func fireButtonPressed(_ sender: UIButton) {
         NSLog("Fire button pressed")
         disableUI()
@@ -309,14 +345,18 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
         if let dest = segue.destination as? WeaponsViewController {
             dest.gameModel = gameModel
         } else if let dest = segue.destination as? GameOverViewController {
+            gameModel.gameStarted = false
+            if let saveStateController = saveStateController as? MenuViewController {
+                saveStateController.gameState = nil
+                saveStateController.removeStateFile()
+            }
             let (name, score) = gameModel.getWinner()
             dest.winner = name
             dest.score = score
-        } else {
-            super.prepare(for: segue, sender: sender)
         }
     }
     
@@ -328,6 +368,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
  
     @IBOutlet weak var playerNameLabel: UILabel!
     @IBOutlet weak var playerScoreLabel: UILabel!
+    @IBOutlet weak var roundLabel: UILabel!
     
     // MARK: - Helper methods
     func clearAllPlanes() {
@@ -401,17 +442,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         fireButton.isEnabled = false
         fireButton.isHidden = true
         screenDraggingGesture.isEnabled = false
-        powerLabel.isHidden = true
         powerSlider.isHidden = true
         playerNameLabel.isHidden = true
         playerScoreLabel.isHidden = true
+        roundLabel.isHidden = true
         hudStackView.isHidden = true
         
         // remove board and tanks
-//        let nodes = board.childNodes
-//        for node in  nodes {
-//            node.removeFromParentNode()
-//        }
+        board.removeFromParentNode()
         
         NSLog("\(#function) finished")
     }
@@ -426,7 +464,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             let tankScene = SCNScene(named: "art.scnassets/Tank.scn")
             guard let tankNode = tankScene?.rootNode.childNode(withName: "Tank", recursively: false) else { continue }
             
-            guard let tank = player.tank else { continue }
+            let tank = player.tank
             tankNode.position = boardDrawer.fromModelSpace(tank.position)
             tankNode.scale = SCNVector3(tankScale,tankScale,tankScale)
             //tankNode.eulerAngles.x = Float.pi / 2
@@ -476,7 +514,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         if let ai = gameModel.board.players[fireResult.playerID].ai {
             // player is an AI
             let impact = fireResult.trajectory.last!
-            ai.recordResult(azimuth: tank.azimuth, altitude: tank.altitude, velocity: tank.velocity,
+            ai.recordResult(gameModel: gameModel, azimuth: tank.azimuth, altitude: tank.altitude, velocity: tank.velocity,
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
         }
 
@@ -522,11 +560,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             }
             // player is an AI
             disableUI()
-            let (azi, alt, vel) = ai.fireParameters(players: gameModel.board.players)
+            let (azi, alt, vel) = ai.fireParameters(gameModel: gameModel, players: gameModel.board.players)
             NSLog("ai firing parameters, azi,alt,vel: (\(azi),\(alt),\(vel))")
             gameModel.setTankAim(azimuth: azi, altitude: alt)
             gameModel.setTankPower(power: vel)
-            let tank = gameModel.board.players[gameModel.board.currentPlayer].tank!
+            let tank = gameModel.board.players[gameModel.board.currentPlayer].tank
             NSLog("ai firing parameters, azi,alt,vel: (\(tank.azimuth),\(tank.altitude),\(tank.velocity)) (updated)")
             updateUI()
             launchProjectile()
@@ -545,13 +583,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         fireButton.isEnabled = true
         powerSlider.isHidden = false
         powerSlider.isEnabled = true
-        powerLabel.isHidden = false
         screenDraggingGesture.isEnabled = true
         manualTrainButton.isEnabled = true
         manualTrainButton.isHidden = false
         hudStackView.isHidden = false
         playerNameLabel.isHidden = false
         playerScoreLabel.isHidden = false
+        roundLabel.isHidden = false
     }
     
     func disableUI() {
@@ -559,7 +597,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         fireButton.isEnabled = false
         powerSlider.isHidden = true
         powerSlider.isEnabled = false
-        powerLabel.isHidden = true
         screenDraggingGesture.isEnabled = false
         manualTrainButton.isEnabled = false
         manualTrainButton.isHidden = true
@@ -574,6 +611,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             if gameModel.board.currentRound > gameModel.board.totalRounds {
                 NSLog("round \(gameModel.board.currentRound) > \(gameModel.board.totalRounds), game over!")
                 gameOver = true
+                gameModel.gameStarted = false
                 performSegue(withIdentifier: "Game Over", sender: nil)
                 return
             }
@@ -617,13 +655,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             //NSLog("scaling to \(rescaleAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
         }
         
-        playerNameLabel.text = "Name:\n\(player.name)"
+        playerNameLabel.text = "\(player.name)"
         playerScoreLabel.text = "Score:\n\(player.score)"
-        if gameBoard.totalRounds > 1 {
-            var currLabel = playerScoreLabel.text!
-            currLabel += "\nRound:\n\(gameBoard.currentRound) of \(gameBoard.totalRounds)"
-            playerScoreLabel.text = currLabel
-        }
+        roundLabel.text = "Round:\n\(gameBoard.currentRound) of \(gameBoard.totalRounds)"
 
         updateHUD()
         
@@ -644,7 +678,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 }
             }
             
-            guard let tank = player.tank else { continue }
+            let tank = player.tank
             guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { continue }
             guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { continue }
             guard let barrelNode = tankNode.childNode(withName: "barrel", recursively: true) else { continue }
@@ -690,7 +724,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     func updateHUD() {
         let board = gameModel.board
         let player = board.players[board.currentPlayer]
-        let tank = player.tank!
+        let tank = player.tank
         
         azimuthLabel.text = String(format: "%.02fº", tank.azimuth)
         altitudeLabel.text = String(format: "%.02fº", tank.altitude)

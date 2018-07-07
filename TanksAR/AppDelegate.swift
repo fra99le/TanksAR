@@ -13,6 +13,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var saveController: UIViewController? = nil
+    var gameController: UIViewController? = nil
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -22,6 +23,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+        NSLog("\(#function)")
+//        if let saveController = saveController as? MenuViewController {
+//            saveController.saveStateFile()
+//        }
+        if let gameController = gameController as? GameViewController {
+            gameController.unplaceBoard()
+        }
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -29,6 +37,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
         
         NSLog("\(#function)")
+        if let gameController = gameController as? GameViewController {
+            gameController.unplaceBoard()
+        }
         if let saveController = saveController as? MenuViewController {
             saveController.saveStateFile()
         }
@@ -46,9 +57,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 
         NSLog("\(#function)")
-        if let saveController = saveController as? MenuViewController {
-            saveController.saveStateFile()
-        }
+//        if let saveController = saveController as? MenuViewController {
+//            saveController.saveStateFile()
+//        }
     }
 
 
