@@ -128,7 +128,7 @@ struct FireResult {
 
 class GameModel : Codable {
     // game board
-    var board: GameBoard = GameBoard() // fails to encode
+    var board: GameBoard = GameBoard()
     let tankSize: Float = 10
     let maxPower: Float = 250
     let elevationScale: Float = 2.0
@@ -190,7 +190,7 @@ class GameModel : Codable {
 
         // add AI objects to AI players
         for i in numPlayers..<totalPlayers {
-            board.players[i].ai = PlayerAI(model: self)
+            board.players[i].ai = PlayerAI()
         }
 
         startRound()
@@ -203,7 +203,7 @@ class GameModel : Codable {
         // add AI objects to AI players
         for i in 0..<totalPlayers {
             guard let ai = board.players[i].ai else { continue }
-            ai.reset(model: self)
+            ai.reset()
         }
     }
 
@@ -384,7 +384,7 @@ class GameModel : Codable {
         
         var iterCount = 0
         var t: Float = 0
-        var prevPosition = p0
+        //var prevPosition = p0
         while airborn {
             
             // For information on effects of wind,
@@ -399,7 +399,7 @@ class GameModel : Codable {
             let position = vectorAdd(vectorAdd(term1, term2), term3)
             
             //print("computing trajectory: pos=\(position)")
-            let velocity = vectorScale(vectorDiff(position,prevPosition), by: 1/timeStep)
+            //let velocity = vectorScale(vectorDiff(position,prevPosition), by: 1/timeStep)
             //print("computing trajectory: pos=\(position), vel=\(velocity)")
 
             // record position
@@ -663,8 +663,6 @@ class GameModel : Codable {
             }
             board.currentRound += 1
             startRound()
-        } else {
-            gameStarted = false
         }
         
         return newRound
