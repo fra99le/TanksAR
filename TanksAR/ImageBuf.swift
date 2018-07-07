@@ -201,38 +201,40 @@ class ImageBuf : Codable {
                 let normalized = (r-minValue) / (maxValue-minValue)
                 let nv = ( normalized * (max-min) ) + min
                 //let nv = ( CGFloat(andMaximum - withMinimum) / CGFloat(maxValue-minValue) ) * CGFloat(r-minValue) + CGFloat(withMinimum)
-                pixels[i] = nv
+                pixels[i] = CGFloat(Int(nv*1_000_000+0.5)) / 1_000_000.0
             }
         }
 
         NSLog("\(#function) finished")
     }
     
-    func elevationToRGB(elevation: Float) -> (r: CGFloat, g: CGFloat, b: CGFloat) {
-        let value = elevation * 1000
-        let b = CGFloat(Int(value / 65536)) / 256
-        let g = CGFloat(Int(value / 256) % 256) / 256
-        let r = CGFloat(Int(value) % 256) / 256
+    func valueToRGB(value: CGFloat) -> (r: UInt8, g: UInt8, b: UInt8) {
+        let value = Int32(value * 1_000_000)
+        let b = UInt8((value / 65536) % 256)
+        let g = UInt8((value / 256) % 256)
+        let r = UInt8(value % 256)
 
         return (r,g,b)
     }
     
+    func valueFromRGB(r: UInt8, g: UInt8, b: UInt8) -> CGFloat {
+        return CGFloat(Int32(b) * 65536 + Int32(g) * 256 + Int32(r)) / 1_000_000.0
+    }
+    
     func asUIImage() -> UIImage {
-        NSLog("\(#function) started")
+        //NSLog("\(#function) started")
 
         // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
         UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 1);
 
-        NSLog("Converting \(width)x\(height) image to a UIImage.")
+        //NSLog("Converting \(width)x\(height) image to a UIImage.")
         var image = UIImage()
         if let context = UIGraphicsGetCurrentContext() {
             for i in 0 ..< width {
                 for j in 0 ..< height {
                     let pixel = getPixel(x: i, y: j)
-//                    if pixel > 1.0 {
-//                        NSLog("pixel value for \(i),\(j) is \(pixel)")
-//                    }
-                    context.setFillColor(red: pixel, green: pixel, blue: pixel, alpha: 1.0)
+                    let (r, g, b) = valueToRGB(value: CGFloat(pixel))
+                    context.setFillColor(red: CGFloat(r)/256, green: CGFloat(g)/256, blue: CGFloat(b)/256, alpha: 1.0)
 
                     context.fill(CGRect(x: CGFloat(i), y: CGFloat(j), width: 1, height: 1))
                 }
@@ -243,12 +245,9 @@ class ImageBuf : Codable {
 
         UIGraphicsEndImageContext();
         
-        NSLog("\(#function) finished")
+        //NSLog("\(#function) finished")
 
         return image
-    }
-    
-    func fromPNG(data: Data) {
     }
     
     func asPNG() -> Data? {
@@ -256,7 +255,36 @@ class ImageBuf : Codable {
     }
     
     func compress() {
+        NSLog("\(#function): packing a \(width)x\(height) image")
         pngBuffer = asPNG()
         pixels = []
+    }
+    
+    func uncompress() {
+        guard let png = pngBuffer else { return }
+        guard let uiImage = UIImage(data: png) else { return }
+        guard let image = uiImage.cgImage else { return }
+        
+        // see: https://gist.github.com/bpercevic/3046ffe2b90a6cea8cfd
+        let bmp = image.dataProvider?.data
+        var data: UnsafePointer<UInt8> = CFDataGetBytePtr(bmp)
+        var r, g, b: UInt8
+        
+        NSLog("\(#function): extracting \(image.width)x\(image.height) image")
+        setSize(width: image.height, height: image.width)
+        for i in 0..<pixels.count {
+            r = data.pointee
+            data = data.advanced(by: 1)
+            g = data.pointee
+            data = data.advanced(by: 1)
+            b = data.pointee
+            data = data.advanced(by: 1)
+            _ = data.pointee
+            data = data.advanced(by: 1)
+            
+            pixels[i] = valueFromRGB(r: r, g: g, b: b)
+        }
+        
+        pngBuffer = nil
     }
 }
