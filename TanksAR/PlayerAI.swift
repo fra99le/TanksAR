@@ -28,20 +28,14 @@ struct Sample : Codable {
 }
 
 class PlayerAI : Codable {
-    var gameModel:GameModel? = nil
     var nelderMead = NelderMead(dimensions: 3)
     var data: [Sample] = []
     var firstShot = true
     
-    init(model: GameModel) {
-        reset(model: model)
-    }
-    
     // needs to be called between rounds (i.e. when tanks move)
-    func reset(model: GameModel) {
+    func reset() {
         data = []
         nelderMead = NelderMead(dimensions: 3)
-        gameModel = model
         firstShot = true
     }
     
@@ -66,8 +60,8 @@ class PlayerAI : Codable {
         return (retAzi, retAlt, retVel)
     }
     
-    func getNextPlayerID() -> Int {
-        guard let model = gameModel else { return 0 }
+    func getNextPlayerID(gameModel: GameModel) -> Int {
+        let model = gameModel
 
         let currentPlayer = model.board.currentPlayer
         var nextPlayer = (currentPlayer + 1) % model.board.players.count
@@ -77,7 +71,7 @@ class PlayerAI : Codable {
         return nextPlayer
     }
     
-    func recordResult(azimuth: Float, altitude: Float, velocity: Float,
+    func recordResult(gameModel: GameModel, azimuth: Float, altitude: Float, velocity: Float,
                       impactX: Float, impactY: Float, impactZ: Float) {
         let (xVel, yVel, zVel) = fromSpherical(azi: azimuth, alt: altitude, velocity: velocity)
         let (azi2, alt2, vel2) = toSpherical(xVel: xVel, yVel: yVel, zVel: zVel)
@@ -90,9 +84,8 @@ class PlayerAI : Codable {
 
         // compute next point
         // pick target player
-        guard let model = gameModel else { return }
-        let nextPlayer = getNextPlayerID()
-        let targetPlayer = model.board.players[nextPlayer]
+        let nextPlayer = getNextPlayerID(gameModel: gameModel)
+        let targetPlayer = gameModel.board.players[nextPlayer]
         let targetTank = targetPlayer.tank
         
         // get dist to target
@@ -101,7 +94,7 @@ class PlayerAI : Codable {
         nelderMead.addResult(parameters:[xVel,yVel,zVel], value: dist)
     }
     
-    func fireParameters(players: [Player]) -> (azimuth: Float, altitude: Float, velocity: Float) {
+    func fireParameters(gameModel: GameModel, players: [Player]) -> (azimuth: Float, altitude: Float, velocity: Float) {
         // pick parameters using Nelder-Mead algorithm
         // see: https://en.wikipedia.org/wiki/Nelder–Mead_method
         // also: http://www.scholarpedia.org/article/Nelder-Mead_algorithm
@@ -110,19 +103,19 @@ class PlayerAI : Codable {
         //NSLog("\(#function): data: \(data)")
         if firstShot {
             var azimuth = Float(drand48() * 360)
-            if let model = gameModel {
-                let nextPlayer = getNextPlayerID()
-                let targetTank = model.board.players[nextPlayer].tank
-                let myTank = model.board.players[model.board.currentPlayer].tank
-                
-                NSLog("tank at \(myTank.position), target at \(targetTank.position).")
-                // tank positions are in model space
-                let targetDir = atan2(myTank.position.x - targetTank.position.x,
-                                      myTank.position.y - targetTank.position.y) * (180 / Float.pi)
-                NSLog("targetDir = \(targetDir)")
-                //azimuth = Float(targetDir + Float(drand48() * 10) - 5)
-                azimuth = targetDir
-            }
+            let model = gameModel
+            let nextPlayer = getNextPlayerID(gameModel: model)
+            let targetTank = model.board.players[nextPlayer].tank
+            let myTank = model.board.players[model.board.currentPlayer].tank
+            
+            NSLog("tank at \(myTank.position), target at \(targetTank.position).")
+            // tank positions are in model space
+            let targetDir = atan2(myTank.position.x - targetTank.position.x,
+                                  myTank.position.y - targetTank.position.y) * (180 / Float.pi)
+            NSLog("targetDir = \(targetDir)")
+            //azimuth = Float(targetDir + Float(drand48() * 10) - 5)
+            azimuth = targetDir
+
             let altitude = Float(drand48() * 50) + 30
             let power = Float(drand48() * 70) + 30
             NSLog("\(#function): firing at random, azi,alt,pow: (\(azimuth),\(altitude),\(power))")
