@@ -48,6 +48,7 @@ class GameViewBlockDrawer : GameViewDrawer {
                 boardBlocks[i][j].removeFromParentNode()
             }
         }
+        boardBlocks = []
         board.removeFromParentNode()
         NSLog("\(#function) finished")
     }
@@ -56,6 +57,10 @@ class GameViewBlockDrawer : GameViewDrawer {
     override func updateBoard() {
         //NSLog("\(#function) started")
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
+        
+        if boardBlocks.count == 0 {
+            addBoard()
+        }
         
         for i in 0..<numPerSide {
             for j in 0..<numPerSide {
