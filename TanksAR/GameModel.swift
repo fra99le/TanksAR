@@ -129,8 +129,9 @@ struct FireResult {
 class GameModel : Codable {
     // game board
     var board: GameBoard = GameBoard()
-    let tankSize: Float = 10
+    let tankSize: Float = 25
     let maxPower: Float = 250
+    let maxWindSpeed: Float = 20  // up to ~45 mph
     let elevationScale: Float = 2.0
     var gameStarted: Bool = false
     
@@ -164,7 +165,7 @@ class GameModel : Codable {
         
         // set wind
         board.windDir = Float(drand48() * 360)
-        board.windSpeed = Float(pow(drand48(),2) * 20) // up to ~45 mph
+        board.windSpeed = Float(pow(drand48(),2)) * maxWindSpeed
         
         NSLog("\(#function) finished")
     }
@@ -301,7 +302,7 @@ class GameModel : Codable {
         for i in 0..<board.players.count {
             // flatten area around tanks
             let tank = board.players[i].tank
-            flattenAreaAt(longitude: Int(tank.position.x), latitude: Int(tank.position.y), withRadius: 20)
+            flattenAreaAt(longitude: Int(tank.position.x), latitude: Int(tank.position.y), withRadius: Int(tankSize * 1.1))
         }
     
         NSLog("\(#function) started")

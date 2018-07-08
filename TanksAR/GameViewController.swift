@@ -688,9 +688,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             // set colors to highlight current player
             var color = UIColor.darkGray
             var showAimGuide = false
+            var showWind = false
             if gameModel.board.currentPlayer == i {
                 color = UIColor.gray
                 showAimGuide = true
+                showWind = true
             }
             tankNode.geometry?.firstMaterial?.diffuse.contents = color
             turretNode.geometry?.firstMaterial?.diffuse.contents = color
@@ -712,6 +714,18 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                 aimGuide.isHidden = true
                 aimGuide.removeAllActions()
                 lastBall.removeAllActions()
+            }
+            
+            // adjust wind indicator
+            guard let windArrow = tankNode.childNode(withName: "windArrow", recursively: true) else { continue }
+            guard let arrow = windArrow.childNode(withName: "arrow", recursively: true) else { continue }
+            NSLog("setting up wind arrow for player \(i)")
+            if showWind {
+                windArrow.eulerAngles.y = -gameBoard.windDir * (Float.pi / 180)
+                arrow.scale.x = 0.25 + 2 * (gameBoard.windSpeed / gameModel.maxWindSpeed)
+                windArrow.isHidden = false
+            } else {
+                windArrow.isHidden = true
             }
         }
         
