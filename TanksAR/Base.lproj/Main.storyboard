@@ -266,7 +266,6 @@
                                 <state key="normal" title="Exit"/>
                                 <connections>
                                     <action selector="exitButtonTapped:" destination="BV1-FR-VrT" eventType="touchUpInside" id="2gU-4f-PYU"/>
-                                    <segue destination="FxJ-NK-Vbj" kind="unwind" unwindAction="unwindToMainMenuWithUnwindSegue:" id="WoS-h5-XcR"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QIh-1p-M8Z">
@@ -411,6 +410,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                         <outlet property="altitudeLabel" destination="TGR-OU-lTp" id="kd8-9s-1ZR"/>
                         <outlet property="azimuthLabel" destination="Uti-S3-6bo" id="8Uw-W8-5qg"/>
                         <outlet property="backupPlaceBoardGesture" destination="5hr-VT-zKA" id="oEq-9l-kHp"/>
+                        <outlet property="exitButton" destination="aHz-n7-WR9" id="bla-Fi-Hwe"/>
                         <outlet property="fireButton" destination="Rqa-bG-wWn" id="9ul-PN-kLT"/>
                         <outlet property="hudStackView" destination="C7J-4d-iJW" id="a6n-CY-KsZ"/>
                         <outlet property="manualTrainButton" destination="qRc-zd-bfR" id="9ba-qv-LUU"/>
@@ -427,6 +427,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                         <outlet property="velocityLabel" destination="8y6-5I-LW8" id="KR7-jr-Q4n"/>
                         <outlet property="weaponLabel" destination="vGF-fx-Cq1" id="SQS-zr-ebi"/>
                         <segue destination="m2W-CC-yJa" kind="show" identifier="Game Over" id="Na1-51-Y44"/>
+                        <segue destination="FxJ-NK-Vbj" kind="unwind" identifier="unwindToMainMenu" unwindAction="unwindToMainMenuWithUnwindSegue:" id="cVv-g6-2Pv"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>

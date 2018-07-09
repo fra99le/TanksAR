@@ -44,6 +44,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
+    @IBOutlet weak var exitButton: UIButton!
     @IBOutlet var powerSlider: UISlider!
     @IBOutlet weak var hudStackView: UIStackView!
     
@@ -325,6 +326,25 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     
     @IBAction func exitButtonTapped(_ sender: UIButton) {
         NSLog("Exit button tapped")
+        disableUI()
+        exitButton.isEnabled = false
+        exitButton.isHidden = true
+        
+        // see: https://www.andrewcbancroft.com/2015/12/18/working-with-unwind-segues-programmatically-in-swift/
+
+        let alert = UIAlertController(title: "Quit Game?", message: "Current game will be lost if you quit.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Resume", comment: "Default inaction"), style: .default, handler: { _ in
+            NSLog("Exit canceled.")
+            self.enableUI()
+        }))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Quit", comment: "Default action"), style: .default, handler: { _ in
+            NSLog("Exiting game!")
+            self.doExitGame()
+        }))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func doExitGame() {
         gameModel.gameStarted = false
         disableUI()
         unplaceBoard()
@@ -336,6 +356,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             saveStateController.gameState = nil
             saveStateController.removeStateFile()
         }
+        // see: https://www.andrewcbancroft.com/2015/12/18/working-with-unwind-segues-programmatically-in-swift/
+        performSegue(withIdentifier: "unwindToMainMenu", sender: self)
     }
     
     @IBAction func fireButtonPressed(_ sender: UIButton) {
@@ -579,6 +601,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
     
     func enableUI() {
+        exitButton.isEnabled = true
+        exitButton.isHidden = false
         fireButton.isHidden = false
         fireButton.isEnabled = true
         powerSlider.isHidden = false
@@ -593,6 +617,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
     
     func disableUI() {
+        // don't mess with exit button here!
         fireButton.isHidden = true
         fireButton.isEnabled = false
         powerSlider.isHidden = true
