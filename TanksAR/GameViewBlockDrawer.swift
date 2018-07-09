@@ -27,7 +27,7 @@ class GameViewBlockDrawer : GameViewDrawer {
         for i in 0..<numPerSide {
             for j in 0..<numPerSide {
                 // create block
-                let blockNode = SCNNode(geometry: SCNBox(width: edgeSize, height: 1, length: edgeSize, chamferRadius: 0))
+                let blockNode = SCNNode(geometry: SCNBox(width: edgeSize * 1.001, height: 1, length: edgeSize * 1.001, chamferRadius: 0))
                 boardBlocks[i][j] = blockNode
                 blockNode.position.y = -1 // make sure update will happen initially
                 
