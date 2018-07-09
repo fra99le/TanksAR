@@ -431,6 +431,14 @@ class GameViewTrigDrawer : GameViewDrawer {
         surface.morpher = SCNMorpher()
         surface.morpher?.targets = [surface.geometry!, bottomGeometry]
         
+        // setup reveal of new edges
+        let newEdgeGeometry = edgeGeometry()
+        newEdgeGeometry.firstMaterial = edgeNode.geometry?.firstMaterial
+        edgeNode.name = "The Edge"
+        edgeNode.morpher = SCNMorpher()
+        edgeNode.morpher?.targets = [edgeNode.geometry!, newEdgeGeometry]
+        
+        // add actions to reveal new surface and edges
         let resurfaceActions = [.wait(duration: currTime),
                                 SCNAction.customAction(duration: 0, action: {node, time in
                                     if time == 0 && (node.morpher?.targets.count)! >= 2 {
@@ -440,22 +448,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                                 })]
         let resurface = SCNAction.sequence(resurfaceActions)
         surface.runAction(resurface)
-
-        // setup reveal of new edges
-        let newEdgeGeometry = edgeGeometry()
-        newEdgeGeometry.firstMaterial = edgeNode.geometry?.firstMaterial
-        edgeNode.name = "The Edge"
-        edgeNode.morpher = SCNMorpher()
-        edgeNode.morpher?.targets = [edgeNode.geometry!, newEdgeGeometry]
-        
-        let reEdgeActions = [.wait(duration: currTime),
-                                SCNAction.customAction(duration: 0, action: {node, time in
-                                    if time == 0 && (node.morpher?.targets.count)! >= 2 {
-                                        // must used setWeight, array notation will crash
-                                        node.morpher?.setWeight(1, forTargetAt: 1)
-                                    }
-                                })]
-        let reEdge = SCNAction.sequence(reEdgeActions)
+        let reEdge = SCNAction.sequence(resurfaceActions)
         edgeNode.runAction(reEdge)
 
         // setup dropping surface
