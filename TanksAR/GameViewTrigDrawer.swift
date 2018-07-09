@@ -294,28 +294,51 @@ class GameViewTrigDrawer : GameViewDrawer {
                         // check to see if dropping vertices should be connected
                         let noDrop = noDropIdxs[0]
                         if displaceArr[noDrop] {
+                            var index = CInt(dropVertices0.count)
+
                             // 3rd vertex is unaffected, so attach other two via a triangle
+                            // top side
                             for k in dropIdxs {
                                 dropVertices0.append(fromModelSpace(Vector3(xArr[k], yArr[k], topArr[k])))
                                 dropVertices1.append(fromModelSpace(Vector3(xArr[k], yArr[k],
                                                                                bottomArr[k] + (topArr[k]-middleArr[k]))))
-                                dropIndices.append(CInt(dropVertices0.count-1))
                             }
                             dropVertices0.append(fromModelSpace(Vector3(xArr[noDrop], yArr[noDrop],
                                                                            currentArr[noDrop])))
                             dropVertices1.append(fromModelSpace(Vector3(xArr[noDrop], yArr[noDrop],
                                                                            currentArr[noDrop])))
-                            dropIndices.append(CInt(dropVertices0.count-1))
+ 
+                            // face one
+                            dropIndices.append(index)
+                            dropIndices.append(index+2)
+                            dropIndices.append(index+1)
+                            
+                            // face two
+                            dropIndices.append(index)
+                            dropIndices.append(index+1)
+                            dropIndices.append(index+2)
+
+                            // bottom side
+                            index = CInt(dropVertices0.count)
                             for k in dropIdxs {
                                 dropVertices0.append(fromModelSpace(Vector3(xArr[k], yArr[k], middleArr[k])))
                                 dropVertices1.append(fromModelSpace(Vector3(xArr[k], yArr[k], bottomArr[k])))
-                                dropIndices.append(CInt(dropVertices0.count-1))
                             }
                             dropVertices0.append(fromModelSpace(Vector3(xArr[noDrop], yArr[noDrop],
                                                                            currentArr[noDrop])))
                             dropVertices1.append(fromModelSpace(Vector3(xArr[noDrop], yArr[noDrop],
                                                                            currentArr[noDrop])))
-                            dropIndices.append(CInt(dropVertices0.count-1))
+
+                            // face one
+                            dropIndices.append(index)
+                            dropIndices.append(index+2)
+                            dropIndices.append(index+1)
+                            
+                            //face two
+                            dropIndices.append(index)
+                            dropIndices.append(index+1)
+                            dropIndices.append(index+2)
+                            
                         } else {
                             // 3rd vertex displaced, so leave unattached.
                             // instead attach four moving vertices (top to middle) via triangles
@@ -332,13 +355,25 @@ class GameViewTrigDrawer : GameViewDrawer {
                             dropVertices1.append(fromModelSpace(Vector3(xArr[idx2], yArr[idx2], bottomArr[idx2] + (topArr[idx2]-middleArr[idx2]))))
                             dropVertices1.append(fromModelSpace(Vector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                             
+                            // triangle one
                             dropIndices.append(index)
                             dropIndices.append(index+2)
                             dropIndices.append(index+1)
                             
+                            // triangle one (other side)
+                            dropIndices.append(index)
+                            dropIndices.append(index+1)
+                            dropIndices.append(index+2)
+                            
+                            // triangle two
                             dropIndices.append(index)
                             dropIndices.append(index+2)
                             dropIndices.append(index+3)
+
+                            // triangle two (other side)
+                            dropIndices.append(index)
+                            dropIndices.append(index+3)
+                            dropIndices.append(index+2)
                         }
                     } else if numDropping == 1  && numDisplaced == 0 {
                         // check to see if dropping vertex should be connected
@@ -362,7 +397,11 @@ class GameViewTrigDrawer : GameViewDrawer {
                             dropIndices.append(index)
                             dropIndices.append(index+2)
                             dropIndices.append(index+1)
-                            
+
+                            dropIndices.append(index)
+                            dropIndices.append(index+1)
+                            dropIndices.append(index+2)
+
                             // add bottom triangle
                             index = CInt(dropVertices0.count)
                             dropVertices0.append(fromModelSpace(Vector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
@@ -377,6 +416,10 @@ class GameViewTrigDrawer : GameViewDrawer {
                             dropIndices.append(index+2)
                             dropIndices.append(index+1)
                             
+                            dropIndices.append(index)
+                            dropIndices.append(index+1)
+                            dropIndices.append(index+2)
+
                         } else {
                             // two vertices are displaced, so leave unattached.
                             // this entire case is handled by the deformation of the final surface (i.e. bottom) layer.
@@ -404,6 +447,10 @@ class GameViewTrigDrawer : GameViewDrawer {
                         dropIndices.append(index+2)
                         dropIndices.append(index+1)
                         
+                        dropIndices.append(index)
+                        dropIndices.append(index+1)
+                        dropIndices.append(index+2)
+
                         // add bottom triangle
                         index = CInt(dropVertices0.count)
                         dropVertices0.append(fromModelSpace(Vector3(xArr[idx1], yArr[idx1], bottomArr[idx1])))
@@ -418,6 +465,10 @@ class GameViewTrigDrawer : GameViewDrawer {
                         dropIndices.append(index+2)
                         dropIndices.append(index+1)
                         
+                        dropIndices.append(index)
+                        dropIndices.append(index+1)
+                        dropIndices.append(index+2)
+
                     }
                 }
             }
