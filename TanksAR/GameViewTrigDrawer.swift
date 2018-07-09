@@ -424,40 +424,8 @@ class GameViewTrigDrawer : GameViewDrawer {
         }
         NSLog("\(dropVertices0.count) drop vertices, \(dropIndices.count) drop indices")
         
-        // draw new static bottom surface
-        var bottomVertices: [SCNVector3] = []
-        var bottomIndices: [CInt] = []
-        //var bottomNormals: [SCNVector3] = []
-        var pos: CInt = 0
-        for i in 0...numPerSide {
-            for j in 0...numPerSide {
-                
-                // consruct new bottom surface
-                let x = CGFloat(i)*edgeSize
-                let y = CGFloat(j)*edgeSize
-                let z = gameModel.getElevation(fromMap: fireResult.bottom, longitude: Int(x), latitude: Int(y))
-                bottomVertices.append(fromModelSpace(Vector3(x,y,CGFloat(z))))
-                
-                if i < numPerSide && j < numPerSide {
-                    bottomIndices.append(pos)
-                    bottomIndices.append(pos+1)
-                    bottomIndices.append(pos+CInt(numPerSide)+2)
-                    
-                    bottomIndices.append(pos)
-                    bottomIndices.append(pos+CInt(numPerSide)+2)
-                    bottomIndices.append(pos+CInt(numPerSide)+1)
-                }
-                pos += 1
-            }
-        }
-        NSLog("\(bottomVertices.count) bottom vertices, \(bottomIndices.count) bottom indices")
-        
-        // animate the appearance and morphing of dropSurface
-        
         // setup reveal of the new bottom surface
-        let bottomSource = SCNGeometrySource(vertices: bottomVertices)
-        let bottomElements = SCNGeometryElement(indices: bottomIndices, primitiveType: .triangles)
-        let bottomGeometry = SCNGeometry(sources: [bottomSource], elements: [bottomElements])
+        let bottomGeometry = surfaceGeometry()
         bottomGeometry.firstMaterial = surface.geometry?.firstMaterial
         surface.name = "The Surface"
         surface.morpher = SCNMorpher()
@@ -472,7 +440,24 @@ class GameViewTrigDrawer : GameViewDrawer {
                                 })]
         let resurface = SCNAction.sequence(resurfaceActions)
         surface.runAction(resurface)
+
+        // setup reveal of new edges
+        let newEdgeGeometry = edgeGeometry()
+        newEdgeGeometry.firstMaterial = edgeNode.geometry?.firstMaterial
+        edgeNode.name = "The Edge"
+        edgeNode.morpher = SCNMorpher()
+        edgeNode.morpher?.targets = [edgeNode.geometry!, newEdgeGeometry]
         
+        let reEdgeActions = [.wait(duration: currTime),
+                                SCNAction.customAction(duration: 0, action: {node, time in
+                                    if time == 0 && (node.morpher?.targets.count)! >= 2 {
+                                        // must used setWeight, array notation will crash
+                                        node.morpher?.setWeight(1, forTargetAt: 1)
+                                    }
+                                })]
+        let reEdge = SCNAction.sequence(reEdgeActions)
+        edgeNode.runAction(reEdge)
+
         // setup dropping surface
         if dropNeeded {
             // create geometry for surface
