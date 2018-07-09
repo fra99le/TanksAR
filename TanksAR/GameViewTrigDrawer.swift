@@ -13,10 +13,7 @@ class GameViewTrigDrawer : GameViewDrawer {
     
     var surface = SCNNode()
     var dropSurface = SCNNode()
-    var topNode = SCNNode()
-    var bottomNode = SCNNode()
-    var leftNode = SCNNode()
-    var rightNode = SCNNode()
+    var edgeNode = SCNNode()
     
     override func addBoard() {
         updateBoard()
@@ -28,9 +25,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         NSLog("\(#function) finished")
     }
     
-    override func updateBoard() {
-        NSLog("\(#function) started")
-        
+    func surfaceGeometry() -> SCNGeometry {
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         
         // draw board surface
@@ -66,47 +61,87 @@ class GameViewTrigDrawer : GameViewDrawer {
         let elements = SCNGeometryElement(indices: indices, primitiveType: .triangles)
         let geometry = SCNGeometry(sources: [vertexSource], elements: [elements])
         geometry.firstMaterial?.diffuse.contents = UIColor.green
-        
-        // add surface to scene
-        surface.removeFromParentNode()
-        surface = SCNNode(geometry: geometry)
-        board.addChildNode(surface)
-        
+
+        return geometry
+    }
+    
+    func edgeGeometry() -> SCNGeometry {
         // draw board edges and base
-        var topVerts: [SCNVector3] = []
-        var bottomVerts: [SCNVector3] = []
-        var leftVerts: [SCNVector3] = []
-        var rightVerts: [SCNVector3] = []
+        let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
+        var edgeVerts: [SCNVector3] = []
         var edgeIndices: [CInt] = []
-        pos = 0
+        var pos: CInt = 0
+        
         for i in 0...numPerSide {
             // top edge (+y)
-            var x = CGFloat(numPerSide-i)*edgeSize
-            var y = CGFloat(numPerSide)*edgeSize
-            var z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
-            topVerts.append(fromModelSpace(Vector3(x,y,0)))
-            topVerts.append(fromModelSpace(Vector3(x,y,z)))
-            
+            let x = CGFloat(numPerSide-i)*edgeSize
+            let y = CGFloat(numPerSide)*edgeSize
+            let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+            edgeVerts.append(fromModelSpace(Vector3(x,y,0)))
+            edgeVerts.append(fromModelSpace(Vector3(x,y,z)))
+
+            // create indices
+            if i < numPerSide {
+                edgeIndices.append(pos)
+                edgeIndices.append(pos+1)
+                edgeIndices.append(pos+2)
+                
+                edgeIndices.append(pos+2)
+                edgeIndices.append(pos+1)
+                edgeIndices.append(pos+3)
+            }
+            pos += 2
+        }
+        
+        for i in 0...numPerSide {
             // bottom edge (y=0)
-            x = CGFloat(i)*edgeSize
-            y = CGFloat(0)*edgeSize
-            z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
-            bottomVerts.append(fromModelSpace(Vector3(x,y,0)))
-            bottomVerts.append(fromModelSpace(Vector3(x,y,z)))
-            
+            let x = CGFloat(i)*edgeSize
+            let y = CGFloat(0)*edgeSize
+            let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+            edgeVerts.append(fromModelSpace(Vector3(x,y,0)))
+            edgeVerts.append(fromModelSpace(Vector3(x,y,z)))
+
+            // create indices
+            if i < numPerSide {
+                edgeIndices.append(pos)
+                edgeIndices.append(pos+1)
+                edgeIndices.append(pos+2)
+                
+                edgeIndices.append(pos+2)
+                edgeIndices.append(pos+1)
+                edgeIndices.append(pos+3)
+            }
+            pos += 2
+        }
+        
+        for i in 0...numPerSide {
             // left edge (x=0)
-            x = CGFloat(0)*edgeSize
-            y = CGFloat(numPerSide-i)*edgeSize
-            z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
-            leftVerts.append(fromModelSpace(Vector3(x,y,0)))
-            leftVerts.append(fromModelSpace(Vector3(x,y,z)))
-            
+            let x = CGFloat(0)*edgeSize
+            let y = CGFloat(numPerSide-i)*edgeSize
+            let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+            edgeVerts.append(fromModelSpace(Vector3(x,y,0)))
+            edgeVerts.append(fromModelSpace(Vector3(x,y,z)))
+
+            // create indices
+            if i < numPerSide {
+                edgeIndices.append(pos)
+                edgeIndices.append(pos+1)
+                edgeIndices.append(pos+2)
+                
+                edgeIndices.append(pos+2)
+                edgeIndices.append(pos+1)
+                edgeIndices.append(pos+3)
+            }
+            pos += 2
+        }
+        
+        for i in 0...numPerSide {
             // right edge (+x)
-            x = CGFloat(numPerSide)*edgeSize
-            y = CGFloat(i)*edgeSize
-            z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
-            rightVerts.append(fromModelSpace(Vector3(x,y,0)))
-            rightVerts.append(fromModelSpace(Vector3(x,y,z)))
+            let x = CGFloat(numPerSide)*edgeSize
+            let y = CGFloat(i)*edgeSize
+            let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+            edgeVerts.append(fromModelSpace(Vector3(x,y,0)))
+            edgeVerts.append(fromModelSpace(Vector3(x,y,z)))
             
             // create indices
             if i < numPerSide {
@@ -117,46 +152,35 @@ class GameViewTrigDrawer : GameViewDrawer {
                 edgeIndices.append(pos+2)
                 edgeIndices.append(pos+1)
                 edgeIndices.append(pos+3)
-                pos += 2
             }
+            pos += 2
         }
         
-        NSLog("\(topVerts.count) edge vertices, \(edgeIndices.count) edge indices, pos=\(pos)")
-        // all sides have the same vertext ordering
+        NSLog("\(edgeVerts.count) edge vertices, \(edgeIndices.count) edge indices, pos=\(pos)")
+
         let edgeElements = SCNGeometryElement(indices: edgeIndices, primitiveType: .triangles)
+        let edgeSource = SCNGeometrySource(vertices: edgeVerts)
+        let edgeGeometry = SCNGeometry(sources: [edgeSource], elements: [edgeElements])
         
-        let topSource = SCNGeometrySource(vertices: topVerts)
-        let bottomSource = SCNGeometrySource(vertices: bottomVerts)
-        let leftSource = SCNGeometrySource(vertices: leftVerts)
-        let rightSource = SCNGeometrySource(vertices: rightVerts)
+        edgeGeometry.firstMaterial?.diffuse.contents = UIColor.green
+
+        return edgeGeometry
+    }
+    
+    override func updateBoard() {
+        NSLog("\(#function) started")
         
-        let topGeometry = SCNGeometry(sources: [topSource], elements: [edgeElements])
-        let bottomGeometry = SCNGeometry(sources: [bottomSource], elements: [edgeElements])
-        let leftGeometry = SCNGeometry(sources: [leftSource], elements: [edgeElements])
-        let rightGeometry = SCNGeometry(sources: [rightSource], elements: [edgeElements])
+        // (re)create surface
+        surface.removeFromParentNode()
+        let surfaceShape = surfaceGeometry()
+        surface = SCNNode(geometry: surfaceShape)
+        board.addChildNode(surface)
         
-        topGeometry.firstMaterial?.diffuse.contents = UIColor.green
-        bottomGeometry.firstMaterial?.diffuse.contents = UIColor.green
-        leftGeometry.firstMaterial?.diffuse.contents = UIColor.green
-        rightGeometry.firstMaterial?.diffuse.contents = UIColor.green
-        
-        // remove old edges
-        topNode.removeFromParentNode()
-        bottomNode.removeFromParentNode()
-        leftNode.removeFromParentNode()
-        rightNode.removeFromParentNode()
-        
-        // create new edges
-        topNode = SCNNode(geometry: topGeometry)
-        bottomNode = SCNNode(geometry: bottomGeometry)
-        leftNode = SCNNode(geometry: leftGeometry)
-        rightNode = SCNNode(geometry: rightGeometry)
-        
-        // add new edges
-        board.addChildNode(topNode)
-        board.addChildNode(bottomNode)
-        board.addChildNode(leftNode)
-        board.addChildNode(rightNode)
+        // (re)create edges
+        edgeNode.removeFromParentNode()
+        let edgeShape = edgeGeometry()
+        edgeNode = SCNNode(geometry: edgeShape)
+        board.addChildNode(edgeNode)
         
         // remove any temporary animation objects
         dropSurface.isHidden = true
