@@ -10,8 +10,6 @@
 		5314E47C20C8BFA00070481A /* ImageBuf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5314E47B20C8BFA00070481A /* ImageBuf.swift */; };
 		5314E47D20C8C4B20070481A /* ImageBuf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5314E47B20C8BFA00070481A /* ImageBuf.swift */; };
 		5314E47E20C8C4B20070481A /* ImageBuf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5314E47B20C8BFA00070481A /* ImageBuf.swift */; };
-		5314E47F20C8CC970070481A /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
-		5314E48020C8CC980070481A /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		5318F3E620D38B4F00377161 /* NelderMead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5318F3E520D38B4F00377161 /* NelderMead.swift */; };
 		5318F3E720D38B4F00377161 /* NelderMead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5318F3E520D38B4F00377161 /* NelderMead.swift */; };
 		5318F3E820D38B4F00377161 /* NelderMead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5318F3E520D38B4F00377161 /* NelderMead.swift */; };
@@ -338,7 +336,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5396120F20D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
-				5314E47F20C8CC970070481A /* GameViewController.swift in Sources */,
 				53EEDB7F20C83C4700B8B71D /* TanksARTests.swift in Sources */,
 				53522CB120DCC41B00DDB71B /* GameViewDrawer.swift in Sources */,
 				53522CAD20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
@@ -356,7 +353,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5396121020D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
-				5314E48020C8CC980070481A /* GameViewController.swift in Sources */,
 				53EEDB8A20C83C4700B8B71D /* TanksARUITests.swift in Sources */,
 				53522CB220DCC41B00DDB71B /* GameViewDrawer.swift in Sources */,
 				53522CAE20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
@@ -529,7 +525,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.DoingScienceToStuff.ARtillery;
+				PRODUCT_BUNDLE_IDENTIFIER = com.DoingScienceToStuff.TanksAR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -547,7 +543,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.DoingScienceToStuff.ARtillery;
+				PRODUCT_BUNDLE_IDENTIFIER = com.DoingScienceToStuff.TanksAR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
