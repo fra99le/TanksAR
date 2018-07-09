@@ -32,9 +32,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     var boardPlaced = false
     var boardSize: Float = 1.0
     var boardScaleFactor: Float = 1.0
-    let tankScale = 10
+    let tankScale: Float = 10
     var candidatePlanes: [SCNNode] = []
     var board = SCNNode()
+    var prevTraj = SCNNode()
+    var currTraj = SCNNode()
     var gameModel = GameModel()
     var users: [UserConfig] = []
     var humanLeft: Int = 0
@@ -115,14 +117,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         NSLog("users.count = \(users.count); players.count = \(gameModel.board.players.count)")
         if users.count != gameModel.board.players.count {
             users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0, tank: nil),
-                             count: gameModel.board.players.count)
+                                 count: gameModel.board.players.count)
         }
         removeTanks()
         addTanks()
         
-        updateHUD()
         updateUI()
-        
+        updateHUD()
+
         placeBoardGesture.require(toFail: backupPlaceBoardGesture)
         
         // Run the view's session
@@ -505,12 +507,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         }
     }
     
-    func launchProjectile() {
-        NSLog("\(#function) started")
-
+    func muzzleParameters() -> (muzzlePosition: Vector3, muzzleVelocity: Vector3) {
         // get location of muzzle
         let tankNode = boardDrawer.tankNodes[gameModel.board.currentPlayer]
-        guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true) else { return }
+        guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true)
+            else { return (Vector3(),Vector3()) }
         let position = muzzleNode.convertPosition(muzzleNode.position, to: board)
         
         // get muzzle velocity
@@ -529,10 +530,20 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // convert to model coordinate space
         let muzzlePosition = boardDrawer.toModelSpace(position)
         let muzzleVelocity = boardDrawer.toModelScale(velocity)
+        
+        return (muzzlePosition, muzzleVelocity)
+    }
+    
+    func launchProjectile() {
+        NSLog("\(#function) started")
 
+        // get muzzle position and velocity
+        let (muzzlePosition, muzzleVelocity) = muzzleParameters()
+        
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
-
+        
         // record result for AIs
+        let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
         if let ai = gameModel.board.players[fireResult.playerID].ai {
             // player is an AI
             let impact = fireResult.trajectory.last!
@@ -553,6 +564,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             }
         }
         
+        currTraj.removeFromParentNode()
         boardDrawer.animateResult(fireResult: fireResult, from: self)
         roundChanged = fireResult.newRound
         
@@ -684,8 +696,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         playerScoreLabel.text = "Score:\n\(player.score)"
         roundLabel.text = "Round:\n\(gameBoard.currentRound) of \(gameBoard.totalRounds)"
 
-        updateHUD()
-        
         // update all tanks turrets and existence
         for i in 0..<users.count {
             let player = gameModel.board.players[i]
@@ -754,12 +764,85 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             }
         }
         
+        updateHUD()
+        
+        // show previous trajectory for user
+        prevTraj.removeFromParentNode()
+        prevTraj = SCNNode()
+        addTrajectory(trajectory: player.prevTrajectory, toNode: prevTraj, color: UIColor.yellow)
+        board.addChildNode(prevTraj)
+        
         // update board
         boardDrawer.updateBoard()
         
         //NSLog("\(#function) finished")
     }
     
+    func drawCurrentTrajectory() {
+        currTraj.removeFromParentNode()
+        currTraj = SCNNode()
+        
+        let (muzzlePosition, muzzleVelocity) = muzzleParameters()
+        let playerTraj = gameModel.computeTrajectory(muzzlePosition: muzzlePosition,
+                                                     muzzleVelocity: muzzleVelocity,
+                                                     withTimeStep: 1/3.0)
+        addTrajectory(trajectory: playerTraj, toNode: currTraj, color: UIColor.lightGray)
+        board.addChildNode(currTraj)
+    }
+    
+    func addTrajectory(trajectory: [Vector3], toNode: SCNNode, color: UIColor) {
+        let segments = 20
+        if trajectory.count > 2 {
+            var prevPos: Vector3 = trajectory.first!
+            for i in 1..<segments {
+                let newIndex = Int(Float(i) * Float(trajectory.count) / Float(segments))
+                let newPos = trajectory[newIndex]
+                
+                let joint = SCNNode(geometry: SCNSphere(radius: CGFloat(0.25*tankScale)))
+                joint.geometry?.firstMaterial?.diffuse.contents = color
+                joint.position = boardDrawer.fromModelSpace(newPos)
+                toNode.addChildNode(joint)
+                
+                addCylinder(from: prevPos, to: newPos, toNode: toNode, color: color)
+                prevPos = newPos
+            }
+            addCylinder(from: prevPos, to: trajectory.last!, toNode: toNode, color: color)
+        }
+        
+    }
+    
+    func addCylinder(from: Vector3, to: Vector3, toNode: SCNNode, color: UIColor) {
+        let cylinder = SCNNode()
+        
+        //NSLog("Adding cylinder from \(from) to \(to).")
+        
+        let length = gameModel.distance(from: from, to: to)
+        cylinder.geometry = SCNCylinder(radius: CGFloat(0.25*tankScale), height: CGFloat(length))
+        cylinder.geometry?.firstMaterial?.diffuse.contents = color
+        
+        // get orientation
+        let viewTo = boardDrawer.fromModelSpace(to)
+        let viewFrom = boardDrawer.fromModelSpace(from)
+        let diff = SCNVector3(viewTo.x - viewFrom.x, viewTo.y - viewFrom.y, viewTo.z - viewFrom.z)
+        
+        let angle1 = atan2(diff.y, sqrt(diff.z*diff.z + diff.x*diff.x))
+        let angle2 = atan2(diff.z, diff.x)
+        //NSLog("diff: \(diff), angles: \(angle1*180/Float.pi),\(angle2*180/Float.pi)")
+        
+        cylinder.eulerAngles.z = Float.pi / 2 - angle1
+        
+        let gimble = SCNNode()
+        gimble.addChildNode(cylinder)
+        gimble.eulerAngles.y = Float.pi - angle2
+        
+        // get position of cylinder's gimble
+        let sum = vectorAdd(to, from)
+        let mid = vectorScale(sum, by: 0.5)
+        gimble.position = boardDrawer.fromModelSpace(mid)
+        
+        toNode.addChildNode(gimble)
+    }
+
     func updateHUD() {
         let board = gameModel.board
         let player = board.players[board.currentPlayer]
@@ -775,6 +858,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             weaponName.append(" (\(sizeStr))")
         }
         weaponLabel.text = weaponName
+        
+        // update targeting computer
+        if player.useTargetingComputer {
+            drawCurrentTrajectory()
+        } else {
+            currTraj.removeFromParentNode()
+        }
+
     }
     
     // MARK: - Map View

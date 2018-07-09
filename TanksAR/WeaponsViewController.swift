@@ -71,6 +71,8 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var altitudeStepper: UIStepper!
     @IBOutlet weak var velocityStepper: UIStepper!
     
+    @IBOutlet weak var targetComputerSwitch: UISwitch!
+    
     // see: https://medium.com/@KaushElsewhere/how-to-dismiss-keyboard-in-a-view-controller-of-ios-3b1bfe973ad1
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
@@ -148,6 +150,14 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         updateUI()
     }
     
+    @IBAction func targetComputerToggled(_ sender: UISwitch) {
+            guard let model = gameModel else { return }
+            let board = model.board
+        
+            gameModel?.board.players[board.currentPlayer].useTargetingComputer = sender.isOn
+            updateUI()
+    }
+
     
     @IBOutlet weak var doneButton: UIButton!
     @IBOutlet weak var reasonLabel: UILabel!
@@ -222,6 +232,10 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         velocityTextField.text = "\(tank.velocity) m/s"
         NSLog("aim: \(azimuthTextField.text!),\(altitudeTextField.text!) @ \(velocityTextField.text!)")
 
+        // targeting computer switch
+        targetComputerSwitch.isOn = player.useTargetingComputer
+        let computerCost = model.computerCost
+
         // update limits on steppers
         weaponTypeStepper.minimumValue = 0
         weaponTypeStepper.maximumValue = Double(model.weaponsList.count) - 1
@@ -236,14 +250,15 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         NSLog("weapon name: \(weapon.name), size: \(weaponSize.name), cost: \(weaponSize.cost)")
         weaponTypeLabel.text = weapon.name
         weaponSizeLabel.text = weaponSize.name
-        weaponCostLabel.text = "\(weaponSize.cost) points"
+        let shotCost = weaponSize.cost + ((player.useTargetingComputer || player.usedComputer) ? computerCost : 0)
+        weaponCostLabel.text = "\(shotCost) points"
         availablePointsLabel.text = "\(player.credit + player.score) points"
         weaponCostLabel.textColor = UIColor.black
         
         // disable done button and give a reason if weapon is invalid
         doneButton.isEnabled = true
         reasonLabel.isHidden = true
-        if weaponID > 0 && weaponSize.cost > (player.credit + player.score) {
+        if (weaponID > 0 || player.useTargetingComputer || player.usedComputer) && shotCost > (player.credit + player.score) {
             reasonLabel.text = "Insufficient points for selected weapon!"
             reasonLabel.isHidden = false
             weaponCostLabel.textColor = UIColor.red

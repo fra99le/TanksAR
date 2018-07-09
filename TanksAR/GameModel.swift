@@ -65,6 +65,10 @@ struct Player : Codable {
     var weaponSizeID: Int = 0
     var hitPoints: Float = 1000
     var ai: PlayerAI? = nil
+    var prevTrajectory: [Vector3] = []
+    var useTargetingComputer: Bool = false // this needs to be pricy to enable
+    var usedComputer: Bool = false
+
     // need to add shielding info
 }
 
@@ -134,6 +138,8 @@ class GameModel : Codable {
     let maxWindSpeed: Float = 20  // up to ~45 mph
     let elevationScale: Float = 2.0
     var gameStarted: Bool = false
+    let gravity = Float(-9.80665)
+    let computerCost = 2000
     
     var weaponsList = [
         Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 35, cost: 10)], style: .explosive),
@@ -353,103 +359,30 @@ class GameModel : Codable {
         NSLog("\(#function) started")
 
         let timeStep = Float(1)/Float(60)
-        let gravity = Float(-9.80665)
         
         // charge points
         let player = board.players[board.currentPlayer]
         let weapon = weaponsList[player.weaponID]
         let weaponSize = weapon.sizes[player.weaponSizeID].size
-        let weaponCost = weapon.sizes[player.weaponSizeID].cost
+        let weaponCost = weapon.sizes[player.weaponSizeID].cost +
+                                    ((player.useTargetingComputer || player.usedComputer) ? computerCost : 0)
         if weaponCost >= player.credit {
             board.players[board.currentPlayer].score -= Int64(weaponCost) - player.credit
             board.players[board.currentPlayer].credit = 0
         } else {
             board.players[board.currentPlayer].credit -= Int64(weaponCost)
         }
+        board.players[board.currentPlayer].usedComputer = false
+        board.players[board.currentPlayer].useTargetingComputer = false
         
-        // compute wind components
-        let windX = cos(board.windDir * (Float.pi / 180)) * board.windSpeed
-        let windY = sin(board.windDir * (Float.pi / 180)) * board.windSpeed
-        let terminalSpeed: Float = 100
-        NSLog("wind: \(board.windSpeed) m/s @ \(board.windDir)º, which is x,y = \(windX),\(windY) m/s")
-
-        // compute trajectory
-        var trajectory: [Vector3] = []
-        var airborn = true
-        let p0 = muzzlePosition // p_0
-        let v0 = muzzleVelocity // v_0
-        let vInf = Vector3(windX, windY, -terminalSpeed)
-        let k: Float = -0.5 * gravity / terminalSpeed
         NSLog("firing \(weapon.name) with size \(weaponSize) and style \(weapon.style).")
-        NSLog("p_0: \(p0), v_0: \(v0), vInf: \(vInf), k: \(k)")
-        
-        var iterCount = 0
-        var t: Float = 0
-        //var prevPosition = p0
-        while airborn {
-            
-            // For information on effects of wind,
-            // see: http://www.decarpentier.nl/downloads/AnalyticalBallisticTrajectoriesWithApproximatelyLinearDrag-GJPdeCarpentier.pdf
-            let vDiff = vectorDiff(v0, vInf)
-            let term1 = vectorScale(vDiff, by: 1/(2 * k) * (1 - exp(-2 * k * t)))
+        let trajectory = computeTrajectory(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity, withTimeStep: timeStep)
 
-            let term2 = vectorScale(vInf, by: t)
-            
-            let term3 = p0
-            
-            let position = vectorAdd(vectorAdd(term1, term2), term3)
-            
-            //print("computing trajectory: pos=\(position)")
-            //let velocity = vectorScale(vectorDiff(position,prevPosition), by: 1/timeStep)
-            //print("computing trajectory: pos=\(position), vel=\(velocity)")
-
-            // record position
-            trajectory.append(position)
-            
-            t += timeStep
-            
-//            // update position
-//            // NOTE: the model should do all calculations in model space, not view space
-//            p0.x += v0.x * timeStep
-//            p0.y += v0.y * timeStep
-//            p0.z += v0.z * timeStep + 0.5 * gravity * (timeStep*timeStep)
-//
-//            // update velocity
-//            v0.z += gravity * timeStep
-            
-            // check for impact
-            let distAboveLand = position.z - getElevation(longitude: Int(position.x), latitude: Int(position.y))
-            if position.z<0 || distAboveLand<0 {
-                airborn = false
-            }
-            
-            for i in 0..<board.players.count {
-                let player = board.players[i]
-                
-                let tank = player.tank
-                guard board.players[i].hitPoints > 0 else  { continue }
-                
-                let dist = distance(from: tank.position, to: position)
-                if dist < tankSize {
-                    // hit a tank
-                    airborn = false
-                }
-            }
-            
-            //prevPosition = position
-
-            if iterCount > 10000 {
-                break
-            }
-            iterCount += 1
-            
-        }
-        NSLog("shell took \(timeStep*Float(iterCount))s (\(iterCount) iterations) to land")
-        //NSLog("trajectory: \(trajectory)")
-        
         // deal with impact
         let impactPosition = trajectory.last!
         let blastRadius = weaponSize
+        
+        board.players[board.currentPlayer].prevTrajectory = trajectory
         
         // update board with new values
         let sizeID = board.players[board.currentPlayer].weaponSizeID
@@ -503,6 +436,96 @@ class GameModel : Codable {
         NSLog("\(#function) finished")
 
         return result
+    }
+    
+    func computeTrajectory(muzzlePosition: Vector3, muzzleVelocity: Vector3, withTimeStep: Float) -> [Vector3] {
+        let timeStep = withTimeStep
+    
+        // record use of targeting computer
+        if board.players[board.currentPlayer].useTargetingComputer {
+            board.players[board.currentPlayer].usedComputer = true
+        }
+        
+        // compute wind components
+        let windX = cos(board.windDir * (Float.pi / 180)) * board.windSpeed
+        let windY = sin(board.windDir * (Float.pi / 180)) * board.windSpeed
+        let terminalSpeed: Float = 100
+        NSLog("wind: \(board.windSpeed) m/s @ \(board.windDir)º, which is x,y = \(windX),\(windY) m/s")
+        
+        // compute trajectory
+        var trajectory: [Vector3] = [muzzlePosition]
+        var airborn = true
+        let p0 = muzzlePosition // p_0
+        let v0 = muzzleVelocity // v_0
+        let vInf = Vector3(windX, windY, -terminalSpeed)
+        let k: Float = -0.5 * gravity / terminalSpeed
+        NSLog("p_0: \(p0), v_0: \(v0), vInf: \(vInf), k: \(k)")
+        
+        var iterCount = 0
+        var t: Float = 0
+        //var prevPosition = p0
+        while airborn {
+            
+            // For information on effects of wind,
+            // see: http://www.decarpentier.nl/downloads/AnalyticalBallisticTrajectoriesWithApproximatelyLinearDrag-GJPdeCarpentier.pdf
+            let vDiff = vectorDiff(v0, vInf)
+            let term1 = vectorScale(vDiff, by: 1/(2 * k) * (1 - exp(-2 * k * t)))
+            
+            let term2 = vectorScale(vInf, by: t)
+            
+            let term3 = p0
+            
+            let position = vectorAdd(vectorAdd(term1, term2), term3)
+            
+            //print("computing trajectory: pos=\(position)")
+            //let velocity = vectorScale(vectorDiff(position,prevPosition), by: 1/timeStep)
+            //print("computing trajectory: pos=\(position), vel=\(velocity)")
+            
+            // record position
+            trajectory.append(position)
+            
+            t += timeStep
+            
+            //            // update position
+            //            // NOTE: the model should do all calculations in model space, not view space
+            //            p0.x += v0.x * timeStep
+            //            p0.y += v0.y * timeStep
+            //            p0.z += v0.z * timeStep + 0.5 * gravity * (timeStep*timeStep)
+            //
+            //            // update velocity
+            //            v0.z += gravity * timeStep
+            
+            // check for impact
+            let distAboveLand = position.z - getElevation(longitude: Int(position.x), latitude: Int(position.y))
+            if position.z<0 || distAboveLand<0 {
+                airborn = false
+            }
+            
+            for i in 0..<board.players.count {
+                let player = board.players[i]
+                
+                let tank = player.tank
+                guard board.players[i].hitPoints > 0 else  { continue }
+                
+                let dist = distance(from: tank.position, to: position)
+                if dist < tankSize {
+                    // hit a tank
+                    airborn = false
+                }
+            }
+            
+            //prevPosition = position
+            
+            if iterCount > 10000 {
+                break
+            }
+            iterCount += 1
+            
+        }
+        NSLog("shell took \(timeStep*Float(iterCount))s (\(iterCount) iterations) to land")
+        //NSLog("trajectory: \(trajectory)")
+        
+        return trajectory
     }
     
     func applyExplosion(at: Vector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> (ImageBuf, ImageBuf, ImageBuf) {
@@ -661,6 +684,7 @@ class GameModel : Codable {
                     board.players[i].score = Int64(Double(board.players[i].score) * 1.1)
                     NSLog("\tPlayer \(0) score now \(board.players[i].score)")
                 }
+                board.players[i].prevTrajectory = []
             }
             board.currentRound += 1
             startRound()
