@@ -93,6 +93,9 @@ struct GameBoard : Codable {
 struct HighScore : Codable {
     var name: String = "Unknown"
     var score: Int64 = 0
+    var date: Date? = nil
+    var numHumans: Int = 0
+    var numAIs: Int = 0
 }
 
 enum WeaponStyle : String, Codable {
@@ -666,6 +669,27 @@ class GameModel : Codable {
         NSLog("\(#function) finished")
     }
 
+    func skipRound() {
+        NSLog("\(#function): skipping to end of round")
+        
+        var roundEnded = false
+        while !roundEnded {
+            if drand48() < 0.25 {
+                let currentPlayer = board.currentPlayer
+                var nextPlayer = (currentPlayer + 1) % board.players.count
+                while board.players[nextPlayer].hitPoints <= 0 {
+                    nextPlayer = (nextPlayer + 1) % board.players.count
+                }
+                let target = board.players[nextPlayer].tank.position
+
+                let aboveTank = Vector3(target.x, target.y, target.z + 50)
+                let straightDown = Vector3(CGFloat(0.0),0.0,-10.0)
+                let result = fire(muzzlePosition: aboveTank, muzzleVelocity: straightDown)
+                roundEnded = result.newRound
+            }
+        }
+    }
+    
     func roundCheck() -> Bool {
         var playersLeft = 0
         for player in board.players {
@@ -682,7 +706,7 @@ class GameModel : Codable {
                 let player = board.players[i]
                 if player.score > 0 {
                     board.players[i].score = Int64(Double(board.players[i].score) * 1.1)
-                    NSLog("\tPlayer \(0) score now \(board.players[i].score)")
+                    NSLog("\tPlayer \(i) score now \(board.players[i].score)")
                 }
                 board.players[i].prevTrajectory = []
             }

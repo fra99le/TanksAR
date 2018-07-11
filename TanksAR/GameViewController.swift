@@ -39,13 +39,29 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     var currTraj = SCNNode()
     var gameModel = GameModel()
     var users: [UserConfig] = []
-    var humanLeft: Int = 0
+    var humanLeft: Int {
+        let players = gameModel.board.players
+        // count human players left
+        var num = 0
+        for player in players {
+            if let _ = player.ai {
+                // player is an AI
+            } else {
+                if player.hitPoints > 0 {
+                    num += 1
+                }
+            }
+        }
+        NSLog("\(num) humans left")
+        return num
+    }
     var saveStateController: UIViewController? = nil
     var roundChanged: Bool = false
     var gameOver = false
     
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
+    @IBOutlet weak var skipButton: UIButton!
     @IBOutlet weak var exitButton: UIButton!
     @IBOutlet var powerSlider: UISlider!
     @IBOutlet weak var hudStackView: UIStackView!
@@ -337,7 +353,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         let alert = UIAlertController(title: "Quit Game?", message: "Current game will be lost if you quit.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("Resume", comment: "Default inaction"), style: .default, handler: { _ in
             NSLog("Exit canceled.")
-            self.enableUI()
+            self.updateUI()
         }))
         alert.addAction(UIAlertAction(title: NSLocalizedString("Quit", comment: "Default action"), style: .default, handler: { _ in
             NSLog("Exiting game!")
@@ -366,6 +382,18 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         NSLog("Fire button pressed")
         disableUI()
         launchProjectile()
+    }
+    
+    @IBAction func skipButtonTapped(_ sender: UIButton) {
+        NSLog("Skipping rest of this round")
+        skipButton.isHidden = true
+        skipButton.isEnabled = false
+        gameModel.skipRound()
+        if let _ = gameModel.board.players[gameModel.board.currentPlayer].ai {
+            finishTurn()
+        }
+        roundChanged = true
+        updateUI()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -446,7 +474,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         placeBoardGesture.isEnabled = false
         backupPlaceBoardGesture.isEnabled = false
         tapToSelectLabel.isHidden = true
-        enableUI()
+        updateUI()
 
         boardDrawer.updateBoard()
         
@@ -465,6 +493,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         tapToSelectLabel.isHidden = false
         fireButton.isEnabled = false
         fireButton.isHidden = true
+        skipButton.isEnabled = false
+        skipButton.isHidden = true
         screenDraggingGesture.isEnabled = false
         powerSlider.isHidden = true
         playerNameLabel.isHidden = true
@@ -551,17 +581,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
         }
 
-        // count human players left
-        humanLeft = 0
-        for player in gameModel.board.players {
-            if let _ = player.ai {
-                // player is an AI
-            } else {
-                if player.hitPoints > 0 {
-                    humanLeft += 1
-                    boardDrawer.timeScaling = 3
-                }
-            }
+        if humanLeft > 0 {
+            boardDrawer.timeScaling = 3
         }
         
         currTraj.removeFromParentNode()
@@ -617,6 +638,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         exitButton.isHidden = false
         fireButton.isHidden = false
         fireButton.isEnabled = true
+        skipButton.isHidden = true
+        skipButton.isEnabled = false
         powerSlider.isHidden = false
         powerSlider.isEnabled = true
         screenDraggingGesture.isEnabled = true
@@ -632,11 +655,19 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         // don't mess with exit button here!
         fireButton.isHidden = true
         fireButton.isEnabled = false
+        if humanLeft == 0 {
+            skipButton.isEnabled = true
+            skipButton.isHidden = false
+        }
         powerSlider.isHidden = true
         powerSlider.isEnabled = false
         screenDraggingGesture.isEnabled = false
         manualTrainButton.isEnabled = false
         manualTrainButton.isHidden = true
+        hudStackView.isHidden = false
+        playerNameLabel.isHidden = false
+        playerScoreLabel.isHidden = false
+        roundLabel.isHidden = false
     }
     
     func updateUI() {
@@ -774,6 +805,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
         
         // update board
         boardDrawer.updateBoard()
+   
+        if let _ = gameModel.board.players[gameModel.board.currentPlayer].ai {
+            // player is an AI
+            disableUI()
+        } else {
+            // player is human
+            enableUI()
+        }
         
         //NSLog("\(#function) finished")
     }

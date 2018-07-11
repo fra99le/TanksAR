@@ -228,6 +228,16 @@
                                     <action selector="powerChanged:" destination="BV1-FR-VrT" eventType="valueChanged" id="RjX-eR-dcZ"/>
                                 </connections>
                             </slider>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Tz9-JN-OSC">
+                                <rect key="frame" x="302" y="599" width="57" height="48"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512839999996" colorSpace="custom" customColorSpace="sRGB"/>
+                                <gestureRecognizers/>
+                                <fontDescription key="fontDescription" type="system" pointSize="30"/>
+                                <state key="normal" title="Skip"/>
+                                <connections>
+                                    <action selector="skipButtonTapped:" destination="BV1-FR-VrT" eventType="touchUpInside" id="Uvx-dD-dAp"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rqa-bG-wWn">
                                 <rect key="frame" x="311" y="599" width="48" height="48"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512842465757" colorSpace="custom" customColorSpace="sRGB"/>
@@ -387,9 +397,11 @@ If no surfaces can be found, double tap to place board in the air.</string>
                             <constraint firstItem="qwI-8x-BEQ" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="5g7-lm-PyQ"/>
                             <constraint firstItem="qwI-8x-BEQ" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="5vR-et-d7b"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="top" secondItem="GEX-Hw-PMz" secondAttribute="top" id="C9f-08-Ydg"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="Tz9-JN-OSC" secondAttribute="trailing" constant="16" id="E5w-nn-PiI"/>
                             <constraint firstItem="QIh-1p-M8Z" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="Gno-7t-9Yb"/>
                             <constraint firstItem="QIh-1p-M8Z" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="16" id="Kc8-l8-Gi8"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="aHz-n7-WR9" secondAttribute="bottom" constant="20" id="Q7v-Ez-6aG"/>
+                            <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Tz9-JN-OSC" secondAttribute="bottom" constant="20" id="Tt4-I0-nIP"/>
                             <constraint firstItem="i6J-Ju-WM4" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="YxW-Wy-wFI"/>
                             <constraint firstItem="dTU-l8-x8U" firstAttribute="top" secondItem="C7J-4d-iJW" secondAttribute="bottom" constant="8" id="ZC1-C9-6Bn"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="HtA-AN-53f" secondAttribute="trailing" constant="16" id="bxp-9O-6ha"/>
@@ -423,6 +435,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                         <outlet property="roundLabel" destination="i6J-Ju-WM4" id="9Jm-vB-G7e"/>
                         <outlet property="sceneView" destination="rD7-ry-WZM" id="MY9-Cc-IRd"/>
                         <outlet property="screenDraggingGesture" destination="MI9-nU-qrH" id="ZqZ-JY-4a2"/>
+                        <outlet property="skipButton" destination="Tz9-JN-OSC" id="IBC-uI-V7a"/>
                         <outlet property="tapToSelectLabel" destination="QIh-1p-M8Z" id="CIX-dN-J2b"/>
                         <outlet property="velocityLabel" destination="8y6-5I-LW8" id="KR7-jr-Q4n"/>
                         <outlet property="weaponLabel" destination="vGF-fx-Cq1" id="SQS-zr-ebi"/>
