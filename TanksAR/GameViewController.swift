@@ -23,7 +23,7 @@ struct GameConfig : Codable {
     var useBlocks: Bool = false
 }
 
-class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelegate, UIGestureRecognizerDelegate {
+class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
@@ -593,16 +593,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
     }
     
     
-    func animationDidStart(_ anim: CAAnimation) {
-        NSLog("Animation started")
-    }
-    
-    func animationDidStop(_ animation: CAAnimation, finished: Bool) {
-        NSLog("Animation stopped (finished: \(finished))\n\n\n")
-        //NSLog("\tbegan at: \(animation.beginTime), with duration: \(animation.duration)")
-
-        finishTurn()
-    }
+//    func animationDidStart(_ anim: CAAnimation) {
+//        NSLog("Animation started")
+//    }
+//    
+//    func animationDidStop(_ animation: CAAnimation, finished: Bool) {
+//        NSLog("Animation stopped (finished: \(finished))\n\n\n")
+//        //NSLog("\tbegan at: \(animation.beginTime), with duration: \(animation.duration)")
+//
+//        finishTurn()
+//    }
     
     func finishTurn() {
         NSLog("\(#function) started")
@@ -687,6 +687,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, CAAnimationDelega
             removeTanks()
             addTanks()
             roundChanged = false
+            
+            // save game at start of each new round
+            if let saveStateController = saveStateController as? MenuViewController {
+                saveStateController.saveStateFile()
+            }
+
         }
         
         // make sure power slider matches player

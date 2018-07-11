@@ -101,7 +101,6 @@ class MenuViewController: UIViewController {
                 dest.gameConfig = (self.gameState?.config)!
                 dest.gameModel = (self.gameState?.model)!
                 self.gameState = nil
-                removeStateFile()
             } else if segue.identifier == "startGame" {
                 NSLog("\(#function) starting \(dest.gameConfig.numRounds) round game with \(dest.gameConfig.numHumans) humans and \(dest.gameConfig.numAIs) Als.")
                 dest.gameConfig = gameConfig;

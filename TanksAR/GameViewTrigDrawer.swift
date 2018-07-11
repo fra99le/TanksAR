@@ -512,7 +512,9 @@ class GameViewTrigDrawer : GameViewDrawer {
             let dropGeometry1 = SCNGeometry(sources: [dropSource1], elements: [elements])
             dropGeometry0.firstMaterial?.diffuse.contents = UIColor.green
             dropGeometry1.firstMaterial?.diffuse.contents = UIColor.green
-            
+            dropGeometry0.firstMaterial?.isDoubleSided = true
+            dropGeometry1.firstMaterial?.isDoubleSided = true
+
             // add drop surface to scene
             dropSurface.removeFromParentNode()
             dropSurface = SCNNode(geometry: dropGeometry0)
