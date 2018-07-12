@@ -90,7 +90,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         if gameConfig.useBlocks {
             boardDrawer = GameViewBlockDrawer(model: gameModel, node: board, numPerSide: 50)
         } else {
-            boardDrawer = GameViewTrigDrawer(model: gameModel, node: board, numPerSide: 100)
+            //boardDrawer = GameViewTrigDrawer(model: gameModel, node: board, numPerSide: 100)
+            boardDrawer = GameViewColoredTrigDrawer(model: gameModel, node: board, numPerSide: 100)
+            //boardDrawer = GameViewTexturedTrigDrawer(model: gameModel, node: board, numPerSide: 100)
         }
         
         unplaceBoard()
