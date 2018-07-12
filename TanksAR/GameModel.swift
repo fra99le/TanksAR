@@ -76,6 +76,7 @@ struct GameBoard : Codable {
     var boardSize: Int = 0
     var surface: ImageBuf = ImageBuf()
     var bedrock: ImageBuf = ImageBuf()
+    var colors: ImageBuf = ImageBuf()
     
     // vector to encode windspeed
     var windSpeed: Float = 0
@@ -120,12 +121,17 @@ struct FireResult {
     var trajectory: [Vector3] = []
     var explosionRadius: Float = 100
     
-    // need data to update map
+    // data needed to animate board
     var old: ImageBuf
     var top: ImageBuf
     var middle: ImageBuf
     var bottom: ImageBuf
 
+    // data needed color updates properly
+    var oldColor: ImageBuf
+    var topColor: ImageBuf
+    var bottomColor: ImageBuf
+    
     var newRound: Bool
     var roundWinner: String?
 }
@@ -168,6 +174,7 @@ class GameModel : Codable {
         board.boardSize = 1025
         board.surface.setSize(width: board.boardSize, height: board.boardSize)
         board.bedrock.setSize(width: board.boardSize, height: board.boardSize)
+        board.colors.setSize(width: board.boardSize, height: board.boardSize) // 0=grass, 1=dirt
         
         board.surface.fillUsingDiamondSquare(withMinimum: 10.0/255.0, andMaximum: 255.0/255.0)
         //board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 10.0/255.0)
@@ -204,7 +211,6 @@ class GameModel : Codable {
         }
 
         startRound()
-        gameStarted = true
     }
 
     func resetAIs() {
@@ -225,6 +231,7 @@ class GameModel : Codable {
         for i in 0..<board.players.count {
             board.players[i].hitPoints = 1000
         }
+        gameStarted = true
     }
     
     func getElevation(longitude: Int, latitude: Int) -> Float {
@@ -259,6 +266,88 @@ class GameModel : Codable {
         
         forMap.setPixel(x: longitude, y: latitude, value: CGFloat(newElevation))
         //print("Elevation at \(longitude),\(latitude) is now \(newElevation*255).")
+    }
+    
+    func getColor(longitude: Int, latitude: Int) -> UIColor {
+        return getColor(forMap: board.colors, longitude: longitude, latitude: latitude)
+    }
+    
+    func getColor(forMap: ImageBuf, longitude: Int, latitude: Int) -> UIColor {
+        guard longitude >= 0 else { return UIColor.blue }
+        guard longitude < forMap.width else { return UIColor.blue }
+        guard latitude >= 0 else { return UIColor.blue }
+        guard latitude < forMap.height else { return UIColor.blue }
+        
+        let pixel = forMap.getPixel(x: longitude, y: latitude)
+        
+        if pixel < 0.5 {
+            return UIColor.green
+        } else if pixel < 2 {
+            return UIColor.brown
+        } else {
+            // invalid value
+            return UIColor.red
+        }
+    }
+    
+    func setColor(longitude: Int, latitude: Int, to: Int) {
+        return setColor(forMap: board.colors, longitude: longitude, latitude: latitude, to: to)
+    }
+    
+    func setColor(forMap: ImageBuf, longitude: Int, latitude: Int, to: Int) {
+        guard longitude >= 0 else { return }
+        guard longitude < forMap.width else { return }
+        guard latitude >= 0 else { return }
+        guard latitude < forMap.height else { return }
+        
+        forMap.setPixel(x: longitude, y: latitude, value: CGFloat(to))
+    }
+
+    func colorMap() -> UIImage {
+        return colorMap(forMap: board.colors)
+    }
+    
+    func colorMap(forMap: ImageBuf) -> UIImage {
+        NSLog("\(#function) started")
+        
+        let width = board.colors.width
+        let height = board.colors.height
+
+        // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 1);
+        
+        //NSLog("Converting \(width)x\(height) image to a UIImage.")
+        var image = UIImage()
+        if let context = UIGraphicsGetCurrentContext() {
+            NSLog("Starting to draw to context")
+            for i in 0 ..< width {
+                for j in 0 ..< height {
+                    let pixel = forMap.getPixel(x: i, y: j)
+                    var color = UIColor.yellow
+                    if pixel < 0.5 {
+                        color = UIColor.green
+                    } else if pixel < 2.0 {
+                        color = UIColor.brown
+                    } else {
+                        color = UIColor.red
+                    }
+                    context.setFillColor(color.cgColor)
+                    
+                    context.fill(CGRect(x: CGFloat(i), y: CGFloat(j), width: 1, height: 1))
+                }
+            }
+            NSLog("Finished drawing to context")
+
+            NSLog("Starting UIImage creation")
+            image = UIGraphicsGetImageFromCurrentImageContext()!;
+            NSLog("Finished UIImage creation")
+        }
+        
+        UIGraphicsEndImageContext();
+        
+        NSLog("\(#function) finished")
+        
+        return image
     }
     
     func placeTanks(withMargin: Int = 50, minDist: Int = 100) {
@@ -390,8 +479,10 @@ class GameModel : Codable {
         // update board with new values
         let sizeID = board.players[board.currentPlayer].weaponSizeID
         let old = ImageBuf()
+        let oldColor = ImageBuf()
         old.copy(board.surface)
-        let (top, middle, bottom) = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
+        oldColor.copy(board.colors)
+        let (top, middle, bottom, topColors, bottomColors) = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
         damageCheck(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
         
         // check for round winner before checking/starting new round
@@ -426,6 +517,9 @@ class GameModel : Codable {
                                             top: top,
                                             middle: middle,
                                             bottom: bottom,
+                                            oldColor: oldColor,
+                                            topColor: topColors,
+                                            bottomColor: bottomColors,
                                             newRound: roundEnded,
                                             roundWinner: roundWinner)
         
@@ -531,15 +625,21 @@ class GameModel : Codable {
         return trajectory
     }
     
-    func applyExplosion(at: Vector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> (ImageBuf, ImageBuf, ImageBuf) {
+    func applyExplosion(at: Vector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> (ImageBuf, ImageBuf, ImageBuf, ImageBuf, ImageBuf) {
         NSLog("\(#function) started")
         let topBuf = ImageBuf()
         let middleBuf = ImageBuf()
         let bottomBuf = ImageBuf()
+        let topColor = ImageBuf()
+        let bottomColor = ImageBuf()
+
         NSLog("starting image buffer copies")
         topBuf.copy(board.surface)
         middleBuf.copy(board.surface)
         bottomBuf.copy(board.surface)
+
+        topColor.copy(board.colors)
+        bottomColor.copy(board.colors)
 
         NSLog("\(#function) starting explosion computation at \(at) with radius \(withRadius) and style \(andStyle).")
         let style = andStyle
@@ -572,9 +672,17 @@ class GameModel : Codable {
                     setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
                     setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
                     
-                    // update actual map
+                    // update elevation map
                     let newElevation = min(currElevation, bottom + max(0,top-middle))
                     setElevation(longitude: i, latitude: j, to: newElevation)
+                    
+                    // update color map
+                    if expTop > currElevation && expBottom < currElevation {
+                        setColor(longitude: i, latitude: j, to: 1) // make crater brown
+                    }
+                    if expBottom < currElevation {
+                        setColor(forMap: bottomColor, longitude: i, latitude: j, to: 1)
+                    }
                 } else if style == .generative {
                     let top = expTop
                     let middle = expBottom
@@ -600,6 +708,12 @@ class GameModel : Codable {
                     setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
                     setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
                     setElevation(longitude: i, latitude: j, to: newElevation)
+                    
+                    // update colors
+                    if expTop > currElevation {
+                        setColor(longitude: i, latitude: j, to: 1) // make dirt piles brown
+                        setColor(forMap: topColor, longitude: i, latitude: j, to: 1)
+                    }
                 } else {
                     NSLog("\(#function) doesn't handle \(andStyle) style.")
                 }
@@ -608,7 +722,7 @@ class GameModel : Codable {
         }
         NSLog("\(#function) finished")
 
-        return (topBuf, middleBuf, bottomBuf)
+        return (topBuf, middleBuf, bottomBuf, topColor, bottomColor)
     }
     
     func distance(from: Vector3, to: Vector3) -> Float {
