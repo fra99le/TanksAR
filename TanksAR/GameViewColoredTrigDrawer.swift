@@ -12,7 +12,9 @@ import SceneKit
 class GameViewColoredTrigDrawer : GameViewTrigDrawer {
     
     var newBottomSurface = SCNNode()
-    
+    var dropSurfaces: [SCNNode] = []
+    let colors = [UIColor.green, UIColor.brown]
+
     func surfaceNode() -> SCNNode {
         return surfaceNode(forSurface: gameModel.board.surface, withColors: gameModel.board.colors)
     }
@@ -23,7 +25,6 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
         // draw board surface
         var vertices: [SCNVector3] = []
         //var normals: [SCNVector3] = []
-        let colors = [UIColor.green, UIColor.brown]
         var indices: [[CInt]] = [[CInt]](repeating: [], count: colors.count)
         var pos: CInt = 0
 
@@ -125,7 +126,7 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
         // draw dropping surfaces
         var dropVertices0: [SCNVector3] = []
         var dropVertices1: [SCNVector3] = []
-        var dropIndices: [CInt] = []
+        var dropIndices: [[CInt]] = [[CInt]](repeating: [], count: colors.count)
         //var dropNormals: [SCNVector3] = []
         var dropNeeded = false
         for i in 0...numPerSide {
@@ -188,6 +189,11 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                         dropNeeded = true
                     }
                     
+                    // determine color index
+                    let colorX = Int((xArr[p[0]] + xArr[p[1]] + xArr[p[2]]) / 3)
+                    let colorY = Int((yArr[p[0]] + yArr[p[1]] + yArr[p[2]]) / 3)
+                    let colorIndex = gameModel.getColorIndex(forMap: fireResult.topColor, longitude: colorX, latitude: colorY)
+                    
                     let numDropping = dropIdxs.count
                     let numDisplaced = displaceIdxs.count
                     if numDropping == 3 {
@@ -197,12 +203,12 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                             dropVertices0.append(fromModelSpace(Vector3(xArr[k], yArr[k], topArr[k])))
                             dropVertices1.append(fromModelSpace(Vector3(xArr[k], yArr[k],
                                                                            bottomArr[k] + (topArr[k]-middleArr[k]))))
-                            dropIndices.append(CInt(dropVertices0.count-1))
+                            dropIndices[colorIndex].append(CInt(dropVertices0.count-1))
                         }
                         for k in p {
                             dropVertices0.append(fromModelSpace(Vector3(xArr[k], yArr[k], middleArr[k])))
                             dropVertices1.append(fromModelSpace(Vector3(xArr[k], yArr[k], bottomArr[k])))
-                            dropIndices.append(CInt(dropVertices0.count-1))
+                            dropIndices[colorIndex].append(CInt(dropVertices0.count-1))
                         }
                     } else if numDropping == 2 {
                         // check to see if dropping vertices should be connected
@@ -223,14 +229,14 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                                                                            currentArr[noDrop])))
  
                             // face one
-                            dropIndices.append(index)
-                            dropIndices.append(index+2)
-                            dropIndices.append(index+1)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+2)
+                            dropIndices[colorIndex].append(index+1)
                             
                             // face two
-                            dropIndices.append(index)
-                            dropIndices.append(index+1)
-                            dropIndices.append(index+2)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+1)
+                            dropIndices[colorIndex].append(index+2)
 
                             // bottom side
                             index = CInt(dropVertices0.count)
@@ -244,14 +250,14 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                                                                            currentArr[noDrop])))
 
                             // face one
-                            dropIndices.append(index)
-                            dropIndices.append(index+2)
-                            dropIndices.append(index+1)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+2)
+                            dropIndices[colorIndex].append(index+1)
                             
                             //face two
-                            dropIndices.append(index)
-                            dropIndices.append(index+1)
-                            dropIndices.append(index+2)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+1)
+                            dropIndices[colorIndex].append(index+2)
                             
                         } else {
                             // 3rd vertex displaced, so leave unattached.
@@ -270,24 +276,24 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                             dropVertices1.append(fromModelSpace(Vector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                             
                             // triangle one
-                            dropIndices.append(index)
-                            dropIndices.append(index+2)
-                            dropIndices.append(index+1)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+2)
+                            dropIndices[colorIndex].append(index+1)
                             
                             // triangle one (other side)
-                            dropIndices.append(index)
-                            dropIndices.append(index+1)
-                            dropIndices.append(index+2)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+1)
+                            dropIndices[colorIndex].append(index+2)
                             
                             // triangle two
-                            dropIndices.append(index)
-                            dropIndices.append(index+2)
-                            dropIndices.append(index+3)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+2)
+                            dropIndices[colorIndex].append(index+3)
 
                             // triangle two (other side)
-                            dropIndices.append(index)
-                            dropIndices.append(index+3)
-                            dropIndices.append(index+2)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+3)
+                            dropIndices[colorIndex].append(index+2)
                         }
                     } else if numDropping == 1  && numDisplaced == 0 {
                         // check to see if dropping vertex should be connected
@@ -308,13 +314,13 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                             dropVertices1.append(fromModelSpace(Vector3(xArr[idx3], yArr[idx3],
                                                                            bottomArr[idx3] + (topArr[idx3]-middleArr[idx3]))))
                             
-                            dropIndices.append(index)
-                            dropIndices.append(index+2)
-                            dropIndices.append(index+1)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+2)
+                            dropIndices[colorIndex].append(index+1)
 
-                            dropIndices.append(index)
-                            dropIndices.append(index+1)
-                            dropIndices.append(index+2)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+1)
+                            dropIndices[colorIndex].append(index+2)
 
                             // add bottom triangle
                             index = CInt(dropVertices0.count)
@@ -326,13 +332,13 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                             dropVertices1.append(fromModelSpace(Vector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                             dropVertices1.append(fromModelSpace(Vector3(xArr[idx3], yArr[idx3], bottomArr[idx3])))
                             
-                            dropIndices.append(index)
-                            dropIndices.append(index+2)
-                            dropIndices.append(index+1)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+2)
+                            dropIndices[colorIndex].append(index+1)
                             
-                            dropIndices.append(index)
-                            dropIndices.append(index+1)
-                            dropIndices.append(index+2)
+                            dropIndices[colorIndex].append(index)
+                            dropIndices[colorIndex].append(index+1)
+                            dropIndices[colorIndex].append(index+2)
 
                         } else {
                             // two vertices are displaced, so leave unattached.
@@ -357,13 +363,13 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                         dropVertices1.append(fromModelSpace(Vector3(xArr[idx3], yArr[idx3],
                                                                        bottomArr[idx3] + (topArr[idx3]-middleArr[idx3]))))
                         
-                        dropIndices.append(index)
-                        dropIndices.append(index+2)
-                        dropIndices.append(index+1)
+                        dropIndices[colorIndex].append(index)
+                        dropIndices[colorIndex].append(index+2)
+                        dropIndices[colorIndex].append(index+1)
                         
-                        dropIndices.append(index)
-                        dropIndices.append(index+1)
-                        dropIndices.append(index+2)
+                        dropIndices[colorIndex].append(index)
+                        dropIndices[colorIndex].append(index+1)
+                        dropIndices[colorIndex].append(index+2)
 
                         // add bottom triangle
                         index = CInt(dropVertices0.count)
@@ -375,19 +381,22 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                         dropVertices1.append(fromModelSpace(Vector3(xArr[idx2], yArr[idx2], bottomArr[idx2])))
                         dropVertices1.append(fromModelSpace(Vector3(xArr[idx3], yArr[idx3], bottomArr[idx3])))
                         
-                        dropIndices.append(index)
-                        dropIndices.append(index+2)
-                        dropIndices.append(index+1)
+                        dropIndices[colorIndex].append(index)
+                        dropIndices[colorIndex].append(index+2)
+                        dropIndices[colorIndex].append(index+1)
                         
-                        dropIndices.append(index)
-                        dropIndices.append(index+1)
-                        dropIndices.append(index+2)
+                        dropIndices[colorIndex].append(index)
+                        dropIndices[colorIndex].append(index+1)
+                        dropIndices[colorIndex].append(index+2)
 
                     }
                 }
             }
         }
-        NSLog("\(dropVertices0.count) drop vertices, \(dropIndices.count) drop indices")
+        
+        for dropIndex in dropIndices {
+            NSLog("\(dropVertices0.count) drop vertices, \(dropIndex.count) drop indices")
+        }
         
         // setup reveal of the new bottom surface
         newBottomSurface.removeFromParentNode()
@@ -426,22 +435,6 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
             // create geometry for surface
             let dropSource0 = SCNGeometrySource(vertices: dropVertices0)
             let dropSource1 = SCNGeometrySource(vertices: dropVertices1)
-            let elements = SCNGeometryElement(indices: dropIndices, primitiveType: .triangles)
-            let dropGeometry0 = SCNGeometry(sources: [dropSource0], elements: [elements])
-            let dropGeometry1 = SCNGeometry(sources: [dropSource1], elements: [elements])
-            dropGeometry0.firstMaterial?.diffuse.contents = UIColor.green
-            dropGeometry1.firstMaterial?.diffuse.contents = UIColor.green
-            dropGeometry0.firstMaterial?.isDoubleSided = true
-            dropGeometry1.firstMaterial?.isDoubleSided = true
-
-            // add drop surface to scene
-            dropSurface.removeFromParentNode()
-            dropSurface = SCNNode(geometry: dropGeometry0)
-            dropSurface.isHidden = true
-            dropSurface.name = "The Drop Surface"
-            dropSurface.morpher = SCNMorpher()
-            dropSurface.morpher?.targets = [dropGeometry0, dropGeometry1]
-            board.addChildNode(dropSurface)
             
             // animate collapse
             let collapseActions = [.wait(duration: currTime),
@@ -453,8 +446,34 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
                                         node.morpher?.setWeight(pow(progress,2), forTargetAt: 1)
                                     }
                                    })]
-            let collapse = SCNAction.sequence(collapseActions)
-            dropSurface.runAction(collapse)
+
+            for node in dropSurfaces {
+                node.removeFromParentNode()
+            }
+            dropSurfaces.removeAll()
+            
+            for i in 0..<colors.count {
+                let elements = SCNGeometryElement(indices: dropIndices[i], primitiveType: .triangles)
+                let dropGeometry0 = SCNGeometry(sources: [dropSource0], elements: [elements])
+                let dropGeometry1 = SCNGeometry(sources: [dropSource1], elements: [elements])
+                dropGeometry0.firstMaterial?.diffuse.contents = colors[i]
+                dropGeometry1.firstMaterial?.diffuse.contents = colors[i]
+                dropGeometry0.firstMaterial?.isDoubleSided = true
+                dropGeometry1.firstMaterial?.isDoubleSided = true
+                
+                // add drop surface to scene
+                dropSurface.removeFromParentNode()
+                dropSurface = SCNNode(geometry: dropGeometry0)
+                dropSurface.isHidden = true
+                dropSurface.name = "Drop Surface \(i)"
+                dropSurface.morpher = SCNMorpher()
+                dropSurface.morpher?.targets = [dropGeometry0, dropGeometry1]
+                board.addChildNode(dropSurface)
+                dropSurfaces.append(dropSurface)
+
+                let collapse = SCNAction.sequence(collapseActions)
+                dropSurface.runAction(collapse)
+            }
         }
         NSLog("drop/bottom surface appear at time \(currTime)")
         if dropNeeded {
