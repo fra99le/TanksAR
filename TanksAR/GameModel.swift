@@ -689,9 +689,11 @@ class GameModel : Codable {
                     
                     // update color map
                     if expTop > currElevation && expBottom < currElevation {
+                        // explosion pokes out of the ground, mark crater below
                         setColorIndex(longitude: i, latitude: j, to: 1) // make crater brown
                     }
                     if expBottom < currElevation {
+                        // set color for bottom below any dropping blocks
                         setColorIndex(forMap: bottomColor, longitude: i, latitude: j, to: 1)
                     }
                 } else if style == .generative {
@@ -722,8 +724,13 @@ class GameModel : Codable {
                     
                     // update colors
                     if expTop > currElevation {
+                        // dirt will be the new top
                         setColorIndex(longitude: i, latitude: j, to: 1) // make dirt piles brown
                         setColorIndex(forMap: topColor, longitude: i, latitude: j, to: 1)
+                    }
+                    if expTop > currElevation && expBottom < currElevation {
+                        // dirt is on top, and won't fall
+                        setColorIndex(forMap: bottomColor, longitude: i, latitude: j, to: 1)
                     }
                 } else {
                     NSLog("\(#function) doesn't handle \(andStyle) style.")
