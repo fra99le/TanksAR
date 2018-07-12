@@ -15,7 +15,7 @@ struct GameState : Codable {
 
 class MenuViewController: UIViewController {
 
-    var gameConfig = GameConfig(numHumans: 1, numAIs: 1, numRounds: 3, useBlocks: false)
+    var gameConfig = GameConfig(numHumans: 1, numAIs: 1, numRounds: 3, mode: .coloredTrigs)
     var gameState: GameState? = nil
     let autoResume = false
     
@@ -146,7 +146,16 @@ class MenuViewController: UIViewController {
     }
 
     @IBAction func modeTapped(_ sender: UIButton) {
-        gameConfig.useBlocks = !gameConfig.useBlocks
+        switch gameConfig.mode {
+        case .coloredTrigs:
+            gameConfig.mode = .blocks
+        case .blocks:
+            gameConfig.mode = .texturedTrigs
+        case .texturedTrigs:
+            gameConfig.mode = .coloredTrigs
+        default:
+            gameConfig.mode = .blocks
+        }
         updateUI()
     }
     
@@ -158,7 +167,18 @@ class MenuViewController: UIViewController {
         humansNumLabel.text = "\(gameConfig.numHumans)"
         aisNumLabel.text = "\(gameConfig.numAIs)"
         roundsNumLabel.text = "\(gameConfig.numRounds)"
-        modeButton.setTitle(gameConfig.useBlocks ? "Super-Retro" : "Retro", for: .normal)
+        var modeString = "Unknown"
+        switch gameConfig.mode {
+        case .blocks:
+            modeString = "Super-Retro"
+        case .plainTrigs:
+            modeString = "Retro-er"
+        case .coloredTrigs:
+            modeString = "Retro"
+        case .texturedTrigs:
+            modeString = "Modern"
+        }
+        modeButton.setTitle(modeString, for: .normal)
         
         // require more than one player
         if gameConfig.numHumans + gameConfig.numAIs <= 1 {

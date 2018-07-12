@@ -16,11 +16,15 @@ struct UserConfig {
     var tank: SCNNode?
 }
 
+enum drawerMode : String, Codable {
+    case blocks, plainTrigs, coloredTrigs, texturedTrigs
+}
+
 struct GameConfig : Codable {
     var numHumans: Int = 0
     var numAIs: Int = 0
     var numRounds: Int = 0
-    var useBlocks: Bool = false
+    var mode: drawerMode = .blocks
 }
 
 class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDelegate {
@@ -87,12 +91,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         appDelegate.gameController = self
         
         // create the game board
-        if gameConfig.useBlocks {
+        switch gameConfig.mode {
+        case .blocks:
             boardDrawer = GameViewBlockDrawer(model: gameModel, node: board, numPerSide: 50)
-        } else {
-            //boardDrawer = GameViewTrigDrawer(model: gameModel, node: board, numPerSide: 100)
+        case .plainTrigs:
+            boardDrawer = GameViewTrigDrawer(model: gameModel, node: board, numPerSide: 100)
+        case .coloredTrigs:
             boardDrawer = GameViewColoredTrigDrawer(model: gameModel, node: board, numPerSide: 100)
-            //boardDrawer = GameViewTexturedTrigDrawer(model: gameModel, node: board, numPerSide: 100)
+        case .texturedTrigs:
+            boardDrawer = GameViewTexturedTrigDrawer(model: gameModel, node: board, numPerSide: 100)
         }
         
         unplaceBoard()
