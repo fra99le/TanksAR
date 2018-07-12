@@ -99,7 +99,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         case .coloredTrigs:
             boardDrawer = GameViewColoredTrigDrawer(model: gameModel, node: board, numPerSide: 100)
         case .texturedTrigs:
-            boardDrawer = GameViewTexturedTrigDrawer(model: gameModel, node: board, numPerSide: 100)
+            boardDrawer = GameViewTexturedTrigDrawer(model: gameModel, node: board, numPerSide: 200)
         }
         
         unplaceBoard()
