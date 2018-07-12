@@ -88,14 +88,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         
         // create the game board
         if gameConfig.useBlocks {
-            boardDrawer = GameViewBlockDrawer()
-            boardDrawer.numPerSide = 50
+            boardDrawer = GameViewBlockDrawer(model: gameModel, node: board, numPerSide: 50)
         } else {
-            boardDrawer = GameViewTrigDrawer()
-            boardDrawer.numPerSide = 100
+            boardDrawer = GameViewTrigDrawer(model: gameModel, node: board, numPerSide: 100)
         }
-        boardDrawer.gameModel = gameModel
-        boardDrawer.board = board
         
         unplaceBoard()
         rotateGesture.delegate = self
@@ -791,8 +787,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             // adjust wind indicator
             guard let windArrow = tankNode.childNode(withName: "windArrow", recursively: true) else { continue }
             guard let arrow = windArrow.childNode(withName: "arrow", recursively: true) else { continue }
-            NSLog("setting up wind arrow for player \(i)")
             if showWind {
+                NSLog("setting up wind arrow for player \(i)")
                 windArrow.eulerAngles.y = -gameBoard.windDir * (Float.pi / 180)
                 arrow.scale.x = 0.25 + 2 * (gameBoard.windSpeed / gameModel.maxWindSpeed)
                 windArrow.isHidden = false
