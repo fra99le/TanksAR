@@ -268,21 +268,32 @@ class GameModel : Codable {
         //print("Elevation at \(longitude),\(latitude) is now \(newElevation*255).")
     }
     
+    func getColorIndex(longitude: Int, latitude: Int) -> Int {
+        return getColorIndex(forMap: board.colors, longitude: longitude, latitude: latitude)
+    }
+    
+    func getColorIndex(forMap: ImageBuf, longitude: Int, latitude: Int) -> Int {
+        guard longitude >= 0 else { return -1 }
+        guard longitude < forMap.width else { return -1 }
+        guard latitude >= 0 else { return -1 }
+        guard latitude < forMap.height else { return -1 }
+        
+        let pixel = forMap.getPixel(x: longitude, y: latitude)
+
+        return Int(pixel)
+    }
+    
+
     func getColor(longitude: Int, latitude: Int) -> UIColor {
         return getColor(forMap: board.colors, longitude: longitude, latitude: latitude)
     }
     
     func getColor(forMap: ImageBuf, longitude: Int, latitude: Int) -> UIColor {
-        guard longitude >= 0 else { return UIColor.blue }
-        guard longitude < forMap.width else { return UIColor.blue }
-        guard latitude >= 0 else { return UIColor.blue }
-        guard latitude < forMap.height else { return UIColor.blue }
+        let index = getColorIndex(forMap: forMap, longitude: longitude, latitude: latitude)
         
-        let pixel = forMap.getPixel(x: longitude, y: latitude)
-        
-        if pixel < 0.5 {
+        if index == 0 {
             return UIColor.green
-        } else if pixel < 2 {
+        } else if index == 1 {
             return UIColor.brown
         } else {
             // invalid value
@@ -290,11 +301,11 @@ class GameModel : Codable {
         }
     }
     
-    func setColor(longitude: Int, latitude: Int, to: Int) {
-        return setColor(forMap: board.colors, longitude: longitude, latitude: latitude, to: to)
+    func setColorIndex(longitude: Int, latitude: Int, to: Int) {
+        return setColorIndex(forMap: board.colors, longitude: longitude, latitude: latitude, to: to)
     }
     
-    func setColor(forMap: ImageBuf, longitude: Int, latitude: Int, to: Int) {
+    func setColorIndex(forMap: ImageBuf, longitude: Int, latitude: Int, to: Int) {
         guard longitude >= 0 else { return }
         guard longitude < forMap.width else { return }
         guard latitude >= 0 else { return }
@@ -678,10 +689,10 @@ class GameModel : Codable {
                     
                     // update color map
                     if expTop > currElevation && expBottom < currElevation {
-                        setColor(longitude: i, latitude: j, to: 1) // make crater brown
+                        setColorIndex(longitude: i, latitude: j, to: 1) // make crater brown
                     }
                     if expBottom < currElevation {
-                        setColor(forMap: bottomColor, longitude: i, latitude: j, to: 1)
+                        setColorIndex(forMap: bottomColor, longitude: i, latitude: j, to: 1)
                     }
                 } else if style == .generative {
                     let top = expTop
@@ -711,8 +722,8 @@ class GameModel : Codable {
                     
                     // update colors
                     if expTop > currElevation {
-                        setColor(longitude: i, latitude: j, to: 1) // make dirt piles brown
-                        setColor(forMap: topColor, longitude: i, latitude: j, to: 1)
+                        setColorIndex(longitude: i, latitude: j, to: 1) // make dirt piles brown
+                        setColorIndex(forMap: topColor, longitude: i, latitude: j, to: 1)
                     }
                 } else {
                     NSLog("\(#function) doesn't handle \(andStyle) style.")
