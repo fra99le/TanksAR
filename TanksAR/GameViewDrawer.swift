@@ -27,6 +27,12 @@ class GameViewDrawer {
 //        numPerSide = size
 //    }
     
+    init(model: GameModel, node: SCNNode, numPerSide: Int) {
+        gameModel = model
+        board = node
+        self.numPerSide = numPerSide
+    }
+    
     // these should be abstract methods, or equivilant
     func addBoard() { preconditionFailure("This method must be overridden") }
     func removeBoard() { preconditionFailure("This method must be overridden") }
