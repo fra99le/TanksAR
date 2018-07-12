@@ -24,12 +24,24 @@ class GameViewTrigDrawer : GameViewDrawer {
         board.removeFromParentNode()
         NSLog("\(#function) finished")
     }
+   
+    func toMapSpace(x: CGFloat, y: CGFloat) -> CGPoint {
+        // convert model space (0,0) -> (boardSize-1,boardSize-1) to map space (0,0) -> (1,1)
+        let boardSize = CGFloat(gameModel.board.boardSize)
+        return CGPoint(x: x / (boardSize-1),
+                       y: y / (boardSize-1))
+    }
     
     func surfaceGeometry() -> SCNGeometry {
+        return surfaceGeometry(forSurface: gameModel.board.surface)
+    }
+    
+    func surfaceGeometry(forSurface: ImageBuf) -> SCNGeometry {
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         
         // draw board surface
         var vertices: [SCNVector3] = []
+        var texCoords: [CGPoint] = []
         //var normals: [SCNVector3] = []
         var indices: [CInt] = []
         var pos: CInt = 0
@@ -38,10 +50,12 @@ class GameViewTrigDrawer : GameViewDrawer {
                 
                 let x = CGFloat(i)*edgeSize
                 let y = CGFloat(j)*edgeSize
-                let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+                let z = CGFloat(gameModel.getElevation(fromMap: forSurface, longitude: Int(x), latitude: Int(y)))
                 
-                vertices.append(fromModelSpace(Vector3(x,y,z)))
-                
+                let viewCoordinates = fromModelSpace(Vector3(x,y,z))
+                vertices.append(viewCoordinates)
+                texCoords.append(toMapSpace(x: x, y: y))
+
                 if i < numPerSide && j < numPerSide {
                     indices.append(pos)
                     indices.append(pos+1)
@@ -58,8 +72,9 @@ class GameViewTrigDrawer : GameViewDrawer {
         
         // create geometry for surface
         let vertexSource = SCNGeometrySource(vertices: vertices)
+        let texSource = SCNGeometrySource(textureCoordinates: texCoords)
         let elements = SCNGeometryElement(indices: indices, primitiveType: .triangles)
-        let geometry = SCNGeometry(sources: [vertexSource], elements: [elements])
+        let geometry = SCNGeometry(sources: [vertexSource, texSource], elements: [elements])
         geometry.firstMaterial?.diffuse.contents = UIColor.green
 
         return geometry
