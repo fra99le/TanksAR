@@ -194,7 +194,8 @@ class MenuViewController: UIViewController {
         // compress image data for fast/small enough encoding
         gameState?.model.board.surface.compress()
         gameState?.model.board.bedrock.compress()
-
+        gameState?.model.board.colors.compress()
+        
 //        let encoder = JSONEncoder()
 //        encoder.outputFormatting = .prettyPrinted
         let encoder = PropertyListEncoder()
@@ -212,6 +213,7 @@ class MenuViewController: UIViewController {
         // these lines restore the surface to usable format
         gameState?.model.board.surface.uncompress()
         gameState?.model.board.bedrock.uncompress()
+        gameState?.model.board.colors.uncompress()
 
         NSLog("\(#function) finished")
     }
@@ -226,6 +228,7 @@ class MenuViewController: UIViewController {
                 
                 result.model.board.surface.uncompress()
                 result.model.board.bedrock.uncompress()
+                result.model.board.colors.uncompress()
 
                 NSLog("\(#function): gameStarted = \(result.model.gameStarted)")
 
