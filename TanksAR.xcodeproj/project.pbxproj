@@ -13,6 +13,8 @@
 		5318F3E620D38B4F00377161 /* NelderMead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5318F3E520D38B4F00377161 /* NelderMead.swift */; };
 		5318F3E720D38B4F00377161 /* NelderMead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5318F3E520D38B4F00377161 /* NelderMead.swift */; };
 		5318F3E820D38B4F00377161 /* NelderMead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5318F3E520D38B4F00377161 /* NelderMead.swift */; };
+		531E9F0720F7169800BCF617 /* GameViewColoredTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 531E9F0620F7169800BCF617 /* GameViewColoredTrigDrawer.swift */; };
+		531E9F0920F716B600BCF617 /* GameViewTexturedTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 531E9F0820F716B600BCF617 /* GameViewTexturedTrigDrawer.swift */; };
 		533032A320CF00990014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
 		533032A420CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
 		533032A520CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
@@ -67,6 +69,8 @@
 /* Begin PBXFileReference section */
 		5314E47B20C8BFA00070481A /* ImageBuf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBuf.swift; sourceTree = "<group>"; };
 		5318F3E520D38B4F00377161 /* NelderMead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NelderMead.swift; sourceTree = "<group>"; };
+		531E9F0620F7169800BCF617 /* GameViewColoredTrigDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewColoredTrigDrawer.swift; sourceTree = "<group>"; };
+		531E9F0820F716B600BCF617 /* GameViewTexturedTrigDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewTexturedTrigDrawer.swift; sourceTree = "<group>"; };
 		533032A220CF00990014A16D /* WeaponsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponsViewController.swift; sourceTree = "<group>"; };
 		53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewTrigDrawer.swift; sourceTree = "<group>"; };
 		53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewBlockDrawer.swift; sourceTree = "<group>"; };
@@ -147,6 +151,8 @@
 				53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */,
 				53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */,
 				53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */,
+				531E9F0620F7169800BCF617 /* GameViewColoredTrigDrawer.swift */,
+				531E9F0820F716B600BCF617 /* GameViewTexturedTrigDrawer.swift */,
 				533032A220CF00990014A16D /* WeaponsViewController.swift */,
 				53EEDB9720C841EE00B8B71D /* MenuViewController.swift */,
 				53EEDB9920C8420500B8B71D /* InstructionsViewController.swift */,
@@ -314,10 +320,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				531E9F0920F716B600BCF617 /* GameViewTexturedTrigDrawer.swift in Sources */,
 				5314E47C20C8BFA00070481A /* ImageBuf.swift in Sources */,
 				53EEDB6C20C83C3F00B8B71D /* GameViewController.swift in Sources */,
 				53522CA820DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */,
 				533032A320CF00990014A16D /* WeaponsViewController.swift in Sources */,
+				531E9F0720F7169800BCF617 /* GameViewColoredTrigDrawer.swift in Sources */,
 				5396120E20D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
 				53527CE220D1DB36005F5FFF /* GameOverViewController.swift in Sources */,
 				53EEDB9C20C8421900B8B71D /* ScoresViewController.swift in Sources */,
