@@ -49,6 +49,26 @@ func vectorScale(_ v1: Vector3, by: Float) -> Vector3 {
     return Vector3(v1.x*by, v1.y*by, v1.z*by)
 }
 
+func vectorNormalize(_ v: Vector3) -> Vector3 {
+    let length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
+    return vectorScale(v, by: 1/length)
+}
+
+func vectorCross(_ v1: Vector3, _ v2: Vector3) -> Vector3 {
+        //      | i  j  k  |
+        //  det | x1 y1 z1 |
+        //      | x2 y2 z2 |
+        var i, j, k: Float;
+        
+        i = v1.y * v2.z - v1.z * v2.y;
+        j = v1.z * v2.x - v1.x * v2.z;
+        k = v1.x * v2.y - v1.y * v2.x;
+        
+        let ret = Vector3( i, j, k);
+        
+        return ret;
+}
+
 struct Tank : Codable {
     var position: Vector3
     var azimuth: Float // in degrees
@@ -234,6 +254,55 @@ class GameModel : Codable {
         gameStarted = true
     }
     
+    func getNormal(longitude: Int, latitude: Int, sampleDist: Int = 10) -> Vector3 {
+        return getNormal(fromMap: board.surface, longitude: longitude, latitude:latitude, sampleDist: sampleDist)
+    }
+
+    func getNormal(fromMap: ImageBuf, longitude: Int, latitude: Int, sampleDist: Int = 10) -> Vector3 {
+        // offsets are in closwise order as seen from positive 'z'
+        let offsets = [
+            [-1,-1],
+            [0,-1],
+            [1,-1],
+            [1,0],
+            [1,1],
+            [0,1],
+            [-1,1],
+            [-1,0]
+        ]
+        var sumVect = Vector3()
+        var count = 0
+        let centerElevation = getElevation(fromMap: fromMap, longitude: longitude, latitude: latitude)
+        for i in 0..<offsets.count {
+            let x1 = longitude + sampleDist * offsets[i][0]
+            let y1 = latitude + sampleDist * offsets[i][1]
+            let nextI = (i + 1) % offsets.count
+            let x2 = longitude + sampleDist * offsets[nextI][0]
+            let y2 = latitude + sampleDist * offsets[nextI][1]
+
+            guard x1 >= 0 else { continue }
+            guard y1 >= 0 else { continue }
+            guard x1 < fromMap.width else { continue }
+            guard y1 < fromMap.height else { continue }
+            guard x2 >= 0 else { continue }
+            guard y2 >= 0 else { continue }
+            guard x2 < fromMap.width else { continue }
+            guard y2 < fromMap.height else { continue }
+
+            let otherElevation1 = getElevation(fromMap: fromMap, longitude: x1, latitude: y1)
+            let otherElevation2 = getElevation(fromMap: fromMap, longitude: x2, latitude: y2)
+
+            let v1 = Vector3(Float(x1-longitude), Float(y1-latitude), otherElevation1-centerElevation)
+            let v2 = Vector3(Float(x2-longitude), Float(y2-latitude), otherElevation2-centerElevation)
+
+            sumVect = vectorAdd(sumVect, vectorCross(v2, v1))
+            count += 1
+        }
+        
+        let normal = vectorNormalize(vectorScale(sumVect, by: 1.0/Float(count)))
+        return normal
+    }
+
     func getElevation(longitude: Int, latitude: Int) -> Float {
         return getElevation(fromMap: board.surface, longitude: longitude, latitude: latitude)
     }
