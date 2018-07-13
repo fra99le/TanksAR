@@ -12,13 +12,15 @@ import SceneKit
 class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
    
     var newBottomSurface = SCNNode()
-
+    var ambientLight = SCNNode()
+    
     func surfaceNode() -> SCNNode {
         return surfaceNode(forSurface: gameModel.board.surface, withColors: gameModel.board.colors)
     }
     
     func surfaceNode(forSurface: ImageBuf, withColors: ImageBuf) -> SCNNode {
-        let geometry = surfaceGeometry(forSurface: forSurface)
+        let geometry = surfaceGeometry(forSurface: forSurface, useNormals: true)
+        geometry.firstMaterial?.isLitPerPixel = true
         let colorImage = gameModel.colorMap(forMap: withColors)
         geometry.firstMaterial?.diffuse.contents = colorImage
         //geometry.firstMaterial?.diffuse.contents = UIColor.green
@@ -30,6 +32,15 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
     
     override func updateBoard() {
         NSLog("\(#function) started")
+        
+        // (re)create ambient light
+        // https://www.raywenderlich.com/83748/beginning-scene-kit-tutorial
+        ambientLight.removeFromParentNode()
+        ambientLight = SCNNode()
+        ambientLight.light = SCNLight()
+        ambientLight.light!.type = SCNLight.LightType.ambient
+        ambientLight.light!.color = UIColor(white: 0.25, alpha: 1.0)
+        board.addChildNode(ambientLight)
         
         // (re)create surface
         surface.removeFromParentNode()
