@@ -32,17 +32,17 @@ class GameViewTrigDrawer : GameViewDrawer {
                        y: y / (boardSize-1))
     }
     
-    func surfaceGeometry() -> SCNGeometry {
-        return surfaceGeometry(forSurface: gameModel.board.surface)
+    func surfaceGeometry(useNormals: Bool = false) -> SCNGeometry {
+        return surfaceGeometry(forSurface: gameModel.board.surface, useNormals: useNormals)
     }
     
-    func surfaceGeometry(forSurface: ImageBuf) -> SCNGeometry {
+    func surfaceGeometry(forSurface: ImageBuf, useNormals: Bool = false) -> SCNGeometry {
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         
         // draw board surface
         var vertices: [SCNVector3] = []
         var texCoords: [CGPoint] = []
-        //var normals: [SCNVector3] = []
+        var normals: [SCNVector3] = []
         var indices: [CInt] = []
         var pos: CInt = 0
         for i in 0...numPerSide {
@@ -51,10 +51,12 @@ class GameViewTrigDrawer : GameViewDrawer {
                 let x = CGFloat(i)*edgeSize
                 let y = CGFloat(j)*edgeSize
                 let z = CGFloat(gameModel.getElevation(fromMap: forSurface, longitude: Int(x), latitude: Int(y)))
+                let n = gameModel.getNormal(fromMap: forSurface, longitude: Int(x), latitude: Int(y))
                 
                 let viewCoordinates = fromModelSpace(Vector3(x,y,z))
                 vertices.append(viewCoordinates)
                 texCoords.append(toMapSpace(x: x, y: y))
+                normals.append(SCNVector3(n.x, n.y, n.z))
 
                 if i < numPerSide && j < numPerSide {
                     indices.append(pos)
@@ -71,10 +73,16 @@ class GameViewTrigDrawer : GameViewDrawer {
         NSLog("\(vertices.count) surface vertices, \(indices.count) surface indices, pos=\(pos)")
         
         // create geometry for surface
+        let elements = SCNGeometryElement(indices: indices, primitiveType: .triangles)
         let vertexSource = SCNGeometrySource(vertices: vertices)
         let texSource = SCNGeometrySource(textureCoordinates: texCoords)
-        let elements = SCNGeometryElement(indices: indices, primitiveType: .triangles)
-        let geometry = SCNGeometry(sources: [vertexSource, texSource], elements: [elements])
+        var geometry: SCNGeometry!
+        if useNormals {
+            let normalSource = SCNGeometrySource(normals: normals)
+            geometry = SCNGeometry(sources: [vertexSource, texSource, normalSource], elements: [elements])
+        } else {
+            geometry = SCNGeometry(sources: [vertexSource, texSource], elements: [elements])
+        }
         geometry.firstMaterial?.diffuse.contents = UIColor.green
 
         return geometry
