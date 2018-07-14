@@ -13,6 +13,42 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
    
     var newBottomSurface = SCNNode()
     var ambientLight = SCNNode()
+    var sun = SCNNode()
+    
+    override func setupLighting() {
+        sceneView.autoenablesDefaultLighting = false
+        
+        // add an ambient light
+        ambientLight.removeFromParentNode()
+        ambientLight = SCNNode()
+        ambientLight.light = SCNLight()
+        ambientLight.light!.type = SCNLight.LightType.ambient
+        ambientLight.light!.color = UIColor(white: 0.25, alpha: 1.0)
+        board.addChildNode(ambientLight)
+        
+        // add the sun
+        sun.removeFromParentNode()
+        sun = SCNNode()
+        let sunLight = SCNLight()
+        sunLight.name = "The Sun"
+        sunLight.type = .directional
+        sunLight.castsShadow = true
+        sunLight.temperature = 5900
+        // see: https://stackoverflow.com/questions/44975457/does-shadow-for-directional-light-even-work-in-scenekit
+        sunLight.orthographicScale = 4000
+        sunLight.automaticallyAdjustsShadowProjection = true
+        sun.light = sunLight
+        // sun.eulerAngles.x = -Float.pi
+        sun.eulerAngles.x = -Float.pi * (3.0/8.0) + 0.001
+        // sun.eulerAngles.y = Float.pi
+        board.addChildNode(sun)
+        
+        // animate direction of the sun
+        //let riseAndSet = SCNAction.repeatForever(.rotateBy(x: CGFloat(2 * Float.pi), y: 0, z: 0, duration: 10))
+        //let riseAndSet = SCNAction.repeatForever(.rotateBy(x: 0, y: CGFloat(2 * Float.pi), z: 0, duration: 10))
+        //let riseAndSet = SCNAction.repeatForever(.rotateBy(x: 0, y: 0, z: CGFloat(2 * Float.pi), duration: 10))
+        //sun.runAction(riseAndSet)
+    }
     
     func surfaceNode() -> SCNNode {
         return surfaceNode(forSurface: gameModel.board.surface, withColors: gameModel.board.colors)
@@ -61,6 +97,8 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         }
         newBottomSurface.isHidden = true
         newBottomSurface.removeFromParentNode()
+        
+        showLights()
         
         NSLog("\(#function) finished")
     }
