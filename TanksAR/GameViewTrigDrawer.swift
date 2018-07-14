@@ -56,7 +56,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                 let viewCoordinates = fromModelSpace(Vector3(x,y,z))
                 vertices.append(viewCoordinates)
                 texCoords.append(toMapSpace(x: x, y: y))
-                normals.append(SCNVector3(n.x, n.y, n.z))
+                normals.append(fromModelScale(n))
 
                 if i < numPerSide && j < numPerSide {
                     indices.append(pos)
