@@ -13,6 +13,7 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
    
     var newBottomSurface = SCNNode()
     var ambientLight = SCNNode()
+    var ecliptic = SCNNode()
     var sun = SCNNode()
     
     override func setupLighting() {
@@ -25,6 +26,11 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         ambientLight.light!.type = SCNLight.LightType.ambient
         ambientLight.light!.color = UIColor(white: 0.25, alpha: 1.0)
         board.addChildNode(ambientLight)
+        
+        // create an eccliptic for repositioning the sun
+        ecliptic = SCNNode()
+        ecliptic.eulerAngles.x = -Float.pi * (3.0/8.0)
+        board.addChildNode(ecliptic)
         
         // add the sun
         sun.removeFromParentNode()
@@ -39,15 +45,14 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         sunLight.automaticallyAdjustsShadowProjection = true
         sun.light = sunLight
         // sun.eulerAngles.x = -Float.pi
-        sun.eulerAngles.x = -Float.pi * (3.0/8.0) + 0.001
+        //sun.eulerAngles.x = -Float.pi * (3.0/8.0) + 0.001
         // sun.eulerAngles.y = Float.pi
-        board.addChildNode(sun)
+        ecliptic.addChildNode(sun)
         
         // animate direction of the sun
-        //let riseAndSet = SCNAction.repeatForever(.rotateBy(x: CGFloat(2 * Float.pi), y: 0, z: 0, duration: 10))
         //let riseAndSet = SCNAction.repeatForever(.rotateBy(x: 0, y: CGFloat(2 * Float.pi), z: 0, duration: 10))
-        //let riseAndSet = SCNAction.repeatForever(.rotateBy(x: 0, y: 0, z: CGFloat(2 * Float.pi), duration: 10))
-        //sun.runAction(riseAndSet)
+        let riseAndSet = SCNAction.repeatForever(.rotateBy(x: CGFloat(-Float.pi / 4), y: CGFloat(Float.pi / 4), z: 0, duration: 300))
+        sun.runAction(riseAndSet)
     }
     
     func surfaceNode() -> SCNNode {
