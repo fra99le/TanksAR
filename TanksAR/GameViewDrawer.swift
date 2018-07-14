@@ -13,6 +13,7 @@ import ARKit
 class GameViewDrawer {
 
     var gameModel: GameModel! = nil
+    var sceneView: ARSCNView! = nil
     var board: SCNNode = SCNNode()
     var tankNodes: [SCNNode] = []
     var numPerSide: Int = 0
@@ -21,16 +22,11 @@ class GameViewDrawer {
     var timeScaling: Double = 3
     let dropTime: Double = 1.5
 
-//    func GameViewDrawer(model: GameModel, boardNode: SCNNode, size: Int) {
-//        gameModel = model
-//        board = boardNode
-//        numPerSide = size
-//    }
-    
-    init(model: GameModel, node: SCNNode, numPerSide: Int) {
+    init(sceneView: ARSCNView, model: GameModel, node: SCNNode, numPerSide: Int) {
         gameModel = model
         board = node
         self.numPerSide = numPerSide
+        self.sceneView = sceneView
     }
     
     // these should be abstract methods, or equivilant
@@ -39,6 +35,10 @@ class GameViewDrawer {
     func updateBoard() { preconditionFailure("This method must be overridden") }
     func animateResult(fireResult: FireResult, from: GameViewController)
         { preconditionFailure("This method must be overridden") }
+    
+    func setupLighting() {
+        sceneView.autoenablesDefaultLighting = true
+    }
     
     func animateShell(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {
         var currTime = at
@@ -89,6 +89,7 @@ class GameViewDrawer {
             // convert back to view coordinates
             explosion.position = fromModelSpace(lastPosition)
             explosion.isHidden = true
+            explosionNode?.castsShadow = false
             board.addChildNode(explosion)
             
             let explosionActions = SCNAction.sequence([.wait(duration: currTime),
@@ -209,4 +210,26 @@ class GameViewDrawer {
         return ret
     }
     
+    func showLights() {
+        var node: SCNNode = board
+        var root: SCNNode = board
+        // find root node
+        while let parent = node.parent {
+            root = parent
+            node = parent
+        }
+        
+        // traverse all nodes
+        NSLog("\(#function) starting from root: \(root)")
+        var queue = [root]
+        while !queue.isEmpty {
+            let node = queue.removeFirst()
+            queue.append(contentsOf: node.childNodes)
+            
+            if let light = node.light {
+                NSLog("\tfound light: \(light) in \(node) at \(node.position)")
+            }
+        }
+        NSLog("\(#function) finished")
+    }
 }
