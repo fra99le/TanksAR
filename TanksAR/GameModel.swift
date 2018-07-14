@@ -295,7 +295,7 @@ class GameModel : Codable {
             let v1 = Vector3(Float(x1-longitude), Float(y1-latitude), otherElevation1-centerElevation)
             let v2 = Vector3(Float(x2-longitude), Float(y2-latitude), otherElevation2-centerElevation)
 
-            sumVect = vectorAdd(sumVect, vectorCross(v2, v1))
+            sumVect = vectorAdd(sumVect, vectorCross(v1, v2))
             count += 1
         }
         
