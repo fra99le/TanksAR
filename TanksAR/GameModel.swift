@@ -389,43 +389,60 @@ class GameModel : Codable {
     
     func colorMap(forMap: ImageBuf) -> UIImage {
         NSLog("\(#function) started")
+        let startTime : CFAbsoluteTime = CFAbsoluteTimeGetCurrent();
         
-        let width = board.colors.width
-        let height = board.colors.height
+        let bitsPerComponent:Int = 8
+        let bitsPerPixel:Int = 32
+        let colors = [UIColor.green, UIColor.brown]
 
-        // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
-        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 1);
-        
-        //NSLog("Converting \(width)x\(height) image to a UIImage.")
-        var image = UIImage()
-        if let context = UIGraphicsGetCurrentContext() {
-            NSLog("Starting to draw to context")
-            for i in 0 ..< width {
-                for j in 0 ..< height {
-                    let pixel = forMap.getPixel(x: i, y: j)
-                    var color = UIColor.yellow
-                    if pixel < 0.5 {
-                        color = UIColor.green
-                    } else if pixel < 2.0 {
-                        color = UIColor.brown
-                    } else {
-                        color = UIColor.red
-                    }
-                    context.setFillColor(color.cgColor)
-                    
-                    context.fill(CGRect(x: CGFloat(i), y: CGFloat(j), width: 1, height: 1))
-                }
-            }
-            NSLog("Finished drawing to context")
-
-            NSLog("Starting UIImage creation")
-            image = UIGraphicsGetImageFromCurrentImageContext()!;
-            NSLog("Finished UIImage creation")
+        var pixelColors: [PixelData] = []
+        for color in colors {
+            let pixelColor = PixelData(a: UInt8(color.cgColor.components![3] * 255),
+                                       r: UInt8(color.cgColor.components![0] * 255),
+                                       g: UInt8(color.cgColor.components![1] * 255),
+                                       b: UInt8(color.cgColor.components![2] * 255))
+            pixelColors.append(pixelColor)
         }
         
-        UIGraphicsEndImageContext();
+        assert(forMap.pixels.count == Int(forMap.width * forMap.height))
+        
+        // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
+        var pixelArray = [PixelData](repeating: PixelData(a: 255, r:0, g: 0, b: 0), count: forMap.width*forMap.height)
+        
+        //NSLog("\(#function): Converting \(width)x\(height) image to a UIImage using CGDataProvider.")
+        //NSLog("copying data into pixelArray")
+        for i in 0 ..< forMap.pixels.count {
+            let colorIdx = Int(forMap.pixels[i])
+            pixelArray[i] = pixelColors[colorIdx]
+        }
+        //NSLog("finished copying data to pixelArray")
+        
+        //var data = pixelArray // Copy to mutable []
+        guard let providerRef = CGDataProvider(
+            data: NSData(bytes: &pixelArray, length: pixelArray.count * MemoryLayout<PixelData>.size)
+            ) else { return UIImage() }
+        
+        let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo:CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
+        
+        let cgim = CGImage(
+            width: forMap.width,
+            height: forMap.height,
+            bitsPerComponent: bitsPerComponent,
+            bitsPerPixel: bitsPerPixel,
+            bytesPerRow: forMap.width * (bitsPerPixel / bitsPerComponent),
+            space: rgbColorSpace,
+            bitmapInfo: bitmapInfo,
+            provider: providerRef,
+            decode: nil,
+            shouldInterpolate: true,
+            intent: .defaultIntent
+        )
+        
+        let image = UIImage(cgImage: cgim!)
         
         NSLog("\(#function) finished")
+        NSLog("\(#function): took " + String(format: "%.4f", CFAbsoluteTimeGetCurrent() - startTime));
         
         return image
     }
