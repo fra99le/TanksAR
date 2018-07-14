@@ -9,6 +9,14 @@
 import Foundation
 import UIKit
 
+// see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
+struct PixelData {
+    var a:UInt8 = 255
+    var r:UInt8
+    var g:UInt8
+    var b:UInt8
+}
+
 class ImageBuf : Codable {
     var width: Int = 0
     var height: Int = 0
@@ -223,32 +231,63 @@ class ImageBuf : Codable {
     
     func asUIImage() -> UIImage {
         //NSLog("\(#function) started")
+        let startTime : CFAbsoluteTime = CFAbsoluteTimeGetCurrent();
 
+        let bitsPerComponent:Int = 8
+        let bitsPerPixel:Int = 32
+        
+        assert(pixels.count == Int(width * height))
+        
         // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
-        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 1);
-
-        //NSLog("Converting \(width)x\(height) image to a UIImage.")
-        var image = UIImage()
-        if let context = UIGraphicsGetCurrentContext() {
-            for i in 0 ..< width {
-                for j in 0 ..< height {
-                    let pixel = getPixel(x: i, y: j)
-                    let (r, g, b) = valueToRGB(value: CGFloat(pixel))
-                    context.setFillColor(red: CGFloat(r)/256, green: CGFloat(g)/256, blue: CGFloat(b)/256, alpha: 1.0)
-
-                    context.fill(CGRect(x: CGFloat(i), y: CGFloat(j), width: 1, height: 1))
-                }
-            }
+        var pixelArray = [PixelData](repeating: PixelData(a: 255, r:0, g: 0, b: 0), count: width*height)
+        //UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 1);
+        
+        //NSLog("\(#function): Converting \(width)x\(height) image to a UIImage using CGDataProvider.")
+        //NSLog("copying data into pixelArray")
+        for i in 0 ..< pixels.count {
+            //let (r, g, b) = valueToRGB(value: CGFloat(pixels[i]))
+            let value = Int32(pixels[i] * 1_000_000)
+            let b = UInt8((value / 65536) % 256)
+            let g = UInt8((value / 256) % 256)
+            let r = UInt8(value % 256)
             
-            image = UIGraphicsGetImageFromCurrentImageContext()!;
+            pixelArray[i].r = r
+            pixelArray[i].g = g
+            pixelArray[i].b = b
+            pixelArray[i].a = 255
         }
-
-        UIGraphicsEndImageContext();
+        //NSLog("finished copying data to pixelArray")
+        
+        //var data = pixelArray // Copy to mutable []
+        guard let providerRef = CGDataProvider(
+            data: NSData(bytes: &pixelArray, length: pixelArray.count * MemoryLayout<PixelData>.size)
+            ) else { return UIImage() }
+        
+        let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo:CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
+        
+        let cgim = CGImage(
+            width: width,
+            height: height,
+            bitsPerComponent: bitsPerComponent,
+            bitsPerPixel: bitsPerPixel,
+            bytesPerRow: width * (bitsPerPixel / bitsPerComponent),
+            space: rgbColorSpace,
+            bitmapInfo: bitmapInfo,
+            provider: providerRef,
+            decode: nil,
+            shouldInterpolate: true,
+            intent: .defaultIntent
+        )
+        
+        let image = UIImage(cgImage: cgim!)
         
         //NSLog("\(#function) finished")
-
+        NSLog("\(#function): took " + String(format: "%.4f", CFAbsoluteTimeGetCurrent() - startTime));
+        
         return image
     }
+
     
     func asPNG() -> Data? {
         return UIImagePNGRepresentation(asUIImage())
