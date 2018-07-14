@@ -93,20 +93,20 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         // create the game board
         switch gameConfig.mode {
         case .blocks:
-            boardDrawer = GameViewBlockDrawer(model: gameModel, node: board, numPerSide: 50)
+            boardDrawer = GameViewBlockDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 50)
         case .plainTrigs:
-            boardDrawer = GameViewTrigDrawer(model: gameModel, node: board, numPerSide: 100)
+            boardDrawer = GameViewTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 100)
         case .coloredTrigs:
-            boardDrawer = GameViewColoredTrigDrawer(model: gameModel, node: board, numPerSide: 100)
+            boardDrawer = GameViewColoredTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 100)
         case .texturedTrigs:
-            boardDrawer = GameViewTexturedTrigDrawer(model: gameModel, node: board, numPerSide: 200)
+            boardDrawer = GameViewTexturedTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 200)
         }
+        boardDrawer.setupLighting()
         
         unplaceBoard()
         rotateGesture.delegate = self
         rescaleGesture.delegate = self
         
-        sceneView.autoenablesDefaultLighting = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -117,7 +117,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
 
         // Enable horizontal plane detection
         configuration.planeDetection = [.horizontal]
-
+        
+        // see: https://blog.markdaws.net/arkit-by-example-part-4-realism-lighting-pbr-b9a0bedb013e
+        configuration.isLightEstimationEnabled = true
+        
         // cause board placement to occur when view reappears
         // this causes problems with the weapons view
         //unplaceBoard()
@@ -147,6 +150,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         updateHUD()
 
         placeBoardGesture.require(toFail: backupPlaceBoardGesture)
+        //screenDraggingGesture.require(toFail: rotateGesture)
         
         // Run the view's session
         sceneView.session.run(configuration)
@@ -526,19 +530,23 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             let tank = player.tank
             tankNode.position = boardDrawer.fromModelSpace(tank.position)
             tankNode.scale = SCNVector3(tankScale,tankScale,tankScale)
-            //tankNode.eulerAngles.x = Float.pi / 2
-            users[i].tank = tankNode
             
-            NSLog("Adding tank at \(tankNode.position)")
+            NSLog("(re)Adding tank at \(tankNode.position)")
+            boardDrawer.tankNodes[i].removeFromParentNode()
             board.addChildNode(tankNode)
             boardDrawer.tankNodes[i] = tankNode
+            users[i].tank = tankNode
         }
         NSLog("\(#function) finished")
     }
     
     func removeTanks() {
         for i in 0..<gameModel.board.players.count {
-            users[i].tank?.removeFromParentNode()
+            guard let tank = users[i].tank else { continue }
+            tank.removeFromParentNode()
+            if i < users.count {
+                users[i].tank = nil
+            }
         }
     }
     
