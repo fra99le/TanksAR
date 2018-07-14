@@ -162,9 +162,9 @@ class ImageBuf : Codable {
         
         let avg = Double(sum) / Double(count)
 
-        let sizeRatio = 2 * Double(size) / Double(width)
+        let sizeRatio = 1 * Double(size) / Double(width)
         let randomScale = Double(noiseLevel) * pow(sizeRatio, 1)
-        let noise = randomScale * (drand48()*randomScale - randomScale/2)
+        let noise = 2*(drand48()*randomScale - randomScale/2)
         //let noise = CGFloat(0)
         let value = avg + noise
         
