@@ -60,6 +60,10 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         let colorImage = gameModel.colorMap(forMap: withColors)
         geometry.firstMaterial?.diffuse.contents = colorImage
         //geometry.firstMaterial?.diffuse.contents = UIColor.green
+        
+        // computing the normal map is very very slow, it's also not right
+        //let normalMap = gameModel.normalMap(forMap: forSurface)
+        //geometry.firstMaterial?.normal.contents = normalMap
 
         let node = SCNNode(geometry: geometry)
 

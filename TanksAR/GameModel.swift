@@ -447,6 +447,47 @@ class GameModel : Codable {
         return image
     }
     
+    func normalMap() -> UIImage {
+        return normalMap(forMap: board.surface)
+    }
+    
+    func normalMap(forMap: ImageBuf) -> UIImage {
+        NSLog("\(#function) started")
+        let startTime : CFAbsoluteTime = CFAbsoluteTimeGetCurrent();
+
+        // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: forMap.width, height: forMap.height), true, 1);
+        
+        var image = UIImage()
+        if let context = UIGraphicsGetCurrentContext() {
+            for i in 0 ..< forMap.width {
+                for j in 0 ..< forMap.height {
+                    let normal = vectorNormalize(getNormal(fromMap: forMap,
+                                                           longitude: i,
+                                                           latitude: j,
+                                                           sampleDist: 1))
+                    
+                    // this needs to be in scene view space, not model space
+                    context.setFillColor(red: CGFloat(normal.x),
+                                         green: CGFloat(normal.z),
+                                         blue: CGFloat(normal.y),
+                                         alpha: 1.0)
+                    
+                    context.fill(CGRect(x: CGFloat(i), y: CGFloat(j), width: 1, height: 1))
+                }
+            }
+            
+            image = UIGraphicsGetImageFromCurrentImageContext()!;
+        }
+        
+        UIGraphicsEndImageContext();
+        
+        NSLog("\(#function) finished")
+        NSLog("\(#function): took " + String(format: "%.4f", CFAbsoluteTimeGetCurrent() - startTime));
+        
+        return image
+    }
+
     func placeTanks(withMargin: Int = 50, minDist: Int = 100) {
         NSLog("\(#function) started")
         var tanksPlaced = 0
