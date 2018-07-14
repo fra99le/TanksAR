@@ -15,7 +15,7 @@ struct GameState : Codable {
 
 class MenuViewController: UIViewController {
 
-    var gameConfig = GameConfig(numHumans: 1, numAIs: 1, numRounds: 3, mode: .coloredTrigs)
+    var gameConfig = GameConfig(numHumans: 1, numAIs: 1, numRounds: 3, mode: .texturedTrigs)
     var gameState: GameState? = nil
     let autoResume = false
     
@@ -147,12 +147,12 @@ class MenuViewController: UIViewController {
 
     @IBAction func modeTapped(_ sender: UIButton) {
         switch gameConfig.mode {
+        case .texturedTrigs:
+            gameConfig.mode = .coloredTrigs
         case .coloredTrigs:
             gameConfig.mode = .blocks
         case .blocks:
             gameConfig.mode = .texturedTrigs
-        case .texturedTrigs:
-            gameConfig.mode = .coloredTrigs
         default:
             gameConfig.mode = .blocks
         }
