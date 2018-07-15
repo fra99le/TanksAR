@@ -106,6 +106,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         unplaceBoard()
         rotateGesture.delegate = self
         rescaleGesture.delegate = self
+        screenDraggingGesture.delegate = self
         
     }
     
@@ -338,11 +339,23 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
 
     // see: https://stackoverflow.com/questions/30829973/simultaneous-gesture-recognition-for-specific-gestures
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        if (gestureRecognizer is UIPanGestureRecognizer || gestureRecognizer is UIRotationGestureRecognizer) {
+        
+        // allow simultaneous pinching and zooming
+        if (gestureRecognizer is UIPinchGestureRecognizer &&
+            otherGestureRecognizer is UIRotationGestureRecognizer) {
             return true
-        } else {
+        }
+        if (otherGestureRecognizer is UIPinchGestureRecognizer &&
+            gestureRecognizer is UIRotationGestureRecognizer) {
+            return true
+        }
+        
+        // disable panning when pinching and zooming
+        if(gestureRecognizer is UIPanGestureRecognizer) {
             return false
         }
+        
+        return false
     }
     
     // MARK: - UI element actions
