@@ -12,6 +12,7 @@ import SceneKit
 class GameViewTrigDrawer : GameViewDrawer {
     
     var surface = SCNNode()
+    var newBottomSurface = SCNNode()
     var dropSurface = SCNNode()
     var edgeNode = SCNNode()
     
@@ -32,18 +33,18 @@ class GameViewTrigDrawer : GameViewDrawer {
                        y: y / (boardSize-1))
     }
     
-    func surfaceGeometry(useNormals: Bool = false) -> SCNGeometry {
-        return surfaceGeometry(forSurface: gameModel.board.surface, useNormals: useNormals)
+    func surfaceNode(useNormals: Bool = false, useTexture: Bool = false) -> SCNNode {
+        return surfaceNode(forSurface: gameModel.board.surface, useNormals: useNormals, withColors: gameModel.board.colors)
     }
     
-    func surfaceGeometry(forSurface: ImageBuf, useNormals: Bool = false) -> SCNGeometry {
+    func surfaceNode(forSurface: ImageBuf, useNormals: Bool = false, withColors: ImageBuf?, colors: [Any] = [UIColor.green]) -> SCNNode {
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         
         // draw board surface
         var vertices: [SCNVector3] = []
         var texCoords: [CGPoint] = []
         var normals: [SCNVector3] = []
-        var indices: [CInt] = []
+        var indices: [[CInt]] = [[CInt]](repeating: [], count: colors.count)
         var pos: CInt = 0
         for i in 0...numPerSide {
             for j in 0...numPerSide {
@@ -59,33 +60,59 @@ class GameViewTrigDrawer : GameViewDrawer {
                 normals.append(fromModelScale(n))
 
                 if i < numPerSide && j < numPerSide {
-                    indices.append(pos)
-                    indices.append(pos+1)
-                    indices.append(pos+CInt(numPerSide)+2)
+                    let cx = Int((CGFloat(i) + 1/3.0) * edgeSize)
+                    let cy = Int((CGFloat(j) + 2/3.0) * edgeSize)
+
+                    var colorIndex = 0
+                    if let colorMap = withColors {
+                        colorIndex = gameModel.getColorIndex(forMap: colorMap, longitude: cx, latitude: cy) % indices.count
+                    }
                     
-                    indices.append(pos)
-                    indices.append(pos+CInt(numPerSide)+2)
-                    indices.append(pos+CInt(numPerSide)+1)
+                    indices[colorIndex].append(pos)
+                    indices[colorIndex].append(pos+1)
+                    indices[colorIndex].append(pos+CInt(numPerSide)+2)
+                }
+                
+                if i < numPerSide && j < numPerSide {
+                    let cx = Int((CGFloat(i) + 2/3.0) * edgeSize)
+                    let cy = Int((CGFloat(j) + 1/3.0) * edgeSize)
+                    
+                    var colorIndex = 0
+                    if let colorMap = withColors {
+                        colorIndex = gameModel.getColorIndex(forMap: colorMap, longitude: cx, latitude: cy) % indices.count
+                    }
+                    
+                    indices[colorIndex].append(pos)
+                    indices[colorIndex].append(pos+CInt(numPerSide)+2)
+                    indices[colorIndex].append(pos+CInt(numPerSide)+1)
                 }
                 pos += 1
             }
         }
         NSLog("\(vertices.count) surface vertices, \(indices.count) surface indices, pos=\(pos)")
-        
+
         // create geometry for surface
-        let elements = SCNGeometryElement(indices: indices, primitiveType: .triangles)
+        let surfaceNode = SCNNode()
         let vertexSource = SCNGeometrySource(vertices: vertices)
         let texSource = SCNGeometrySource(textureCoordinates: texCoords)
-        var geometry: SCNGeometry!
-        if useNormals {
-            let normalSource = SCNGeometrySource(normals: normals)
-            geometry = SCNGeometry(sources: [vertexSource, texSource, normalSource], elements: [elements])
-        } else {
-            geometry = SCNGeometry(sources: [vertexSource, texSource], elements: [elements])
-        }
-        geometry.firstMaterial?.diffuse.contents = UIColor.green
 
-        return geometry
+        // create geometry for surface
+        for i in 0..<colors.count {
+            let elements = SCNGeometryElement(indices: indices[i], primitiveType: .triangles)
+            var geometry: SCNGeometry!
+            var sources = [vertexSource, texSource]
+            if useNormals {
+                let normalSource = SCNGeometrySource(normals: normals)
+                sources.append(normalSource)
+            }
+            geometry = SCNGeometry(sources: sources, elements: [elements])
+            geometry.firstMaterial?.diffuse.contents = colors[i]
+            
+            let coloredNode = SCNNode(geometry: geometry)
+            surfaceNode.addChildNode(coloredNode)
+        }
+
+        return surfaceNode
     }
     
     func edgeGeometry() -> SCNGeometry {
@@ -195,8 +222,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         
         // (re)create surface
         surface.removeFromParentNode()
-        let surfaceShape = surfaceGeometry()
-        surface = SCNNode(geometry: surfaceShape)
+        surface = surfaceNode()
         board.addChildNode(surface)
         
         // (re)create edges
@@ -499,11 +525,18 @@ class GameViewTrigDrawer : GameViewDrawer {
         NSLog("\(dropVertices0.count) drop vertices, \(dropIndices.count) drop indices")
         
         // setup reveal of the new bottom surface
-        let bottomGeometry = surfaceGeometry()
-        bottomGeometry.firstMaterial = surface.geometry?.firstMaterial
+        newBottomSurface.removeFromParentNode()
+        newBottomSurface = surfaceNode(forSurface: fireResult.bottom, withColors: fireResult.bottomColor)
+        newBottomSurface.isHidden = true
+        board.addChildNode(newBottomSurface)
+        
         surface.name = "The Surface"
-        surface.morpher = SCNMorpher()
-        surface.morpher?.targets = [surface.geometry!, bottomGeometry]
+        let hideOldSurface = SCNAction.sequence([.wait(duration: currTime),
+                                                 .hide()])
+        let showNewSurface = SCNAction.sequence([.wait(duration: currTime),
+                                                 .unhide()])
+        surface.runAction(hideOldSurface)
+        newBottomSurface.runAction(showNewSurface)
         
         // setup reveal of new edges
         let newEdgeGeometry = edgeGeometry()
@@ -513,16 +546,14 @@ class GameViewTrigDrawer : GameViewDrawer {
         edgeNode.morpher?.targets = [edgeNode.geometry!, newEdgeGeometry]
         
         // add actions to reveal new surface and edges
-        let resurfaceActions = [.wait(duration: currTime),
-                                SCNAction.customAction(duration: 0, action: {node, time in
-                                    if time == 0 && (node.morpher?.targets.count)! >= 2 {
-                                        // must used setWeight, array notation will crash
-                                        node.morpher?.setWeight(1, forTargetAt: 1)
-                                    }
-                                })]
-        let resurface = SCNAction.sequence(resurfaceActions)
-        surface.runAction(resurface)
-        let reEdge = SCNAction.sequence(resurfaceActions)
+        let reEdgeActions = [.wait(duration: currTime),
+                             SCNAction.customAction(duration: 0, action: {node, time in
+                                if time == 0 && (node.morpher?.targets.count)! >= 2 {
+                                    // must used setWeight, array notation will crash
+                                    node.morpher?.setWeight(1, forTargetAt: 1)
+                                }
+                             })]
+        let reEdge = SCNAction.sequence(reEdgeActions)
         edgeNode.runAction(reEdge)
 
         // setup dropping surface

@@ -11,82 +11,15 @@ import SceneKit
 
 class GameViewColoredTrigDrawer : GameViewTrigDrawer {
     
-    var newBottomSurface = SCNNode()
     var dropSurfaces: [SCNNode] = []
     let colors = [UIColor.green, UIColor.brown]
-
-    func surfaceNode() -> SCNNode {
-        return surfaceNode(forSurface: gameModel.board.surface, withColors: gameModel.board.colors)
-    }
-    
-    func surfaceNode(forSurface: ImageBuf, withColors: ImageBuf) -> SCNNode {
-        let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
-        
-        // draw board surface
-        var vertices: [SCNVector3] = []
-        //var normals: [SCNVector3] = []
-        var indices: [[CInt]] = [[CInt]](repeating: [], count: colors.count)
-        var pos: CInt = 0
-
-        for i in 0...numPerSide {
-            for j in 0...numPerSide {
-                
-                let x = CGFloat(i)*edgeSize
-                let y = CGFloat(j)*edgeSize
-                let z = CGFloat(gameModel.getElevation(fromMap: forSurface, longitude: Int(x), latitude: Int(y)))
-                
-                vertices.append(fromModelSpace(Vector3(x,y,z)))
-                
-                if i < numPerSide && j < numPerSide {
-                    let cx = Int((CGFloat(i) + 1/3.0) * edgeSize)
-                    let cy = Int((CGFloat(j) + 2/3.0) * edgeSize)
-                    
-                    let colorIndex = gameModel.getColorIndex(forMap: withColors, longitude: cx, latitude: cy)
-                    guard colorIndex < indices.count else { continue }
-                    
-                    indices[colorIndex].append(pos)
-                    indices[colorIndex].append(pos+1)
-                    indices[colorIndex].append(pos+CInt(numPerSide)+2)
-                }
-                
-                if i < numPerSide && j < numPerSide {
-                    let cx = Int((CGFloat(i) + 2/3.0) * edgeSize)
-                    let cy = Int((CGFloat(j) + 1/3.0) * edgeSize)
-                    
-                    let colorIndex = gameModel.getColorIndex(forMap: withColors, longitude: cx, latitude: cy)
-                    guard colorIndex < indices.count else { continue }
-
-                    indices[colorIndex].append(pos)
-                    indices[colorIndex].append(pos+CInt(numPerSide)+2)
-                    indices[colorIndex].append(pos+CInt(numPerSide)+1)
-                }
-                pos += 1
-            }
-        }
-        NSLog("\(vertices.count) surface vertices, \(indices.count) surface indices, pos=\(pos)")
-        
-        // create geometry for surface
-        let surfaceNode = SCNNode()
-        
-        for i in 0..<colors.count {
-            let vertexSource = SCNGeometrySource(vertices: vertices)
-            let elements = SCNGeometryElement(indices: indices[i], primitiveType: .triangles)
-            let geometry = SCNGeometry(sources: [vertexSource], elements: [elements])
-            geometry.firstMaterial?.diffuse.contents = colors[i]
-            
-            let coloredNode = SCNNode(geometry: geometry)
-            surfaceNode.addChildNode(coloredNode)
-        }
-        
-        return surfaceNode
-    }
     
     override func updateBoard() {
         NSLog("\(#function) started")
         
         // (re)create surface
         surface.removeFromParentNode()
-        surface = surfaceNode()
+        surface = surfaceNode(forSurface: gameModel.board.surface, useNormals: false, withColors: gameModel.board.colors, colors: colors)
         board.addChildNode(surface)
         
         // (re)create edges
@@ -400,7 +333,7 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
         
         // setup reveal of the new bottom surface
         newBottomSurface.removeFromParentNode()
-        newBottomSurface = surfaceNode(forSurface: fireResult.bottom, withColors: fireResult.bottomColor)
+        newBottomSurface = surfaceNode(forSurface: fireResult.bottom, useNormals: false, withColors: fireResult.bottomColor, colors: colors)
         newBottomSurface.isHidden = true
         board.addChildNode(newBottomSurface)
 
