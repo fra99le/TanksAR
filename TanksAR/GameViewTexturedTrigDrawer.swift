@@ -11,7 +11,6 @@ import SceneKit
 
 class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
    
-    var newBottomSurface = SCNNode()
     var ambientLight = SCNNode()
     var ecliptic = SCNNode()
     var sun = SCNNode()
@@ -60,17 +59,13 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
     }
     
     func surfaceNode(forSurface: ImageBuf, withColors: ImageBuf) -> SCNNode {
-        let geometry = surfaceGeometry(forSurface: forSurface, useNormals: true)
-        geometry.firstMaterial?.isLitPerPixel = true
         let colorImage = gameModel.colorMap(forMap: withColors)
-        geometry.firstMaterial?.diffuse.contents = colorImage
-        //geometry.firstMaterial?.diffuse.contents = UIColor.green
+        let node = super.surfaceNode(forSurface: forSurface, useNormals: true, withColors: withColors, colors: [colorImage])
+        node.geometry?.firstMaterial?.isLitPerPixel = true
         
         // computing the normal map is very very slow, it's also not right
         //let normalMap = gameModel.normalMap(forMap: forSurface)
-        //geometry.firstMaterial?.normal.contents = normalMap
-
-        let node = SCNNode(geometry: geometry)
+        //node.geometry.firstMaterial?.normal.contents = normalMap
 
         return node
     }
@@ -89,7 +84,7 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         
         // (re)create surface
         surface.removeFromParentNode()
-        surface = surfaceNode()
+        surface = surfaceNode(forSurface: gameModel.board.surface, useNormals: true, withColors: gameModel.board.colors, colors: [gameModel.colorMap()])
         board.addChildNode(surface)
         
         // (re)create edges
