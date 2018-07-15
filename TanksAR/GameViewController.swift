@@ -820,7 +820,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         prevTraj.removeFromParentNode()
         prevTraj = SCNNode()
         addTrajectory(trajectory: player.prevTrajectory, toNode: prevTraj, color: UIColor.yellow)
-        prevTraj.opacity = 0.5
         board.addChildNode(prevTraj)
         
         // update board
