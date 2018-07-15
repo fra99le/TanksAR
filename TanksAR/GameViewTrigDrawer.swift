@@ -33,7 +33,11 @@ class GameViewTrigDrawer : GameViewDrawer {
                        y: y / (boardSize-1))
     }
     
-    func surfaceNode(useNormals: Bool = false, useTexture: Bool = false) -> SCNNode {
+    func surfaceNode() -> SCNNode {
+        return surfaceNode(useNormals: false)
+    }
+
+    func surfaceNode(useNormals: Bool = false) -> SCNNode {
         return surfaceNode(forSurface: gameModel.board.surface, useNormals: useNormals, withColors: gameModel.board.colors)
     }
     
