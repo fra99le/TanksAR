@@ -41,7 +41,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     var board = SCNNode()
     var prevTraj = SCNNode()
     var currTraj = SCNNode()
-    var gameModel = GameModel()
+    var gameModel: GameModel = GameModel()
     var users: [UserConfig] = []
     var humanLeft: Int {
         let players = gameModel.board.players
@@ -84,7 +84,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         sceneView.delegate = self
         
         // Show statistics such as fps and timing information
-        sceneView.showsStatistics = false
+        sceneView.showsStatistics = true
         
         // see: https://stackoverflow.com/questions/24046164/how-do-i-get-a-reference-to-the-app-delegate-in-swift
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -388,8 +388,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         gameModel.gameStarted = false
         disableUI()
         unplaceBoard()
-        gameModel = GameModel()
-        boardDrawer.gameModel = gameModel
         gameOver = true
         users = []
         if let saveStateController = saveStateController as? MenuViewController {
@@ -600,9 +598,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         
         // record result for AIs
         let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
-        if let ai = gameModel.board.players[fireResult.playerID].ai {
+        if let ai = gameModel.board.players[fireResult.playerID].ai,
+            let impact = fireResult.trajectory.last {
             // player is an AI
-            let impact = fireResult.trajectory.last!
             ai.recordResult(gameModel: gameModel, azimuth: tank.azimuth, altitude: tank.altitude, velocity: tank.velocity,
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
         }
