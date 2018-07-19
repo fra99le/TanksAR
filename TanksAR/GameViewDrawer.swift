@@ -21,6 +21,7 @@ class GameViewDrawer {
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var timeScaling: Double = 3
     let dropTime: Double = 1.5
+    //let dropTime: Double = 10 // for debugging purposes
 
     init(sceneView: ARSCNView, model: GameModel, node: SCNNode, numPerSide: Int) {
         gameModel = model
