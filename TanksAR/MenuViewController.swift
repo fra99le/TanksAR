@@ -105,6 +105,7 @@ class MenuViewController: UIViewController {
                 NSLog("\(#function) starting \(dest.gameConfig.numRounds) round game with \(dest.gameConfig.numHumans) humans and \(dest.gameConfig.numAIs) Als.")
                 dest.gameConfig = gameConfig;
                 dest.gameModel = GameModel()
+                //dest.gameModel = TestGameModel()    // for debugging
                 dest.gameOver = false
             } else {
                 NSLog("Unknown segue identifier: \(segue.identifier!)")
