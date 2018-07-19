@@ -652,6 +652,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             boardDrawer.timeScaling = 3
             updateUI()
             enableUI()
+            
+            // restore board
+            if let testModel = gameModel as? TestGameModel {
+                if testModel.board.currentPlayer % 2 != 0 {
+                    testModel.initializeBoard()
+                }
+            }
+
         }
 
         NSLog("\(#function) finished")
