@@ -140,6 +140,7 @@ struct FireResult {
     var timeStep: Float = 1
     var trajectory: [Vector3] = []
     var explosionRadius: Float = 100
+    var weaponStyle: WeaponStyle
     
     // data needed to animate board
     var old: ImageBuf
@@ -651,6 +652,7 @@ class GameModel : Codable {
                                             timeStep: timeStep,
                                             trajectory: trajectory,
                                             explosionRadius: blastRadius,
+                                            weaponStyle: weapon.style,
                                             old: old,
                                             top: top,
                                             middle: middle,
