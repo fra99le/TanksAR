@@ -147,11 +147,13 @@ struct FireResult {
     var top: ImageBuf
     var middle: ImageBuf
     var bottom: ImageBuf
+    var final: ImageBuf
 
     // data needed color updates properly
     var oldColor: ImageBuf
     var topColor: ImageBuf
     var bottomColor: ImageBuf
+    var finalColor: ImageBuf
     
     var newRound: Bool
     var roundWinner: String?
@@ -617,12 +619,12 @@ class GameModel : Codable {
         
         // update board with new values
         let sizeID = board.players[board.currentPlayer].weaponSizeID
-        let old = ImageBuf()
-        let oldColor = ImageBuf()
-        old.copy(board.surface)
-        oldColor.copy(board.colors)
+        let old = ImageBuf(board.surface)
+        let oldColor = ImageBuf(board.colors)
         let (top, middle, bottom, topColors, bottomColors) = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
         damageCheck(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
+        let final = ImageBuf(board.surface)
+        let finalColor = ImageBuf(board.colors)
         
         // check for round winner before checking/starting new round
         var roundWinner: String? = nil
@@ -657,9 +659,11 @@ class GameModel : Codable {
                                             top: top,
                                             middle: middle,
                                             bottom: bottom,
+                                            final: final,
                                             oldColor: oldColor,
                                             topColor: topColors,
                                             bottomColor: bottomColors,
+                                            finalColor: finalColor,
                                             newRound: roundEnded,
                                             roundWinner: roundWinner)
         

@@ -322,7 +322,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                     let top = gameModel.getElevation(fromMap: fireResult.top, longitude: Int(x), latitude: Int(y))
                     let middle = gameModel.getElevation(fromMap: fireResult.middle, longitude: Int(x), latitude: Int(y))
                     let bottom = gameModel.getElevation(fromMap: fireResult.bottom, longitude: Int(x), latitude: Int(y))
-                    let new = gameModel.getElevation(fromMap: gameModel.board.surface, longitude: Int(x), latitude: Int(y))
+                    let new = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x), latitude: Int(y))
                     // NSLog("\(#function) i,j: \(i),\(j), k: \(k), current: \(current), top: \(top), middle: \(middle), bottom: \(bottom)")
                     
                     // record elevations for each point
@@ -457,7 +457,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                         // final position
                         let x1_1 = xArr[dropIdxs[0]]
                         let y1_1 = yArr[dropIdxs[0]]
-                        let z1_1 = gameModel.getElevation(fromMap: gameModel.board.surface, longitude: Int(x1_1), latitude: Int(y1_1))
+                        let z1_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x1_1), latitude: Int(y1_1))
                         let v1_1 = Vector3(x1_1, y1_1, CGFloat(z1_1))
                         
                         let x2_1 = xArr[dropIdxs[0]]
@@ -467,7 +467,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                         
                         let x3_1 = xArr[dropIdxs[1]]
                         let y3_1 = yArr[dropIdxs[1]]
-                        let z3_1 = gameModel.getElevation(fromMap: gameModel.board.surface, longitude: Int(x3_1), latitude: Int(y3_1))
+                        let z3_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x3_1), latitude: Int(y3_1))
                         let v3_1 = Vector3(x3_1, y3_1, CGFloat(z3_1))
                         
                         let x4_1 = xArr[dropIdxs[1]]
@@ -477,7 +477,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                         
                         let x5_1 = xArr[unchangedIdxs[0]]
                         let y5_1 = yArr[unchangedIdxs[0]]
-                        let z5_1 = gameModel.getElevation(fromMap: gameModel.board.surface, longitude: Int(x5_1), latitude: Int(y5_1))
+                        let z5_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x5_1), latitude: Int(y5_1))
                         let v5_1 = Vector3(x5_1, y5_1, CGFloat(z5_1))
                         
                         let normal0_1 = gameModel.getNormal(longitude: Int(x1_1), latitude: Int(y1_1))
@@ -563,17 +563,17 @@ class GameViewTrigDrawer : GameViewDrawer {
                             z0 = topArr[k]
                             z1 = bottomArr[k] + (topArr[k] - middleArr[k])
                             norm0 = gameModel.getNormal(fromMap: fireResult.top, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: gameModel.board.surface, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                         } else if displaceArr[k] {
                             z0 = bottomArr[k]
                             z1 = bottomArr[k]
                             norm0 = gameModel.getNormal(fromMap: fireResult.bottom, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: fireResult.bottom, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                         } else if unchangedArr[k] {
                             z0 = currentArr[k]
                             z1 = currentArr[k]
                             norm0 = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: gameModel.board.surface, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                         } else {
                             NSLog("This is bad (line \(#line)), i,j=\(i),\(j); k=\(k), \(dropArr[k]), \(displaceArr[k]), \(unchangedArr[k])")
                             NSLog("\(currentArr[k]) -> \(topArr[k]) > \(middleArr[k]) > \(bottomArr[k]) -> \(newArr[k])")

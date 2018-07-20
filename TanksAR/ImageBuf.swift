@@ -25,6 +25,13 @@ class ImageBuf : Codable {
     let noiseLevel: Float = 10
     //let noiseLevel: Float = 0
     
+    init() {
+    }
+    
+    init(_ copyOf: ImageBuf) {
+        copy(copyOf)
+    }
+    
     func setSize(width: Int, height: Int) {
         self.width = width
         self.height = height

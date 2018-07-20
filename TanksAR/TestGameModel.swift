@@ -81,6 +81,8 @@ class TestGameModel : GameModel {
         old.copy(board.surface)
         oldColor.copy(board.colors)
         let (top, middle, bottom, topColors, bottomColors) = applyExplosion(at: Vector3(), withRadius: weaponSize, andStyle: weapon.style)
+        let final = ImageBuf(board.surface)
+        let finalColor = ImageBuf(board.colors)
         
         // check for round winner before checking/starting new round
         var roundWinner: String? = nil
@@ -119,9 +121,11 @@ class TestGameModel : GameModel {
                                             top: top,
                                             middle: middle,
                                             bottom: bottom,
+                                            final: final,
                                             oldColor: oldColor,
                                             topColor: topColors,
                                             bottomColor: bottomColors,
+                                            finalColor: finalColor,
                                             newRound: roundEnded,
                                             roundWinner: roundWinner)
         
