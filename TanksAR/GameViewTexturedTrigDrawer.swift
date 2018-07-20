@@ -57,7 +57,6 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
     override func surfaceNode(forSurface: ImageBuf, useNormals: Bool = false, withColors: ImageBuf?, colors: [Any] = [UIColor.green]) -> SCNNode {
         let colorImage = gameModel.colorMap(forMap: withColors!)
         let node = super.surfaceNode(forSurface: forSurface, useNormals: true, withColors: withColors, colors: [colorImage])
-        node.geometry?.firstMaterial?.isLitPerPixel = true
         
         // computing the normal map is very very slow, it's also not right
         //let normalMap = gameModel.normalMap(forMap: forSurface)

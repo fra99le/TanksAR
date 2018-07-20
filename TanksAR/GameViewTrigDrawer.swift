@@ -111,6 +111,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                 sources.append(normalSource)
             }
             geometry = SCNGeometry(sources: sources, elements: [elements])
+            geometry.firstMaterial?.isLitPerPixel = useNormals
             geometry.firstMaterial?.diffuse.contents = colors[i]
             
             let coloredNode = SCNNode(geometry: geometry)
@@ -371,17 +372,17 @@ class GameViewTrigDrawer : GameViewDrawer {
                     
                     // enumeration of possible triangles:
                     // (d=drops, i=displaced, u=unchanged)
-                    // d,i,u
-                    // 3,0,0    all drop (easiest drop case)
-                    // 0,3,0    newBottomSurface
-                    // 0,0,3    nothing happens (except to the normals)
-                    // 2,1,0    convert to 3,0,0
-                    // 2,0,1    one remains attached
-                    // 1,2,0    convert to 3,0,0
-                    // 0,2,1    newBottomSurface
-                    // 1,0,2    two remain attached
-                    // 0,1,2    newBottomSurface
-                    // 1,1,1    one of each
+                    // n: d,i,u
+                    // 0: 3,0,0    all drop (easiest drop case)
+                    // 1: 0,3,0    newBottomSurface
+                    // 2: 0,0,3    nothing happens (except to the normals)
+                    // 3: 2,1,0    convert to 3,0,0
+                    // 4: 2,0,1    one remains attached
+                    // 5: 1,2,0    convert to 3,0,0
+                    // 6: 0,2,1    newBottomSurface
+                    // 7: 1,0,2    two remain attached
+                    // 8: 0,1,2    newBottomSurface
+                    // 9: 1,1,1    one of each
                     
                     // for debugging
 //                    showOnly = dropCases[4]
@@ -406,13 +407,20 @@ class GameViewTrigDrawer : GameViewDrawer {
                         continue
                     }
 
-                    if fireResult.weaponStyle == .generative &&
-                        ((numDropping == 2 && numUnchanged == 1) ||
-                            (numDropping == 1 && numUnchanged == 2)) {
-                        // 2,0,1 and 1,0,2 are problematic for .generative weapons
-                        if numDropping == 1 && numUnchanged == 2 {
-                            continue
-                        }
+                    let explosionZ = CGFloat((fireResult.trajectory.last?.z)!)
+                    if (numDropping == 1 && numUnchanged == 2) &&
+                        (bottomArr[unchangedIdxs[0]] < explosionZ) {
+                        // 1,0,2
+                        // problematic for .generative weapons near the edges
+                        continue
+                    } else if (numDropping == 2 && numUnchanged == 1) &&
+                        (bottomArr[unchangedIdxs[0]] < explosionZ) {
+                        // 2,0,1
+                        
+                        // if the unchanged point is above the explosion,
+                        // then it is save to attach the dropping points to it.
+                        // if the unchanged point is below the dropping one,
+                        // it is probably disconnected.
                         
                         // need to cap edge for 2,0,1 case
                         
@@ -701,6 +709,8 @@ class GameViewTrigDrawer : GameViewDrawer {
                 let dropGeometry1 = SCNGeometry(sources: sources1, elements: [elements])
                 dropGeometry0.firstMaterial?.diffuse.contents = colors[i]
                 dropGeometry1.firstMaterial?.diffuse.contents = colors[i]
+                dropGeometry0.firstMaterial?.isLitPerPixel = useNormals
+                dropGeometry1.firstMaterial?.isLitPerPixel = useNormals
                 dropGeometry0.firstMaterial?.isDoubleSided = true
                 dropGeometry1.firstMaterial?.isDoubleSided = true
 
@@ -723,7 +733,8 @@ class GameViewTrigDrawer : GameViewDrawer {
         }
         NSLog("drop/bottom surface appear at time \(currTime)")
         if dropNeeded {
-            currTime += 2*dropTime
+            currTime += dropTime
+            //currTime += dropTime
         }
         NSLog("board settled at time \(currTime).")
         
