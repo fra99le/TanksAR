@@ -65,8 +65,8 @@ class GameViewTrigDrawer : GameViewDrawer {
                 normals.append(fromModelScale(n))
 
                 if i < numPerSide && j < numPerSide {
-                    let cx = Int((CGFloat(i) + 1/3.0) * edgeSize)
-                    let cy = Int((CGFloat(j) + 2/3.0) * edgeSize)
+                    let cx = Int(CGFloat(i) * edgeSize + 1.0/3.0 * edgeSize)
+                    let cy = Int(CGFloat(j) * edgeSize + 2.0/3.0 * edgeSize)
 
                     var colorIndex = 0
                     if let colorMap = withColors {
@@ -79,8 +79,8 @@ class GameViewTrigDrawer : GameViewDrawer {
                 }
                 
                 if i < numPerSide && j < numPerSide {
-                    let cx = Int((CGFloat(i) + 2/3.0) * edgeSize)
-                    let cy = Int((CGFloat(j) + 1/3.0) * edgeSize)
+                    let cx = Int(CGFloat(i) * edgeSize + 2.0/3.0 * edgeSize)
+                    let cy = Int(CGFloat(j) * edgeSize + 1.0/3.0 * edgeSize)
                     
                     var colorIndex = 0
                     if let colorMap = withColors {
@@ -360,7 +360,9 @@ class GameViewTrigDrawer : GameViewDrawer {
                     // determine color index
                     let colorX = Int((xArr[p[0]] + xArr[p[1]] + xArr[p[2]]) / 3)
                     let colorY = Int((yArr[p[0]] + yArr[p[1]] + yArr[p[2]]) / 3)
-                    let colorIndex = gameModel.getColorIndex(forMap: fireResult.topColor, longitude: colorX, latitude: colorY) % colors.count
+                    let colorIndex = gameModel.getColorIndex(forMap: fireResult.topColor,
+                                                             longitude: colorX,
+                                                             latitude: colorY) % colors.count
                     
                     let numDropping = dropIdxs.count
                     let numDisplaced = displaceIdxs.count
