@@ -121,6 +121,10 @@ class GameViewTrigDrawer : GameViewDrawer {
     }
     
     func edgeGeometry() -> SCNGeometry {
+        return edgeGeometry(forSurface: gameModel.board.surface)
+    }
+    
+    func edgeGeometry(forSurface: ImageBuf) -> SCNGeometry {
         // draw board edges and base
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         var edgeVerts: [SCNVector3] = []
@@ -131,7 +135,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             // top edge (+y)
             let x = CGFloat(numPerSide-i)*edgeSize
             let y = CGFloat(numPerSide)*edgeSize
-            let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+            let z = CGFloat(gameModel.getElevation(fromMap: forSurface, longitude: Int(x), latitude: Int(y)))
             edgeVerts.append(fromModelSpace(Vector3(x,y,0)))
             edgeVerts.append(fromModelSpace(Vector3(x,y,z)))
 
@@ -152,7 +156,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             // bottom edge (y=0)
             let x = CGFloat(i)*edgeSize
             let y = CGFloat(0)*edgeSize
-            let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+            let z = CGFloat(gameModel.getElevation(fromMap: forSurface, longitude: Int(x), latitude: Int(y)))
             edgeVerts.append(fromModelSpace(Vector3(x,y,0)))
             edgeVerts.append(fromModelSpace(Vector3(x,y,z)))
 
@@ -173,7 +177,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             // left edge (x=0)
             let x = CGFloat(0)*edgeSize
             let y = CGFloat(numPerSide-i)*edgeSize
-            let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+            let z = CGFloat(gameModel.getElevation(fromMap: forSurface, longitude: Int(x), latitude: Int(y)))
             edgeVerts.append(fromModelSpace(Vector3(x,y,0)))
             edgeVerts.append(fromModelSpace(Vector3(x,y,z)))
 
@@ -194,7 +198,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             // right edge (+x)
             let x = CGFloat(numPerSide)*edgeSize
             let y = CGFloat(i)*edgeSize
-            let z = CGFloat(gameModel.getElevation(longitude: Int(x), latitude: Int(y)))
+            let z = CGFloat(gameModel.getElevation(fromMap: forSurface, longitude: Int(x), latitude: Int(y)))
             edgeVerts.append(fromModelSpace(Vector3(x,y,0)))
             edgeVerts.append(fromModelSpace(Vector3(x,y,z)))
             
@@ -631,7 +635,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         newBottomSurface.runAction(showNewSurface)
         
         // setup reveal of new edges
-        let newEdgeGeometry = edgeGeometry()
+        let newEdgeGeometry = edgeGeometry(forSurface: fireResult.bottom)
         newEdgeGeometry.firstMaterial = edgeNode.geometry?.firstMaterial
         edgeNode.name = "The Edge"
         edgeNode.morpher = SCNMorpher()

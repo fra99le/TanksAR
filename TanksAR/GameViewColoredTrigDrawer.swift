@@ -23,7 +23,7 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
         
         // (re)create edges
         edgeNode.removeFromParentNode()
-        let edgeShape = edgeGeometry()
+        let edgeShape = edgeGeometry(forSurface: gameModel.board.surface)
         edgeNode = SCNNode(geometry: edgeShape)
         board.addChildNode(edgeNode)
         
