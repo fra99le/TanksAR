@@ -29,7 +29,7 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         // create an eccliptic for repositioning the sun
         ecliptic = SCNNode()
         ecliptic.eulerAngles.x = -Float.pi * (3.0/8.0)
-        board.addChildNode(ecliptic)
+        sceneView.scene.rootNode.addChildNode(ecliptic)
         
         // add the sun
         sun.removeFromParentNode()
