@@ -393,15 +393,16 @@ class GameViewTrigDrawer : GameViewDrawer {
 
                     // NOTE: Should try recording a distribution here, so make sure all cases are covered
 
-                    if numDropping == 0 {
+                    if numDropping == 0 /* && !useNormals */ {
                         // nothing dropping, why animate it?
+                        // Unless of course the normals will be affected by nearby points.
                         continue
                     }
                     
-                    if numUnchanged == 3 {
+                    if numUnchanged == 3 /* && !useNormals */ {
                         // 0,0,3
-                        // not needed?
-                        // normals along the edge are weird
+                        // nothing happened, why animate it?
+                        // Unless of course the normals will be affected by nearby points.
                         continue
                     }
 
@@ -632,6 +633,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         newBottomSurface.removeFromParentNode()
         newBottomSurface = surfaceNode(forSurface: fireResult.bottom, useNormals: false, withColors: fireResult.bottomColor, colors: colors)
         newBottomSurface.isHidden = true
+        //newBottomSurface.position = SCNVector3(0,-1,0) // to avoid overlapping surfaces
         board.addChildNode(newBottomSurface)
         
         surface.name = "The Surface"
