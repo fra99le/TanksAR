@@ -43,6 +43,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     var currTraj = SCNNode()
     var gameModel: GameModel = GameModel()
     var users: [UserConfig] = []
+    var currentUser = 0
     var humanLeft: Int {
         let players = gameModel.board.players
         // count human players left
@@ -310,7 +311,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
 
     @IBOutlet var rescaleGesture: UIPinchGestureRecognizer!
     @IBAction func rescaleGesture(_ sender: UIPinchGestureRecognizer) {
-        let player = gameModel.board.currentPlayer
+        let player = currentUser
+
+        // update view
         let newScale = CGFloat(boardScaleFactor) * CGFloat(users[player].scaleFactor) * sender.scale
         board.scale = SCNVector3(newScale,newScale,newScale)
 
@@ -323,17 +326,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
 
     @IBOutlet var rotateGesture: UIRotationGestureRecognizer!
     @IBAction func rotateGesture(_ sender: UIRotationGestureRecognizer) {
-        let player = gameModel.board.currentPlayer
+        let player = currentUser
+        
+        // update view
         board.eulerAngles.y = Float(CGFloat(users[player].rotation) - sender.rotation)
         
         if sender.state == .ended {
             //NSLog("rotate gesture: \(sender.rotation) ended or player \(player)")
             users[player].rotation -= Float(sender.rotation)
-            
-            NSLog("rotation for user \(player) set to \(users[player].rotation)")
-            let angle = users[player].rotation
-            users[player].rotation = atan2(sin(angle),cos(angle))
-            NSLog("rotation for user \(player) adjusted to to \(users[player].rotation)")
+            //NSLog("rotation for user \(player) set to \(users[player].rotation)")
         }
     }
 
@@ -659,7 +660,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
                     testModel.initializeBoard()
                 }
             }
-
+            currentUser = gameModel.board.currentPlayer
         }
 
         NSLog("\(#function) finished")
@@ -738,6 +739,21 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         if let _ = player.ai {
             // player is an AI
         } else {
+            // determine minimal rotation
+            let currAngle = board.eulerAngles.y
+            let destAngle = users[gameModel.board.currentPlayer].rotation
+            let currAngleClean = atan2(sin(currAngle),cos(currAngle))
+            let destAngleClean = atan2(sin(destAngle),cos(destAngle))
+            var angleDiff = destAngleClean - currAngleClean
+            if angleDiff > Float.pi {
+                angleDiff -= 2*Float.pi
+            } else if angleDiff < -Float.pi {
+                angleDiff += 2*Float.pi
+            }
+            NSLog("old angle was \(users[gameModel.board.currentPlayer].rotation), board at \(board.eulerAngles.y)")
+            users[gameModel.board.currentPlayer].rotation = board.eulerAngles.y + angleDiff
+            NSLog("new angle is \(users[gameModel.board.currentPlayer].rotation), diff is \(angleDiff)")
+
             // update scale and rotation for player
             let scaleNode = board
             let rotationAnimation = CABasicAnimation(keyPath: "eulerAngles.y")
