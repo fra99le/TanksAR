@@ -85,7 +85,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         sceneView.delegate = self
         
         // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
+        sceneView.showsStatistics = false
         
         // see: https://stackoverflow.com/questions/24046164/how-do-i-get-a-reference-to-the-app-delegate-in-swift
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
