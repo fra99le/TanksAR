@@ -56,6 +56,8 @@ class MenuViewController: UIViewController {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.saveController = self
         
+        gameConfig = loadMenu()
+        
         resumeGameButton.isHidden = true
     }
     
@@ -162,6 +164,8 @@ class MenuViewController: UIViewController {
     
     
     func updateUI() {
+        saveMenu()
+
         humansStepper.value = Double(gameConfig.numHumans)
         aisStepper.value = Double(gameConfig.numAIs)
         roundsStepper.value = Double(gameConfig.numRounds)
@@ -266,4 +270,46 @@ class MenuViewController: UIViewController {
         try? FileManager.default.removeItem(at: savedStateURL)
     }
     
+    var savedMenuURL: URL {
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        let baseURL = documentsURL?.appendingPathComponent("MainMenu")
+        let outputURL = baseURL?.appendingPathExtension("plist")
+        return outputURL!
+    }
+    
+    func saveMenu() {
+        NSLog("\(#function) started")
+        
+        let encoder = PropertyListEncoder()
+        do {
+            NSLog("\(#function) started encoding data")
+            let encodedState = try encoder.encode(gameConfig)
+            NSLog("\(#function) encoded data, size was \(encodedState.count)")
+            //NSLog(String(data: encodedState, encoding: .utf8)!)
+            try encodedState.write(to: savedMenuURL)
+            NSLog("\(#function) saved data")
+        } catch  {
+            NSLog("Unexpected error: \(error).")
+        }
+        
+        NSLog("\(#function) finished")
+    }
+    
+    func loadMenu() -> GameConfig {
+        NSLog("\(#function) started")
+        if let loadedData = try? Data(contentsOf: savedMenuURL) {
+            NSLog("\(#function) loaded data")
+            let decoder = PropertyListDecoder()
+            if let result = try? decoder.decode(GameConfig.self, from: loadedData) {
+                NSLog("\(#function) decoded data")
+                NSLog("\(#function) finished")
+                NSLog("Loaded data: \(result)")
+                return result
+            }
+        }
+        
+        NSLog("\(#function) did nothing")
+        return GameConfig(numHumans: 1, numAIs: 1, numRounds: 3, mode: .texturedTrigs)
+    }
+
 }
