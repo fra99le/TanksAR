@@ -707,8 +707,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                 let dropGeometry1 = SCNGeometry(sources: sources1, elements: [elements])
                 dropGeometry0.firstMaterial?.diffuse.contents = colors[i]
                 dropGeometry1.firstMaterial?.diffuse.contents = colors[i]
-                dropGeometry0.firstMaterial?.isLitPerPixel = useNormals
-                dropGeometry1.firstMaterial?.isLitPerPixel = useNormals
                 dropGeometry0.firstMaterial?.isDoubleSided = true
                 dropGeometry1.firstMaterial?.isDoubleSided = true
 
