@@ -199,6 +199,7 @@ class GameModel : Codable {
         board.bedrock.setSize(width: board.boardSize, height: board.boardSize)
         board.colors.setSize(width: board.boardSize, height: board.boardSize) // 0=grass, 1=dirt
         
+        // Note: drawing random lines on the board before diamond-square might allow for seeing lines of mountains or valleys
         board.surface.fillUsingDiamondSquare(withMinimum: 10.0/255.0, andMaximum: 255.0/255.0)
         //board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 10.0/255.0)
         
