@@ -104,14 +104,12 @@ class GameViewTrigDrawer : GameViewDrawer {
         // create geometry for surface
         for i in 0..<colors.count {
             let elements = SCNGeometryElement(indices: indices[i], primitiveType: .triangles)
-            var geometry: SCNGeometry!
             var sources = [vertexSource, texSource]
             if useNormals {
                 let normalSource = SCNGeometrySource(normals: normals)
                 sources.append(normalSource)
             }
-            geometry = SCNGeometry(sources: sources, elements: [elements])
-            geometry.firstMaterial?.isLitPerPixel = useNormals
+            let geometry = SCNGeometry(sources: sources, elements: [elements])
             geometry.firstMaterial?.diffuse.contents = colors[i]
             
             let coloredNode = SCNNode(geometry: geometry)
