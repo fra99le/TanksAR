@@ -40,10 +40,10 @@ class TestGameModel : GameModel {
         NSLog("\(#function) finished")
     }
     
-    override func startGame(numPlayers: Int, numAIs: Int = 0, rounds: Int) {
+    override func startGame(withConfig: GameConfig) {
         // need two players to prevent triggering round changes
         // also, second player restores the board
-        super.startGame(numPlayers: 2, numAIs: 0, rounds: 10)
+        super.startGame(withConfig: withConfig)
         //board.currentRound = 6
     }
     
