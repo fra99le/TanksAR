@@ -16,8 +16,9 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var playerNameLabel: UILabel!
     @IBOutlet weak var playerScoreLabel: UILabel!
     @IBOutlet weak var playerNameField: UITextField!
+    @IBOutlet weak var doneButton: UIButton!
     
-    var currentPlayerID: Int = 0
+    var currentPlayerID: Int = -1
     
     @IBOutlet weak var newHighSchoolLabel: UILabel!
     @IBOutlet weak var resultsStack: UIStackView!
@@ -25,6 +26,7 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var scoreLabel: UILabel!
     
     var players: [Player] = []
+    var nameAccepted: [Bool] = []
     var gameConfig: GameConfig = GameConfig()
     
     override func viewDidLoad() {
@@ -33,6 +35,7 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
         // Do any additional setup after loading the view.
         highScores = HighScoreController()
         playerNameField.delegate = self
+        nameAccepted = [Bool](repeating: false, count: players.count)
     }
 
     override func didReceiveMemoryWarning() {
@@ -66,37 +69,63 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
         return true
     }
 
+    func checkName(_ name: String) -> Bool {
+        return name != ""
+    }
+    
     @IBAction func playerNameChanged(_ sender: UITextField) {
         NSLog("\(#function) started")
         if let newName = sender.text {
             NSLog("newName: \(newName)")
-            players[currentPlayerID].name = newName
-            players[currentPlayerID].didSetName = true
+            if checkName(newName) {
+                NSLog("newName \(newName) accepted by checkName")
+                players[currentPlayerID].name = newName
+                players[currentPlayerID].didSetName = true
+                nameAccepted[currentPlayerID] = true
+            }
         }
         updateUI()
         NSLog("\(#function) finished")
     }
     
+    @IBAction func doneButtonTapped(_ sender: UIButton) {
+        NSLog("done button pressed")
+        nameAccepted[currentPlayerID] = checkName(players[currentPlayerID].name)
+        updateUI()
+    }
+    
     func updateUI() {
         NSLog("\(#function) started")
+
         // check to see is any names need to be entered
-        let minScore = highScores.scores[highScores.maxShown-1].score
+        let scoreList = highScores.topScores(num: highScores.maxShown)
+        let minScore = scoreList[highScores.maxShown-1].score
         for playerID in 0..<players.count {
             let player = players[playerID]
             
-            if player.score > minScore && (!player.didSetName || player.name == "") {
+            if player.score > minScore && player.ai == nil {
+                // human player got a high score
                 playerNameStack.isHidden = false
                 resultsStack.isHidden = true
-                
+                currentPlayerID = playerID
+
                 playerNameLabel.text = player.name
                 playerScoreLabel.text = "\(player.score)"
-                playerNameField.text = ""
                 playerNameField.resignFirstResponder()
-                currentPlayerID = playerID
-                
-                //playerNameField.becomeFirstResponder()
-                NSLog("\(#function) finished early (line \(#line))")
-                return
+                playerNameField.text = player.name
+
+                if (!player.didSetName || player.name == "") {
+                    // name is invalid
+                    doneButton.isEnabled = false
+                    NSLog("\(#function) finished early (line \(#line))")
+                    return
+                } else if !nameAccepted[playerID] {
+                    // verify name
+                    NSLog("nameAccepted[\(playerID)] = \(nameAccepted[playerID])")
+                    doneButton.isEnabled = true
+                    NSLog("\(#function) finished early (line \(#line))")
+                    return
+                }
             }
         }
         

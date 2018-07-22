@@ -851,13 +851,13 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New High Score!!!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nbB-4L-DKH">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="R2f-li-nI8" userLabel="Player">
                                         <rect key="frame" x="0.0" y="68" width="195" height="30"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="R2f-li-nI8" userLabel="Player">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New High Score!!!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nbB-4L-DKH">
                                         <rect key="frame" x="0.0" y="118" width="195" height="30"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                         <nil key="textColor"/>
@@ -888,7 +888,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                 </subviews>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="lGt-pp-Em9">
-                                <rect key="frame" x="20" y="268.5" width="335" height="130"/>
+                                <rect key="frame" x="20" y="237.5" width="335" height="192"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yPA-99-B6v">
                                         <rect key="frame" x="0.0" y="0.0" width="335" height="30"/>
@@ -944,6 +944,14 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                             </textField>
                                         </subviews>
                                     </stackView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yvH-Y1-DaN">
+                                        <rect key="frame" x="0.0" y="150" width="335" height="42"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                                        <state key="normal" title="Done"/>
+                                        <connections>
+                                            <action selector="doneButtonTapped:" destination="m2W-CC-yJa" eventType="touchUpInside" id="u24-pd-Sck"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="pzS-dm-Nq2" firstAttribute="width" secondItem="O7G-lH-lWQ" secondAttribute="width" id="Ld4-sy-uSQ"/>
@@ -962,6 +970,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                         <viewLayoutGuide key="safeArea" id="qKl-Mg-HlQ"/>
                     </view>
                     <connections>
+                        <outlet property="doneButton" destination="yvH-Y1-DaN" id="JW6-as-Lv6"/>
                         <outlet property="newHighSchoolLabel" destination="nbB-4L-DKH" id="v7B-AD-2EW"/>
                         <outlet property="playerLabel" destination="R2f-li-nI8" id="LrT-ll-sA3"/>
                         <outlet property="playerNameField" destination="jHK-LE-tVG" id="da0-6z-hFD"/>
