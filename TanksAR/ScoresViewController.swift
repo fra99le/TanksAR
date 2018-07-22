@@ -16,9 +16,63 @@ class ScoresViewController: UIViewController {
         // Do any additional setup after loading the view.
         
     }
+    
+    
+    @IBOutlet weak var scoresStackView: UIStackView!
+    @IBOutlet var highScoreLabels: [UILabel]!
 
+    func relativeDate(_ date: Date) -> String {
+        // see: https://www.albertomoral.com/blog/2018/1/20/dateformatter-to-display-relative-dates-today-yesterday-etc
+        
+        let relativeFormatter = DateFormatter()
+        relativeFormatter.timeStyle = .none
+        relativeFormatter.dateStyle = .medium
+        relativeFormatter.doesRelativeDateFormatting = true
+        let relativeDate = relativeFormatter.string(from: date)
+
+        let absoluteFormatter = DateFormatter()
+        absoluteFormatter.timeStyle = .none
+        absoluteFormatter.dateStyle = .medium
+        absoluteFormatter.doesRelativeDateFormatting = false
+        let absoluteDate = absoluteFormatter.string(from: date)
+
+        if absoluteDate != relativeDate {
+            NSLog("Dates differ: \(relativeDate) != \(absoluteDate)")
+            return relativeDate
+        }
+        NSLog("Dates identical: \(relativeDate) == \(absoluteDate)")
+
+        let interval = date.timeIntervalSinceNow
+        let days = interval / 86400
+        let ret = "\(Int(days)) days ago"
+        
+        return ret
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
-        // needs to get the scores from the game model and set labels
+        // needs to get the scores and set labels
+        let scoresController = HighScoreController()
+        let topScores = scoresController.topScores(num: scoresController.maxShown)
+
+        for pos in 0..<10 {
+            var scoreText = "\(pos+1). Unknown . . . -1"
+            if pos < topScores.count {
+                let score = topScores[pos]
+                let timeAgo = relativeDate(score.date)
+                scoreText = "\(pos+1). \(score.name) . . . \(score.score) (\(timeAgo))"
+            }
+            
+            // add score to stack view
+            // see: https://stackoverflow.com/questions/30728062/add-views-in-uistackview-programmatically
+            let scoreLabel = UILabel()
+            scoreLabel.widthAnchor.constraint(equalToConstant: self.view.frame.width).isActive = true
+            scoreLabel.heightAnchor.constraint(equalToConstant: 20.0).isActive = true
+            scoreLabel.text  = scoreText
+            scoreLabel.textAlignment = .center
+            
+            scoresStackView.addArrangedSubview(scoreLabel)
+            scoresStackView.translatesAutoresizingMaskIntoConstraints = false
+        }
     }
     
     override func didReceiveMemoryWarning() {

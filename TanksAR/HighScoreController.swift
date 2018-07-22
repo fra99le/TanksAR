@@ -29,7 +29,13 @@ class HighScoreController : Codable {
     
     func topScores(num: Int = 10) -> [HighScore] {
         // see: https://stackoverflow.com/questions/28527797/how-to-return-first-5-objects-of-array-in-swift
-        return Array(scores.prefix(min(num,scores.count)))
+        var ret = Array(scores.prefix(min(num,scores.count)))
+        
+        while ret.count < num {
+            ret.append(HighScore())
+        }
+        
+        return ret
     }
     
     func addHighScore(score: HighScore) {
