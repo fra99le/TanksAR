@@ -12,9 +12,7 @@ struct HighScore : Codable {
     var name: String = "Unknown"
     var score: Int64 = 0
     var date: Date = Date()
-    var numHumans: Int = 0
-    var numAIs: Int = 0
-    var numRounds: Int = 1
+    var config: GameConfig = GameConfig()
 }
 
 class HighScoreController : Codable {
@@ -99,6 +97,8 @@ class HighScoreController : Codable {
                 NSLog("\(#function) finished")
                 NSLog("Loaded data: \(result)")
                 return result
+            } else  {
+                NSLog("Decoding of high scores failed.")
             }
         }
         
