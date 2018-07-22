@@ -144,12 +144,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         if users.count != gameModel.board.players.count {
             users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0, tank: nil),
                                  count: gameModel.board.players.count)
+            currentUser = gameModel.board.currentPlayer
         }
         removeTanks()
         addTanks()
         
         updateUI()
-        updateHUD()
 
         placeBoardGesture.require(toFail: backupPlaceBoardGesture)
         //screenDraggingGesture.require(toFail: rotateGesture)
@@ -427,9 +427,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
                 saveStateController.gameState = nil
                 saveStateController.removeStateFile()
             }
-            let (name, score) = gameModel.getWinner()
-            dest.winner = name
-            dest.score = score
+            dest.players = gameModel.board.players
+            dest.gameConfig = gameConfig
         }
     }
     
@@ -495,7 +494,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         placeBoardGesture.isEnabled = false
         backupPlaceBoardGesture.isEnabled = false
         tapToSelectLabel.isHidden = true
-        updateUI()
 
         boardDrawer.updateBoard()
         

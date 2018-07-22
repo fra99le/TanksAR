@@ -177,9 +177,6 @@ class GameModel : Codable {
         // still need MIRVs and liquid weapons
         ]
     
-    // high-score data
-    let highScores: [HighScore] = []
-    
     func generateBoard() {
         NSLog("\(#function) started")
         

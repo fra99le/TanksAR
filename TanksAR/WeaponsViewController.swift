@@ -52,10 +52,17 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
 
         if let newName = sender.text {
             NSLog("new name: \(newName)")
-            model.board.players[board.currentPlayer].name = newName
+            if newName.count <= 0 {
+                model.board.players[board.currentPlayer].name = "Player \(board.currentPlayer+1)"
+                model.board.players[board.currentPlayer].didSetName = false
+            } else {
+                model.board.players[board.currentPlayer].name = newName
+                model.board.players[board.currentPlayer].didSetName = true
+            }
         } else {
             NSLog("new name missing!")
             model.board.players[board.currentPlayer].name = "Player \(board.currentPlayer+1)"
+            model.board.players[board.currentPlayer].didSetName = false
         }
         updateUI()
     }
