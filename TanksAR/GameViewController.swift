@@ -579,7 +579,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         let yVel = power * sin(alt)
         let zVel = -power * cos(azi) * cos(alt)
         
-        NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
+        //NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
         let velocity = SCNVector3(xVel, yVel, zVel)
         
         // convert to model coordinate space

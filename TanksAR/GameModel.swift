@@ -692,7 +692,7 @@ class GameModel : Codable {
         let windX = cos(board.windDir * (Float.pi / 180)) * board.windSpeed
         let windY = sin(board.windDir * (Float.pi / 180)) * board.windSpeed
         let terminalSpeed: Float = 100
-        NSLog("wind: \(board.windSpeed) m/s @ \(board.windDir)º, which is x,y = \(windX),\(windY) m/s")
+        //NSLog("wind: \(board.windSpeed) m/s @ \(board.windDir)º, which is x,y = \(windX),\(windY) m/s")
         
         // compute trajectory
         var trajectory: [Vector3] = [muzzlePosition]
@@ -701,7 +701,7 @@ class GameModel : Codable {
         let v0 = muzzleVelocity // v_0
         let vInf = Vector3(windX, windY, -terminalSpeed)
         let k: Float = -0.5 * gravity / terminalSpeed
-        NSLog("p_0: \(p0), v_0: \(v0), vInf: \(vInf), k: \(k)")
+        //NSLog("p_0: \(p0), v_0: \(v0), vInf: \(vInf), k: \(k)")
         
         var iterCount = 0
         var t: Float = 0
@@ -764,7 +764,7 @@ class GameModel : Codable {
             iterCount += 1
             
         }
-        NSLog("shell took \(timeStep*Float(iterCount))s (\(iterCount) iterations) to land")
+        //NSLog("shell took \(timeStep*Float(iterCount))s (\(iterCount) iterations) to land")
         //NSLog("trajectory: \(trajectory)")
         
         return trajectory
@@ -1007,18 +1007,18 @@ class GameModel : Codable {
         board.players[board.currentPlayer].weaponSizeID = weaponSizeID
     }
     
-    func getWinner() -> (name: String, score: Int64) {
-        var maxScore = board.players[0].score - 1
-        var winner = ""
-        for i in 0..<board.players.count {
-            if board.players[i].score > maxScore {
-                maxScore = board.players[i].score
-                winner = board.players[i].name
-            }
-        }
-        
-        return (winner, maxScore)
-    }
+//    func getWinner() -> (name: String, score: Int64) {
+//        var maxScore = board.players[0].score - 1
+//        var winner = ""
+//        for i in 0..<board.players.count {
+//            if board.players[i].score > maxScore {
+//                maxScore = board.players[i].score
+//                winner = board.players[i].name
+//            }
+//        }
+//        
+//        return (winner, maxScore)
+//    }
     
     func fluidFill(startX: Int, startY: Int, totalVolume: Float) {
         NSLog("\(#function) started")
