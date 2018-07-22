@@ -52,9 +52,6 @@ class HighScoreController : Codable {
             return false
         })
         scores = sortedScores
-        for score in scores {
-            NSLog("\(score)")
-        }
         
         if scores.count > maxScores {
             scores.removeLast(scores.count - maxScores)
@@ -96,7 +93,7 @@ class HighScoreController : Codable {
             if let result = try? decoder.decode(Array<HighScore>.self, from: loadedData) {
                 NSLog("\(#function) decoded data")
                 NSLog("\(#function) finished")
-                NSLog("Loaded data: \(result)")
+                //NSLog("Loaded data: \(result)")
                 return result
             } else  {
                 NSLog("Decoding of high scores failed.")
