@@ -79,6 +79,7 @@ struct Tank : Codable {
 struct Player : Codable {
     var tank: Tank = Tank(position: Vector3(), azimuth: 0, altitude: 0, velocity: 0)
     var name: String = "Unknown"
+    var didSetName = false
     var credit: Int64 = 5000
     var score: Int64 = 0
     var weaponID: Int = 0
@@ -109,14 +110,6 @@ struct GameBoard : Codable {
     // game progress
     var totalRounds = 1
     var currentRound = 1
-}
-
-struct HighScore : Codable {
-    var name: String = "Unknown"
-    var score: Int64 = 0
-    var date: Date? = nil
-    var numHumans: Int = 0
-    var numAIs: Int = 0
 }
 
 enum WeaponStyle : String, Codable {
@@ -210,19 +203,29 @@ class GameModel : Codable {
         NSLog("\(#function) finished")
     }
     
-    func startGame(numPlayers: Int, numAIs: Int = 0, rounds: Int) {
-        let totalPlayers = numPlayers+numAIs
+    func startGame(withConfig: GameConfig) {
+        let config = withConfig
+        let totalPlayers = config.numHumans+config.numAIs
         board.players = [Player](repeating: Player(), count: totalPlayers)
         board.currentPlayer = 0
 
         board.currentRound = 1
-        board.totalRounds = rounds
+        board.totalRounds = config.numRounds
         NSLog("\(#function) starting \(board.totalRounds) round game.")
         
-        // set player names
+        // set player names and initial credit
+        let numPlayers = config.numHumans
         for i in 0..<totalPlayers {
+            board.players[i].credit = config.credit
+            
+            board.players[i].didSetName = false
             if i < numPlayers {
-                board.players[i].name = "Player \(i+1)"
+                if i < config.playerNames.count && config.playerNames[i] != "" {
+                    board.players[i].name = config.playerNames[i]
+                    board.players[i].didSetName = true
+                } else  {
+                    board.players[i].name = "Player \(i+1)"
+                }
             } else {
                 board.players[i].name = "Al \(i-numPlayers+1)"
             }
@@ -234,7 +237,7 @@ class GameModel : Codable {
             board.players[i].ai = PlayerAI()
         }
 
-        startRound()
+        startRound() // will set gameStarted
     }
 
     func resetAIs() {
