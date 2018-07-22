@@ -93,6 +93,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.gameController = self
         
+        setupDrawer()
+        
+        unplaceBoard()
+        rotateGesture.delegate = self
+        rescaleGesture.delegate = self
+        screenDraggingGesture.delegate = self
+        
+    }
+    
+    func setupDrawer() {
         // create the game board
         switch gameConfig.mode {
         case .blocks:
@@ -105,12 +115,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             boardDrawer = GameViewTexturedTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 200)
         }
         boardDrawer.setupLighting()
-        
-        unplaceBoard()
-        rotateGesture.delegate = self
-        rescaleGesture.delegate = self
-        screenDraggingGesture.delegate = self
-        
+    }
+    
+    func updateDrawer() {
+        boardDrawer.gameModel = gameModel
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -136,9 +144,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         }
         
         // start a game
+        removeTanks()
         if !gameModel.gameStarted && !gameOver {
             NSLog("\(#function) starting \(gameConfig.numRounds) round game. (gameStarted=\(gameModel.gameStarted))")
             gameModel.startGame(withConfig: gameConfig)
+            updateDrawer()
+            // destroy old per user info, as order may have changed
             users = []
         }
         boardDrawer.updateBoard()
@@ -148,7 +159,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
                                  count: gameModel.board.players.count)
             currentUser = gameModel.board.currentPlayer
         }
-        removeTanks()
         addTanks()
         
         updateUI()
@@ -710,6 +720,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         if roundChanged {
             NSLog("round change detected")
             roundChanged = false
+            removeTanks()
             if gameModel.board.currentRound > gameModel.board.totalRounds {
                 NSLog("round \(gameModel.board.currentRound) > \(gameModel.board.totalRounds), game over!")
                 gameOver = true
@@ -718,7 +729,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
                 return
             }
             NSLog("Starting round \(gameModel.board.currentRound) of \(gameModel.board.currentRound).")
-            removeTanks()
             addTanks()
             
             // save game at start of each new round
