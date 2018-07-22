@@ -709,6 +709,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         //NSLog("\(#function) started")
         if roundChanged {
             NSLog("round change detected")
+            roundChanged = false
             if gameModel.board.currentRound > gameModel.board.totalRounds {
                 NSLog("round \(gameModel.board.currentRound) > \(gameModel.board.totalRounds), game over!")
                 gameOver = true
@@ -719,7 +720,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             NSLog("Starting round \(gameModel.board.currentRound) of \(gameModel.board.currentRound).")
             removeTanks()
             addTanks()
-            roundChanged = false
             
             // save game at start of each new round
             if let saveStateController = saveStateController as? MenuViewController {
