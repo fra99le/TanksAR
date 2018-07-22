@@ -225,6 +225,7 @@ class GameModel : Codable {
                 }
             } else {
                 board.players[i].name = "Al \(i-numPlayers+1)"
+                board.players[i].didSetName = true
             }
             NSLog("player \(i)'s name is \(board.players[i].name)")
         }
