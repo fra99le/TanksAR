@@ -15,7 +15,7 @@ struct GameState : Codable {
 
 class MenuViewController: UIViewController {
 
-    var gameConfig = GameConfig(numHumans: 1, numAIs: 1, numRounds: 3, mode: .texturedTrigs)
+    var gameConfig = GameConfig()
     var gameState: GameState? = nil
     let autoResume = false
     
@@ -131,6 +131,7 @@ class MenuViewController: UIViewController {
     
     @IBAction func humansStepperTapped(_ sender: UIStepper) {
         gameConfig.numHumans = Int(sender.value)
+        gameConfig.playerNames = []
         updateUI()
     }
     
@@ -309,7 +310,7 @@ class MenuViewController: UIViewController {
         }
         
         NSLog("\(#function) did nothing")
-        return GameConfig(numHumans: 1, numAIs: 1, numRounds: 3, mode: .texturedTrigs)
+        return GameConfig()
     }
 
 }
