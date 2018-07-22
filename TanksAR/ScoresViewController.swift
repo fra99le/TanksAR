@@ -37,10 +37,10 @@ class ScoresViewController: UIViewController {
         let absoluteDate = absoluteFormatter.string(from: date)
 
         if absoluteDate != relativeDate {
-            NSLog("Dates differ: \(relativeDate) != \(absoluteDate)")
+            //NSLog("Dates differ: \(relativeDate) != \(absoluteDate)")
             return relativeDate
         }
-        NSLog("Dates identical: \(relativeDate) == \(absoluteDate)")
+        //NSLog("Dates identical: \(relativeDate) == \(absoluteDate)")
 
         let interval = date.timeIntervalSinceNow
         let days = interval / 86400
