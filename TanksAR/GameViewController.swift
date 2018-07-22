@@ -21,10 +21,12 @@ enum drawerMode : String, Codable {
 }
 
 struct GameConfig : Codable {
-    var numHumans: Int = 0
-    var numAIs: Int = 0
-    var numRounds: Int = 0
-    var mode: drawerMode = .blocks
+    var numHumans: Int = 1
+    var numAIs: Int = 1
+    var numRounds: Int = 3
+    var mode: drawerMode = .texturedTrigs
+    var credit: Int64 = 5000
+    var playerNames: [String] = []
 }
 
 class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDelegate {
@@ -134,10 +136,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         }
         
         // start a game
-        NSLog("\(#function) starting \(gameConfig.numRounds) round game. (gameStarted=\(gameModel.gameStarted))")
         if !gameModel.gameStarted && !gameOver {
-            gameModel.startGame(numPlayers: gameConfig.numHumans, numAIs: gameConfig.numAIs, rounds: gameConfig.numRounds)
-            gameModel.gameStarted = true
+            NSLog("\(#function) starting \(gameConfig.numRounds) round game. (gameStarted=\(gameModel.gameStarted))")
+            gameModel.startGame(withConfig: gameConfig)
+            users = []
         }
         boardDrawer.updateBoard()
         NSLog("users.count = \(users.count); players.count = \(gameModel.board.players.count)")
