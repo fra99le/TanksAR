@@ -31,6 +31,7 @@ class PlayerAI : Codable {
     var nelderMead = NelderMead(dimensions: 3)
     var data: [Sample] = []
     var firstShot = true
+    var lastTarget = -1
     
     // needs to be called between rounds (i.e. when tanks move)
     func reset() {
@@ -87,6 +88,7 @@ class PlayerAI : Codable {
         // compute next point
         // pick target player
         let nextPlayer = getNextPlayerID(gameModel: gameModel)
+        NSLog("\(#function): \(gameModel.board.players[gameModel.board.currentPlayer].name) targetting player \(nextPlayer) (\(gameModel.board.players[nextPlayer].name))")
         let targetPlayer = gameModel.board.players[nextPlayer]
         let targetTank = targetPlayer.tank
         
@@ -100,13 +102,18 @@ class PlayerAI : Codable {
         // pick parameters using Nelder-Mead algorithm
         // see: https://en.wikipedia.org/wiki/Nelder–Mead_method
         // also: http://www.scholarpedia.org/article/Nelder-Mead_algorithm
+
+        let model = gameModel
+        let nextPlayer = getNextPlayerID(gameModel: model)
+
+        if nextPlayer != lastTarget {
+            reset()
+        }
+        lastTarget = nextPlayer
         
         // fill initial simplex
         //NSLog("\(#function): data: \(data)")
         if firstShot {
-            var azimuth = Float(drand48() * 360)
-            let model = gameModel
-            let nextPlayer = getNextPlayerID(gameModel: model)
             let targetTank = model.board.players[nextPlayer].tank
             let myTank = model.board.players[model.board.currentPlayer].tank
             
@@ -115,8 +122,8 @@ class PlayerAI : Codable {
             let targetDir = atan2(myTank.position.x - targetTank.position.x,
                                   myTank.position.y - targetTank.position.y) * (180 / Float.pi)
             //NSLog("targetDir = \(targetDir)")
-            //azimuth = Float(targetDir + Float(drand48() * 10) - 5)
-            azimuth = targetDir
+            //let azimuth = Float(targetDir + Float(drand48() * 10) - 5)
+            let azimuth = targetDir
 
             let altitude = Float(drand48() * 50) + 30
             let power = Float(drand48() * 70) + 30
@@ -156,10 +163,11 @@ class PlayerAI : Codable {
             let zVel = power * sin(alt)
             
             //NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
-            let tankHeight: Float = 2
+            let tankHeight: Float = 14.52 // 0.625+0.827 = 1.452 * tankScale
             let velocity = Vector3(xVel, yVel, zVel)
             
             // convert to model coordinate space
+            // Note: This position is very wrong, and could be leading to incorrect solutions.
             var muzzlePosition = tank.position
             muzzlePosition.z += tankHeight
             let muzzleVelocity = velocity
