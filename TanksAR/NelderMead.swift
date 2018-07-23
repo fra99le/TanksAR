@@ -63,6 +63,7 @@ class NelderMead : Codable {
     var state: NMState = .initial
     var nextQueue: [[Float]] = []
     var extendScale: Float = 1.0
+    let maxExtendScale: Float = 1e6
     var prevR: NMSample? = nil
     var shrinkTemp: NMSample? = nil
     
@@ -92,18 +93,18 @@ class NelderMead : Codable {
             }
             return false
         })
-        NSLog("simplex: \(simplex)")
-        NSLog("ordered: \(ordered)")
+        //NSLog("simplex: \(simplex)")
+        //NSLog("ordered: \(ordered)")
 
         return ordered
     }
     
     func addResult(parameters: [Float], value: Float) {
-        NSLog("\(#function) started")
+        //NSLog("\(#function) started")
 
         let newSample = NMSample(parameters: parameters, value: value)
 
-        NSLog("\(#function) with parameters \(parameters) and value \(value)")
+        //NSLog("\(#function) with parameters \(parameters) and value \(value)")
 
         // check for initialization state
         if simplex.count < dimensions {
@@ -119,14 +120,14 @@ class NelderMead : Codable {
         let s = ordered[ordered.count-2]
         let l = ordered.first!
         let r = newSample
-        NSLog("f(l) = \(l.value)")
-        NSLog("f(s) = \(s.value)")
-        NSLog("f(h) = \(h.value)")
-        NSLog("f(r) = \(r.value)")
+        //NSLog("f(l) = \(l.value)")
+        //NSLog("f(s) = \(s.value)")
+        //NSLog("f(h) = \(h.value)")
+        //NSLog("f(r) = \(r.value)")
 
         // check new point and determine next step
         if simplex.count < dimensions+1 {
-            NSLog("state: initial (simplex.count = \(simplex.count))")
+            //NSLog("state: initial (simplex.count = \(simplex.count))")
             simplex.append(r)
             if simplex.count >= dimensions+1 {
                 state = .reflect
@@ -134,14 +135,14 @@ class NelderMead : Codable {
             return
         }
         if state == .shrink {
-            NSLog("state: \(state), nextQueue: \(nextQueue)")
+            //NSLog("state: \(state), nextQueue: \(nextQueue)")
             if nextQueue.count >= 1 {
                 // store h's replacement for later use
-                NSLog("storing r as shrinkTemp")
+                //NSLog("storing r as shrinkTemp")
                 shrinkTemp = r
             } else {
                 // replace h&2
-                NSLog("Replacing h&s, shrinkTemp=\(shrinkTemp!)")
+                //NSLog("Replacing h&s, shrinkTemp=\(shrinkTemp!)")
                 ordered.removeLast()
                 ordered.removeLast()
                 ordered.append(r)
@@ -194,7 +195,7 @@ class NelderMead : Codable {
             extendScale = 1.0
         } else if r.value < l.value {
             // expand condition met
-            extendScale = extendScale * gamma
+            extendScale = min(extendScale * gamma, maxExtendScale)
             state = .expand // repeat reflection, but with a larger magnitude
         } else if r.value >= s.value {
             prevR = r
@@ -204,45 +205,45 @@ class NelderMead : Codable {
             } else if r.value >= h.value {
                 state = .contract_in
             } else {
-                NSLog("\(#function) this should be impossible at line \(#line)")
+                //NSLog("\(#function) this should be impossible at line \(#line)")
             }
         } else {
             // shrink condition met
             state = .shrink
         }
         prevR = r
-        NSLog("\(#function) ending, state=\(state)")
+        //NSLog("\(#function) ending, state=\(state)")
 
-        NSLog("\(#function) finished")
+        //NSLog("\(#function) finished")
 
     }
 
     func nextPoint() -> [Float] {
-        NSLog("\(#function) started, nextQueue: \(nextQueue)")
+        //NSLog("\(#function) started, nextQueue: \(nextQueue)")
 
         if state == .initial && simplex.count < dimensions+1 {
             NSLog("state: initial")
-            NSLog("simplex: \(simplex)")
+            //NSLog("simplex: \(simplex)")
             
             // add new initial point
             var vector = NMVector(repeating: 0.0, count: dimensions)
             if simplex.count > 0 {
                 let pos = simplex.count-1
-                NSLog("\tsetting position \(pos) of vector")
+                //NSLog("\tsetting position \(pos) of vector")
                 if seed[pos] != 0 {
                     vector = seed
                     vector[pos] = seed[pos] + 0.1 * nmVectorLength(seed)
                 } else {
                     vector[pos] = 1
                 }
-                NSLog("seed: \(seed), vector: \(vector)")
+                //NSLog("seed: \(seed), vector: \(vector)")
             } else if seed.count == vector.count {
-                NSLog("using seed: \(seed)")
+                //NSLog("using seed: \(seed)")
                 vector = seed
             } else {
                 seed = vector
             }
-            NSLog("\treturning initial vector \(vector)")
+            //NSLog("\treturning initial vector \(vector)")
             return vector
         }
         guard simplex.count == dimensions+1 else { return seed }
@@ -278,6 +279,7 @@ class NelderMead : Codable {
             // produces one new point
             let scaled = nmVectorScale(hToC, by: gamma * extendScale)
             extendScale *= 2
+            extendScale = min(extendScale, maxExtendScale)
             let xe = nmVectorAdd(c, scaled)
             nextQueue.append(xe)
         case .contract_out:
@@ -304,13 +306,15 @@ class NelderMead : Codable {
                 let newS = nmVectorAdd(l.parameters, sScaled)
                 nextQueue.append(newH)
                 nextQueue.append(newS)
-                NSLog("added two to nextQueue: \(nextQueue)")
+                //NSLog("added two to nextQueue: \(nextQueue)")
             }
         }
         
-        NSLog("\(#function) finished, nextQueue: \(nextQueue)")
+        //NSLog("\(#function) finished, nextQueue: \(nextQueue)")
+        let ret = nextQueue.remove(at: 0)
+        NSLog("\(#function): returning \(ret)")
 
-        return nextQueue.remove(at: 0)
+        return ret
     }
     
     func done() -> Bool {

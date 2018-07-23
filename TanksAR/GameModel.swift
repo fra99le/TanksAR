@@ -681,7 +681,7 @@ class GameModel : Codable {
         return result
     }
     
-    func computeTrajectory(muzzlePosition: Vector3, muzzleVelocity: Vector3, withTimeStep: Float) -> [Vector3] {
+    func computeTrajectory(muzzlePosition: Vector3, muzzleVelocity: Vector3, withTimeStep: Float, ignoreTanks: Bool = false) -> [Vector3] {
         let timeStep = withTimeStep
     
         // record use of targeting computer
@@ -744,16 +744,16 @@ class GameModel : Codable {
                 airborn = false
             }
             
-            for i in 0..<board.players.count {
-                let player = board.players[i]
-                
-                let tank = player.tank
-                guard board.players[i].hitPoints > 0 else  { continue }
-                
-                let dist = distance(from: tank.position, to: position)
-                if dist < tankSize {
-                    // hit a tank
-                    airborn = false
+            if !ignoreTanks {
+                for player in board.players {
+                    let tank = player.tank
+                    guard player.hitPoints > 0 else  { continue }
+                    
+                    let dist = distance(from: tank.position, to: position)
+                    if dist < tankSize {
+                        // hit a tank
+                        airborn = false
+                    }
                 }
             }
             
@@ -895,6 +895,11 @@ class GameModel : Codable {
             let tank = player.tank
             let tankPos = tank.position
             //NSLog("\ttank at \(tankPos)")
+            
+            // skip eliminated tanks
+            if player.hitPoints <= 0 {
+                continue
+            }
             
             let dist = distance(from: tankPos, to: at)
             NSLog("\t tank \(i) dist = \(dist)")
