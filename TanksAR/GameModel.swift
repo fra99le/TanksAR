@@ -76,6 +76,15 @@ struct Tank : Codable {
     var velocity: Float // in m/s
 }
 
+struct PlayerStats: Codable {
+    var shotsFired: Int = 0
+    var kills: Int = 0
+    var suicides: Int = 0
+    var maxKillsPerShot: Int = 0
+    var pointsSpent: Int64 = 0
+    var maxPoints: Int64 = 0
+}
+
 struct Player : Codable {
     var tank: Tank = Tank(position: Vector3(), azimuth: 0, altitude: 0, velocity: 0)
     var name: String = "Unknown"
@@ -90,6 +99,8 @@ struct Player : Codable {
     var useTargetingComputer: Bool = false // this needs to be pricy to enable
     var usedComputer: Bool = false
 
+    var stats: PlayerStats = PlayerStats()
+    
     // need to add shielding info
 }
 
@@ -627,6 +638,10 @@ class GameModel : Codable {
         
         board.players[board.currentPlayer].prevTrajectory = trajectory
         
+        // update stats
+        board.players[board.currentPlayer].stats.shotsFired += 1
+        board.players[board.currentPlayer].stats.pointsSpent += Int64(weaponCost)
+        
         // update board with new values
         let sizeID = board.players[board.currentPlayer].weaponSizeID
         let old = ImageBuf(board.surface)
@@ -897,6 +912,7 @@ class GameModel : Codable {
     func damageCheck(at: Vector3, fromWeapon: Weapon, withSize: Int) {
         NSLog("\(#function) started")
 
+        var totalKills = 0
         for i in 0..<board.players.count {
             let player = board.players[i]
             
@@ -922,13 +938,20 @@ class GameModel : Codable {
                 board.players[i].hitPoints = max(0, board.players[i].hitPoints -  damage)
                 
                 if board.currentPlayer != i {
+                    board.players[board.currentPlayer].stats.kills += 1
                     board.players[board.currentPlayer].score += Int64(damage)
                     if board.players[i].hitPoints <= 0 {
+                        totalKills += 1
                         board.players[board.currentPlayer].score += 1000
                     }
                     NSLog("\tplayer \(board.currentPlayer) score now \(board.players[board.currentPlayer].score)")
+
+                    // update max points stat
+                    board.players[board.currentPlayer].stats.maxPoints = max(board.players[board.currentPlayer].stats.maxPoints,
+                        board.players[board.currentPlayer].score)
                 } else {
-                    // player killed themself, distribute poinrts across other players
+                    // player killed themself, distribute points across other players
+                    board.players[board.currentPlayer].stats.suicides += 1
                     var playersLeft: Float = 0
                     for player in board.players {
                         if player.hitPoints > 0 {
@@ -945,6 +968,7 @@ class GameModel : Codable {
                 }
             }
         }
+        board.players[board.currentPlayer].stats.maxKillsPerShot = max(totalKills, board.players[board.currentPlayer].stats.maxKillsPerShot)
         
         NSLog("\(#function) finished")
     }

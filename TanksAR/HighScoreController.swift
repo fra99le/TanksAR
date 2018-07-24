@@ -13,6 +13,7 @@ struct HighScore : Codable {
     var score: Int64 = 0
     var date: Date = Date()
     var config: GameConfig = GameConfig()
+    var stats: PlayerStats = PlayerStats()
 }
 
 class HighScoreController : Codable {
