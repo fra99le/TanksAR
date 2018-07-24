@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="cEh-LH-kqS">
-    <device id="retina4_7" orientation="portrait">
+    <device id="retina4_0" orientation="landscape">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
@@ -15,23 +15,23 @@
             <objects>
                 <viewController title="TitleScreen" id="cEh-LH-kqS" customClass="MenuViewController" customModule="TanksAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="7d7-Du-m1U">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oVd-gA-zqf">
-                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="30" translatesAutoresizingMaskIntoConstraints="NO" id="EWi-5U-v3d">
-                                        <rect key="frame" x="0.0" y="0.0" width="375.5" height="516"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="568.5" height="516"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ARtillery" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Eph-xi-hCC">
-                                                <rect key="frame" x="117" y="0.0" width="141.5" height="48"/>
+                                                <rect key="frame" x="213.5" y="0.0" width="141.5" height="48"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="40"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="dpv-Ed-PuI">
-                                                <rect key="frame" x="76.5" y="78" width="222.5" height="30"/>
+                                                <rect key="frame" x="173" y="78" width="222.5" height="30"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Humans:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6zj-Js-OhK">
                                                         <rect key="frame" x="0.0" y="0.0" width="97" height="30"/>
@@ -54,7 +54,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="yib-HL-CTW">
-                                                <rect key="frame" x="76.5" y="138" width="222.5" height="30"/>
+                                                <rect key="frame" x="173" y="138" width="222.5" height="30"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="AIs: " textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="S9y-XF-tKi">
                                                         <rect key="frame" x="0.0" y="0.0" width="97" height="30"/>
@@ -77,7 +77,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="dYF-F3-SG3">
-                                                <rect key="frame" x="76.5" y="198" width="222.5" height="30"/>
+                                                <rect key="frame" x="173" y="198" width="222.5" height="30"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Rounds:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0bw-MQ-hmp">
                                                         <rect key="frame" x="0.0" y="0.0" width="97" height="30"/>
@@ -100,7 +100,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="IBH-nf-2gl">
-                                                <rect key="frame" x="119.5" y="258" width="137" height="42"/>
+                                                <rect key="frame" x="216" y="258" width="137" height="42"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OYq-1l-IIX">
                                                         <rect key="frame" x="0.0" y="0.0" width="69" height="42"/>
@@ -119,7 +119,7 @@
                                                 </subviews>
                                             </stackView>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="swB-4g-0ly">
-                                                <rect key="frame" x="122.5" y="330" width="131" height="42"/>
+                                                <rect key="frame" x="219" y="330" width="131" height="42"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                                 <state key="normal" title="High Scores"/>
                                                 <connections>
@@ -134,21 +134,21 @@
                                                     <segue destination="Iy8-LG-PXm" kind="show" id="Ifh-Ph-EYa"/>
                                                 </connections>
                                             </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5BT-Al-IS8">
+                                                <rect key="frame" x="205.5" y="402" width="158" height="42"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                                                <state key="normal" title="Resume Game"/>
+                                                <connections>
+                                                    <segue destination="BV1-FR-VrT" kind="show" identifier="resumeGame" id="L4u-yX-l7V"/>
+                                                </connections>
+                                            </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FWR-NA-CWw">
-                                                <rect key="frame" x="130" y="402" width="116" height="42"/>
+                                                <rect key="frame" x="226.5" y="474" width="116" height="42"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                                 <state key="normal" title="Play Game"/>
                                                 <connections>
                                                     <action selector="playGameTapped:" destination="cEh-LH-kqS" eventType="touchUpInside" id="25i-Rr-1qV"/>
                                                     <segue destination="BV1-FR-VrT" kind="show" identifier="startGame" id="niD-Ws-avX"/>
-                                                </connections>
-                                            </button>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5BT-Al-IS8">
-                                                <rect key="frame" x="109" y="474" width="158" height="42"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
-                                                <state key="normal" title="Resume Game"/>
-                                                <connections>
-                                                    <segue destination="BV1-FR-VrT" kind="show" identifier="resumeGame" id="L4u-yX-l7V"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -204,11 +204,11 @@
             <objects>
                 <viewController title="GameScreen" id="BV1-FR-VrT" customClass="GameViewController" customModule="TanksAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="GEX-Hw-PMz">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rD7-ry-WZM">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
                                 <gestureRecognizers/>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="NvL-x5-eHp" appends="YES" id="ZtK-JS-eZj"/>
@@ -219,7 +219,7 @@
                                 </connections>
                             </arscnView>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minValue="0.0" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="dTU-l8-x8U">
-                                <rect key="frame" x="110" y="617" width="154" height="31"/>
+                                <rect key="frame" x="207" y="270" width="154" height="31"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="150" id="fS1-1f-Ivd"/>
                                 </constraints>
@@ -228,7 +228,7 @@
                                 </connections>
                             </slider>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Tz9-JN-OSC">
-                                <rect key="frame" x="302" y="599" width="57" height="48"/>
+                                <rect key="frame" x="495" y="252" width="57" height="48"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512839999996" colorSpace="custom" customColorSpace="sRGB"/>
                                 <gestureRecognizers/>
                                 <fontDescription key="fontDescription" type="system" pointSize="30"/>
@@ -238,7 +238,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rqa-bG-wWn">
-                                <rect key="frame" x="311" y="599" width="48" height="48"/>
+                                <rect key="frame" x="504" y="252" width="48" height="48"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512842465757" colorSpace="custom" customColorSpace="sRGB"/>
                                 <gestureRecognizers/>
                                 <fontDescription key="fontDescription" type="system" pointSize="30"/>
@@ -248,28 +248,28 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Score: 0" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HtA-AN-53f">
-                                <rect key="frame" x="295" y="20" width="64" height="20.5"/>
+                                <rect key="frame" x="488" y="0.0" width="64" height="20.5"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512842465757" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Round: 1" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="i6J-Ju-WM4" userLabel="Round Label">
-                                <rect key="frame" x="16" y="20" width="66" height="20.5"/>
+                                <rect key="frame" x="16" y="0.0" width="66" height="20.5"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512839999996" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qwI-8x-BEQ">
-                                <rect key="frame" x="164" y="20" width="47" height="20.5"/>
+                                <rect key="frame" x="260.5" y="0.0" width="47" height="20.5"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512842465757" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aHz-n7-WR9">
-                                <rect key="frame" x="16" y="599" width="48" height="48"/>
+                                <rect key="frame" x="16" y="252" width="48" height="48"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="30"/>
                                 <state key="normal" title="Exit"/>
@@ -278,7 +278,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QIh-1p-M8Z">
-                                <rect key="frame" x="16" y="20" width="343" height="122"/>
+                                <rect key="frame" x="16" y="0.0" width="536" height="81.5"/>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
                                 <string key="text">Tap to place board on a horizontal surface (highligted in grey).  Device may need to be moved around to find a surface.
 
@@ -287,111 +287,119 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zMC-9V-Juf" userLabel="HUD Background">
+                                <rect key="frame" x="178" y="203" width="211" height="59"/>
+                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                            </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="C7J-4d-iJW">
-                                <rect key="frame" x="131" y="518" width="112.5" height="91"/>
+                                <rect key="frame" x="178.5" y="203" width="211" height="59"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qRc-zd-bfR">
-                                        <rect key="frame" x="0.0" y="0.0" width="112.5" height="27"/>
-                                        <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qRc-zd-bfR">
+                                        <rect key="frame" x="0.0" y="0.0" width="211" height="27"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <state key="normal" title="Weapon Settings"/>
                                         <connections>
                                             <segue destination="dpu-8T-xq9" kind="presentation" identifier="Weapons" id="RvF-JA-zGV"/>
                                         </connections>
                                     </button>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1pc-Yg-cDt">
-                                        <rect key="frame" x="0.0" y="27" width="112.5" height="16"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="oxL-jk-iGu">
+                                        <rect key="frame" x="0.0" y="27" width="211" height="32"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Traversal: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="chu-Sw-81y" userLabel="Azimuth">
-                                                <rect key="frame" x="0.0" y="0.0" width="64" height="16"/>
-                                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0º" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Uti-S3-6bo">
-                                                <rect key="frame" x="64" y="0.0" width="48.5" height="16"/>
-                                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="iX0-JA-LWv">
+                                                <rect key="frame" x="0.0" y="0.0" width="84.5" height="32"/>
+                                                <subviews>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1pc-Yg-cDt">
+                                                        <rect key="frame" x="0.0" y="0.0" width="84.5" height="16"/>
+                                                        <subviews>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Traversal: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="chu-Sw-81y" userLabel="Azimuth">
+                                                                <rect key="frame" x="0.0" y="0.0" width="70.5" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="0º" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Uti-S3-6bo">
+                                                                <rect key="frame" x="70.5" y="0.0" width="14" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                        </subviews>
+                                                    </stackView>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nBy-nh-Uuz">
+                                                        <rect key="frame" x="0.0" y="16" width="84.5" height="16"/>
+                                                        <subviews>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Elevation: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pWX-h5-DDL" userLabel="Altitude">
+                                                                <rect key="frame" x="0.0" y="0.0" width="62.5" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="45º" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TGR-OU-lTp">
+                                                                <rect key="frame" x="62.5" y="0.0" width="22" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                        </subviews>
+                                                    </stackView>
+                                                </subviews>
+                                            </stackView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="uOx-za-q5q">
+                                                <rect key="frame" x="100.5" y="0.0" width="110.5" height="32"/>
+                                                <subviews>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5q4-IW-X40">
+                                                        <rect key="frame" x="0.0" y="0.0" width="110.5" height="16"/>
+                                                        <subviews>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Velocity: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IYA-kB-dHr" userLabel="Power">
+                                                                <rect key="frame" x="0.0" y="0.0" width="62" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="100 m/s" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8y6-5I-LW8">
+                                                                <rect key="frame" x="62" y="0.0" width="48.5" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                        </subviews>
+                                                    </stackView>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="m0A-wQ-lO4">
+                                                        <rect key="frame" x="0.0" y="16" width="110.5" height="16"/>
+                                                        <subviews>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Projectile: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QW0-XH-vXU" userLabel="Weapon">
+                                                                <rect key="frame" x="0.0" y="0.0" width="64" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Regular" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vGF-fx-Cq1">
+                                                                <rect key="frame" x="64" y="0.0" width="46.5" height="16"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                                <nil key="textColor"/>
+                                                                <nil key="highlightedColor"/>
+                                                            </label>
+                                                        </subviews>
+                                                    </stackView>
+                                                </subviews>
+                                            </stackView>
                                         </subviews>
-                                    </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nBy-nh-Uuz">
-                                        <rect key="frame" x="0.0" y="43" width="112.5" height="16"/>
-                                        <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Elevation: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pWX-h5-DDL" userLabel="Altitude">
-                                                <rect key="frame" x="0.0" y="0.0" width="64" height="16"/>
-                                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="45º" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TGR-OU-lTp">
-                                                <rect key="frame" x="64" y="0.0" width="48.5" height="16"/>
-                                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                        </subviews>
-                                    </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5q4-IW-X40">
-                                        <rect key="frame" x="0.0" y="59" width="112.5" height="16"/>
-                                        <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Velocity: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IYA-kB-dHr" userLabel="Power">
-                                                <rect key="frame" x="0.0" y="0.0" width="64" height="16"/>
-                                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="100 m/s" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8y6-5I-LW8">
-                                                <rect key="frame" x="64" y="0.0" width="48.5" height="16"/>
-                                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                        </subviews>
-                                    </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="m0A-wQ-lO4">
-                                        <rect key="frame" x="0.0" y="75" width="112.5" height="16"/>
-                                        <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Projectile: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QW0-XH-vXU" userLabel="Weapon">
-                                                <rect key="frame" x="0.0" y="0.0" width="64" height="16"/>
-                                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Regular" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vGF-fx-Cq1">
-                                                <rect key="frame" x="64" y="0.0" width="48.5" height="16"/>
-                                                <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                        </subviews>
+                                        <variation key="heightClass=compact" axis="horizontal" spacing="16"/>
+                                        <variation key="heightClass=regular" axis="vertical"/>
                                     </stackView>
                                 </subviews>
                                 <color key="backgroundColor" red="0.66422420739999999" green="0.66424006219999998" blue="0.66423153879999997" alpha="0.50457512842465757" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="qRc-zd-bfR" secondAttribute="trailing" id="4q5-KN-Sud"/>
-                                    <constraint firstItem="TGR-OU-lTp" firstAttribute="width" secondItem="Uti-S3-6bo" secondAttribute="width" id="Fzm-1L-JBc"/>
-                                    <constraint firstItem="8y6-5I-LW8" firstAttribute="width" secondItem="Uti-S3-6bo" secondAttribute="width" id="KIy-3T-jpI"/>
-                                    <constraint firstItem="qRc-zd-bfR" firstAttribute="leading" secondItem="C7J-4d-iJW" secondAttribute="leading" id="QDd-2e-k49"/>
-                                    <constraint firstItem="IYA-kB-dHr" firstAttribute="width" secondItem="chu-Sw-81y" secondAttribute="width" id="aIz-zR-yhl"/>
-                                    <constraint firstItem="QW0-XH-vXU" firstAttribute="width" secondItem="chu-Sw-81y" secondAttribute="width" id="hRh-fl-FF9"/>
-                                    <constraint firstItem="pWX-h5-DDL" firstAttribute="width" secondItem="chu-Sw-81y" secondAttribute="width" id="oCV-pR-Ul3"/>
-                                    <constraint firstItem="vGF-fx-Cq1" firstAttribute="width" secondItem="Uti-S3-6bo" secondAttribute="width" id="rT0-Tl-3Nl"/>
+                                    <constraint firstItem="qRc-zd-bfR" firstAttribute="leading" secondItem="C7J-4d-iJW" secondAttribute="leading" id="FyL-7l-gof"/>
+                                    <constraint firstAttribute="trailing" secondItem="qRc-zd-bfR" secondAttribute="trailing" id="P6E-kI-vHG"/>
+                                    <constraint firstItem="qRc-zd-bfR" firstAttribute="centerX" secondItem="C7J-4d-iJW" secondAttribute="centerX" id="lkX-Kj-DN5"/>
                                 </constraints>
                             </stackView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="HtA-AN-53f" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="0g9-HW-Jnz"/>
+                            <constraint firstItem="C7J-4d-iJW" firstAttribute="centerY" secondItem="zMC-9V-Juf" secondAttribute="centerY" id="1ar-gD-3c5"/>
                             <constraint firstItem="C7J-4d-iJW" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="2Gk-ap-4oN"/>
                             <constraint firstItem="qwI-8x-BEQ" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="5g7-lm-PyQ"/>
                             <constraint firstItem="qwI-8x-BEQ" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="5vR-et-d7b"/>
@@ -401,6 +409,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                             <constraint firstItem="QIh-1p-M8Z" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="16" id="Kc8-l8-Gi8"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="aHz-n7-WR9" secondAttribute="bottom" constant="20" id="Q7v-Ez-6aG"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Tz9-JN-OSC" secondAttribute="bottom" constant="20" id="Tt4-I0-nIP"/>
+                            <constraint firstItem="C7J-4d-iJW" firstAttribute="centerX" secondItem="zMC-9V-Juf" secondAttribute="centerX" id="Ww1-yb-kTG"/>
                             <constraint firstItem="i6J-Ju-WM4" firstAttribute="top" secondItem="Z0Y-yR-u5V" secondAttribute="top" id="YxW-Wy-wFI"/>
                             <constraint firstItem="dTU-l8-x8U" firstAttribute="top" secondItem="C7J-4d-iJW" secondAttribute="bottom" constant="8" id="ZC1-C9-6Bn"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="HtA-AN-53f" secondAttribute="trailing" constant="16" id="bxp-9O-6ha"/>
@@ -408,10 +417,12 @@ If no surfaces can be found, double tap to place board in the air.</string>
                             <constraint firstItem="dTU-l8-x8U" firstAttribute="centerX" secondItem="GEX-Hw-PMz" secondAttribute="centerX" id="dzb-hW-aEZ"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="QIh-1p-M8Z" secondAttribute="trailing" constant="16" id="fnV-FH-2Q1"/>
                             <constraint firstItem="aHz-n7-WR9" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" constant="16" id="gFA-GQ-jE8"/>
+                            <constraint firstItem="C7J-4d-iJW" firstAttribute="width" secondItem="zMC-9V-Juf" secondAttribute="width" id="hKd-Ng-PcD"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="bottom" secondItem="Z0Y-yR-u5V" secondAttribute="bottom" id="iuZ-hH-2hL"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="trailing" secondItem="Rqa-bG-wWn" secondAttribute="trailing" constant="16" id="kRg-96-ZQP"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="dTU-l8-x8U" secondAttribute="bottom" constant="20" id="nnP-Lv-Rob"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="trailing" secondItem="Z0Y-yR-u5V" secondAttribute="trailing" id="qQm-OX-dIS"/>
+                            <constraint firstItem="C7J-4d-iJW" firstAttribute="height" secondItem="zMC-9V-Juf" secondAttribute="height" id="uMu-YM-338"/>
                             <constraint firstItem="rD7-ry-WZM" firstAttribute="leading" secondItem="Z0Y-yR-u5V" secondAttribute="leading" id="xJs-TJ-zrJ"/>
                             <constraint firstItem="Z0Y-yR-u5V" firstAttribute="bottom" secondItem="Rqa-bG-wWn" secondAttribute="bottom" constant="20" id="zED-YZ-OCe"/>
                         </constraints>
@@ -423,6 +434,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                         <outlet property="backupPlaceBoardGesture" destination="5hr-VT-zKA" id="oEq-9l-kHp"/>
                         <outlet property="exitButton" destination="aHz-n7-WR9" id="bla-Fi-Hwe"/>
                         <outlet property="fireButton" destination="Rqa-bG-wWn" id="9ul-PN-kLT"/>
+                        <outlet property="hudBackground" destination="zMC-9V-Juf" id="EWN-PH-wAI"/>
                         <outlet property="hudStackView" destination="C7J-4d-iJW" id="a6n-CY-KsZ"/>
                         <outlet property="manualTrainButton" destination="qRc-zd-bfR" id="9ba-qv-LUU"/>
                         <outlet property="placeBoardGesture" destination="NvL-x5-eHp" id="T9y-nK-hH1"/>
@@ -477,23 +489,23 @@ If no surfaces can be found, double tap to place board in the air.</string>
             <objects>
                 <viewController id="dpu-8T-xq9" customClass="WeaponsViewController" customModule="TanksAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="JFB-1j-I94">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ijw-5w-cvJ">
-                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="WAN-2x-ll0">
-                                        <rect key="frame" x="0.0" y="0.0" width="375.5" height="589"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="568.5" height="589"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text=" " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GUe-BP-spl">
-                                                <rect key="frame" x="186.5" y="0.0" width="3" height="12"/>
+                                                <rect key="frame" x="283" y="0.0" width="3" height="12"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="N6I-5d-bOj">
-                                                <rect key="frame" x="59.5" y="22" width="256.5" height="20.5"/>
+                                                <rect key="frame" x="156" y="22" width="256.5" height="20.5"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Credit: 0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DSV-x0-XIo" userLabel="Credit Label">
                                                         <rect key="frame" x="0.0" y="0.0" width="192.5" height="20.5"/>
@@ -510,7 +522,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="XW6-fa-rxJ">
-                                                <rect key="frame" x="59.5" y="52.5" width="256.5" height="30"/>
+                                                <rect key="frame" x="156" y="52.5" width="256.5" height="30"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vIF-Fe-BU4">
                                                         <rect key="frame" x="0.0" y="0.0" width="52" height="30"/>
@@ -530,19 +542,19 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NXa-jg-xjf">
-                                                <rect key="frame" x="185" y="92.5" width="6" height="12"/>
+                                                <rect key="frame" x="281.5" y="92.5" width="6" height="12"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Manual Training" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wA9-xg-xpt" userLabel="Manual Aiming">
-                                                <rect key="frame" x="127.5" y="114.5" width="121" height="20.5"/>
+                                                <rect key="frame" x="224" y="114.5" width="121" height="20.5"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="erJ-kp-oaR">
-                                                <rect key="frame" x="59.5" y="145" width="256.5" height="29"/>
+                                                <rect key="frame" x="156" y="145" width="256.5" height="29"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Traversal:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="L8e-NG-FIc">
                                                         <rect key="frame" x="0.0" y="0.0" width="74" height="29"/>
@@ -568,7 +580,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="AmE-MD-8l5">
-                                                <rect key="frame" x="59.5" y="184" width="256.5" height="29"/>
+                                                <rect key="frame" x="156" y="184" width="256.5" height="29"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Elevation:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fPO-bw-83q">
                                                         <rect key="frame" x="0.0" y="0.0" width="74" height="29"/>
@@ -594,7 +606,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="gZS-5G-oDk">
-                                                <rect key="frame" x="59.5" y="223" width="256.5" height="29"/>
+                                                <rect key="frame" x="156" y="223" width="256.5" height="29"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Velocity: " textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zh1-HG-v9o">
                                                         <rect key="frame" x="0.0" y="0.0" width="74" height="29"/>
@@ -620,7 +632,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="CPi-Y6-EjD">
-                                                <rect key="frame" x="59.5" y="262" width="256.5" height="31"/>
+                                                <rect key="frame" x="156" y="262" width="256.5" height="31"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Targeting Computer:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Zm-9l-tHF" userLabel="Targeting">
                                                         <rect key="frame" x="0.0" y="0.0" width="157.5" height="31"/>
@@ -637,19 +649,19 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BP7-fE-K5y">
-                                                <rect key="frame" x="185" y="303" width="6" height="12"/>
+                                                <rect key="frame" x="281.5" y="303" width="6" height="12"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Projectile Selection" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aVP-SH-Egu">
-                                                <rect key="frame" x="114.5" y="325" width="147" height="20.5"/>
+                                                <rect key="frame" x="211" y="325" width="147" height="20.5"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="cvV-Qh-KAz">
-                                                <rect key="frame" x="59.5" y="355.5" width="256.5" height="29"/>
+                                                <rect key="frame" x="156" y="355.5" width="256.5" height="29"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Type:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3Tn-Jy-iqj">
                                                         <rect key="frame" x="0.0" y="0.0" width="74" height="29"/>
@@ -677,7 +689,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="IbL-Us-kCj">
-                                                <rect key="frame" x="59.5" y="394.5" width="256.5" height="29"/>
+                                                <rect key="frame" x="156" y="394.5" width="256.5" height="29"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Size:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g5q-st-679">
                                                         <rect key="frame" x="0.0" y="0.0" width="74" height="29"/>
@@ -705,7 +717,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="qH3-XW-gl6">
-                                                <rect key="frame" x="59.5" y="433.5" width="256.5" height="20.5"/>
+                                                <rect key="frame" x="156" y="433.5" width="256.5" height="20.5"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Cost:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NKG-16-XiX">
                                                         <rect key="frame" x="0.0" y="0.0" width="74" height="20.5"/>
@@ -727,7 +739,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="i3Z-Zb-4Rm">
-                                                <rect key="frame" x="59.5" y="464" width="256.5" height="20.5"/>
+                                                <rect key="frame" x="156" y="464" width="256.5" height="20.5"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Available:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UpY-Cz-EDa">
                                                         <rect key="frame" x="0.0" y="0.0" width="74" height="20.5"/>
@@ -749,19 +761,19 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 </subviews>
                                             </stackView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text=" " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xRK-j0-Kew">
-                                                <rect key="frame" x="186.5" y="494.5" width="3" height="12"/>
+                                                <rect key="frame" x="283" y="494.5" width="3" height="12"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V90-R7-ODV" userLabel="Reason Label">
-                                                <rect key="frame" x="167" y="516.5" width="42" height="20.5"/>
+                                                <rect key="frame" x="263.5" y="516.5" width="42" height="20.5"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Js0-hE-nSn">
-                                                <rect key="frame" x="159" y="547" width="58" height="42"/>
+                                                <rect key="frame" x="255.5" y="547" width="58" height="42"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                                 <state key="normal" title="Done"/>
                                                 <connections>
@@ -839,11 +851,11 @@ If no surfaces can be found, double tap to place board in the air.</string>
             <objects>
                 <viewController title="Game Over" id="m2W-CC-yJa" customClass="GameOverViewController" customModule="TanksAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="p5J-al-LAf">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="yk4-H7-oto">
-                                <rect key="frame" x="90.5" y="172.5" width="195" height="322"/>
+                                <rect key="frame" x="186.5" y="-1" width="195" height="322"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Game Over" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ubf-Hj-K1V" userLabel="Game Over">
                                         <rect key="frame" x="0.0" y="0.0" width="195" height="48"/>
@@ -888,10 +900,10 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                 </subviews>
                             </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="lGt-pp-Em9">
-                                <rect key="frame" x="20" y="237.5" width="335" height="192"/>
+                                <rect key="frame" x="20" y="64" width="528" height="192"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yPA-99-B6v">
-                                        <rect key="frame" x="0.0" y="0.0" width="335" height="30"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="528" height="30"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Human: " textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O7G-lH-lWQ">
                                                 <rect key="frame" x="0.0" y="0.0" width="90.5" height="30"/>
@@ -900,7 +912,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vdJ-HG-mCT">
-                                                <rect key="frame" x="90.5" y="0.0" width="244.5" height="30"/>
+                                                <rect key="frame" x="90.5" y="0.0" width="437.5" height="30"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -908,7 +920,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                         </subviews>
                                     </stackView>
                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZE5-1Y-kjr">
-                                        <rect key="frame" x="0.0" y="50" width="335" height="30"/>
+                                        <rect key="frame" x="0.0" y="50" width="528" height="30"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Score: " textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="95D-ks-OB0">
                                                 <rect key="frame" x="0.0" y="0.0" width="90.5" height="30"/>
@@ -917,7 +929,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l6T-R0-DVH">
-                                                <rect key="frame" x="90.5" y="0.0" width="244.5" height="30"/>
+                                                <rect key="frame" x="90.5" y="0.0" width="437.5" height="30"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -925,7 +937,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                         </subviews>
                                     </stackView>
                                     <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pE8-HP-b6q">
-                                        <rect key="frame" x="0.0" y="100" width="335" height="30"/>
+                                        <rect key="frame" x="0.0" y="100" width="528" height="30"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Name: " textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pzS-dm-Nq2">
                                                 <rect key="frame" x="0.0" y="0.0" width="90.5" height="30"/>
@@ -934,7 +946,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter your name" textAlignment="natural" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="jHK-LE-tVG">
-                                                <rect key="frame" x="90.5" y="0.0" width="244.5" height="30"/>
+                                                <rect key="frame" x="90.5" y="0.0" width="437.5" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                 <textInputTraits key="textInputTraits" returnKeyType="done"/>
@@ -945,7 +957,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                         </subviews>
                                     </stackView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yvH-Y1-DaN">
-                                        <rect key="frame" x="0.0" y="150" width="335" height="42"/>
+                                        <rect key="frame" x="0.0" y="150" width="528" height="42"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                         <state key="normal" title="Done"/>
                                         <connections>
@@ -991,11 +1003,11 @@ If no surfaces can be found, double tap to place board in the air.</string>
             <objects>
                 <viewController title="Instructions" id="Iy8-LG-PXm" customClass="InstructionsViewController" customModule="TanksAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="hL7-KW-NZU">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FJk-5o-3u3">
-                                <rect key="frame" x="16" y="40" width="343" height="545"/>
+                                <rect key="frame" x="16" y="20" width="536" height="218"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <attributedString key="attributedText">
                                     <fragment>
@@ -1008,7 +1020,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iFA-aJ-AzE">
-                                <rect key="frame" x="16" y="605" width="343" height="42"/>
+                                <rect key="frame" x="16" y="258" width="536" height="42"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                 <state key="normal" title="Main Menu"/>
                                 <connections>
@@ -1039,17 +1051,17 @@ If no surfaces can be found, double tap to place board in the air.</string>
             <objects>
                 <viewController title="HighScores" id="9sr-k1-CdP" customClass="ScoresViewController" customModule="TanksAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Rh0-V9-HkB">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="568" height="320"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="High Scores" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cMs-TI-CEL">
-                                <rect key="frame" x="109" y="20" width="157" height="36"/>
+                                <rect key="frame" x="205.5" y="0.0" width="157" height="36"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="30"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Emg-Jy-6Qt">
-                                <rect key="frame" x="16" y="605" width="343" height="42"/>
+                                <rect key="frame" x="16" y="258" width="536" height="42"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                 <state key="normal" title="Main Menu"/>
                                 <connections>
@@ -1057,7 +1069,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                 </connections>
                             </button>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" showsHorizontalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DfL-F8-Gu8">
-                                <rect key="frame" x="0.0" y="76" width="375" height="509"/>
+                                <rect key="frame" x="0.0" y="56" width="568" height="182"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="d5R-pH-pYE">
                                         <rect key="frame" x="0.0" y="0.0" width="4.5" height="20.5"/>
