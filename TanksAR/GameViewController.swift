@@ -563,7 +563,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     }
     
     func removeTanks() {
-        for i in 0..<gameModel.board.players.count {
+        guard users.count > 0 else { return }
+        for i in 0..<users.count {
             guard let tank = users[i].tank else { continue }
             tank.removeFromParentNode()
             if i < users.count {
@@ -650,7 +651,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
             // player is an AI
             disableUI()
-            let (azi, alt, vel) = ai.fireParameters(gameModel: gameModel, players: gameModel.board.players, num: 100)
+            let (azi, alt, vel) = ai.fireParameters(gameModel: gameModel, players: gameModel.board.players, num: 1000)
             NSLog("ai firing parameters, azi,alt,vel: (\(azi),\(alt),\(vel))")
             gameModel.setTankAim(azimuth: azi, altitude: alt)
             gameModel.setTankPower(power: vel)
