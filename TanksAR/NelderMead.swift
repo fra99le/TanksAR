@@ -275,7 +275,7 @@ class NelderMead : Codable {
             let xr = nmVectorAdd(c, scaled)
             nextQueue.append(xr)
         case .expand:
-            NSLog("state: expand (gamma: \(gamma), extendScale: \(extendScale)")
+            NSLog("state: expand (gamma: \(gamma), extendScale: \(extendScale))")
             // produces one new point
             let scaled = nmVectorScale(hToC, by: gamma * extendScale)
             extendScale *= 2
@@ -312,7 +312,7 @@ class NelderMead : Codable {
         
         //NSLog("\(#function) finished, nextQueue: \(nextQueue)")
         let ret = nextQueue.remove(at: 0)
-        NSLog("\(#function): returning \(ret)")
+        //NSLog("\(#function): returning \(ret)")
 
         return ret
     }
