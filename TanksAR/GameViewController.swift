@@ -850,7 +850,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
                 showAimGuide = true
                 showWind = true
                 // show player arrow if there is no prevTraj
-                if player.prevTrajectory.count <= 0 {
+                if player.prevTrajectory.count <= 0 && player.ai == nil {
                     showPlayerArrow = true
                 }
             }
