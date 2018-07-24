@@ -104,20 +104,21 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         newBottomSurface.removeFromParentNode()
         
         // make tanks look 'metalic'
-        for tank in tankNodes {
-            let diffuse = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
-            let metalness = #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)
-            tank.geometry?.firstMaterial?.diffuse.contents = diffuse
-            tank.geometry?.firstMaterial?.metalness.contents = metalness
-            if let turret = tank.childNode(withName: "turret", recursively: true) {
-                turret.geometry?.firstMaterial?.diffuse.contents = diffuse
-                turret.geometry?.firstMaterial?.metalness.contents = metalness
-            }
-            if let barrel = tank.childNode(withName: "barrel", recursively: true) {
-                barrel.geometry?.firstMaterial?.diffuse.contents = diffuse
-                barrel.geometry?.firstMaterial?.metalness.contents = metalness
-            }
-        }
+        //This code breaks the highligting of the active player
+//        for tank in tankNodes {
+//            let diffuse = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
+//            let metalness = #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)
+//            tank.geometry?.firstMaterial?.diffuse.contents = diffuse
+//            tank.geometry?.firstMaterial?.metalness.contents = metalness
+//            if let turret = tank.childNode(withName: "turret", recursively: true) {
+//                turret.geometry?.firstMaterial?.diffuse.contents = diffuse
+//                turret.geometry?.firstMaterial?.metalness.contents = metalness
+//            }
+//            if let barrel = tank.childNode(withName: "barrel", recursively: true) {
+//                barrel.geometry?.firstMaterial?.diffuse.contents = diffuse
+//                barrel.geometry?.firstMaterial?.metalness.contents = metalness
+//            }
+//        }
         
         showLights()
         
