@@ -931,10 +931,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
                 playerArrowNode.removeFromParentNode()
                 board.addChildNode(labeledArrowNode)
                 playerArrowNode = labeledArrowNode
-                NSLog("got to line \(#line) for player \(i)")
-
-            } else {
-                NSLog("got to line \(#line) for player \(i)")
             }
         }
         
