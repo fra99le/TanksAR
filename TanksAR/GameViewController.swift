@@ -65,6 +65,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     var saveStateController: UIViewController? = nil
     var roundChanged: Bool = false
     var gameOver = false
+    var playerNameNode = SCNNode()
+    var playerArrowNode = SCNNode()
     
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
@@ -284,6 +286,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         guard let gesture = sender as? UIPanGestureRecognizer else { return }
         guard boardDrawer.tankNodes.count > 0 else { return }
         
+        if !playerArrowNode.isHidden {
+            NSLog("Hiding player arrow")
+            // arrow appear animation
+            let arrowHideAction = SCNAction.sequence([.scale(to: 0, duration: 1),
+                                                      .hide(),
+                                                      .removeFromParentNode()])
+            playerArrowNode.runAction(arrowHideAction)
+        }
+
         //NSLog("Screen dragged \(gesture).")
         //NSLog("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
         // determine player
@@ -413,6 +424,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     
     @IBAction func fireButtonPressed(_ sender: UIButton) {
         NSLog("Fire button pressed")
+        if !playerArrowNode.isHidden {
+            NSLog("Hiding player arrow")
+            // arrow appear animation
+            let arrowHideAction = SCNAction.sequence([.scale(to: 0, duration: 0),
+                                                      .hide(),
+                                                      .removeFromParentNode()])
+            playerArrowNode.runAction(arrowHideAction)
+        }
+        
         disableUI()
         launchProjectile()
     }
@@ -820,10 +840,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             var color = UIColor.darkGray
             var showAimGuide = false
             var showWind = false
+            var showPlayerArrow = false
             if gameModel.board.currentPlayer == i {
                 color = UIColor.gray
                 showAimGuide = true
                 showWind = true
+                // show player arrow if there is no prevTraj
+                if player.prevTrajectory.count <= 0 {
+                    showPlayerArrow = true
+                }
             }
             tankNode.geometry?.firstMaterial?.diffuse.contents = color
             turretNode.geometry?.firstMaterial?.diffuse.contents = color
@@ -858,15 +883,71 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             } else {
                 windArrow.isHidden = true
             }
+            
+            // show player arrow
+            if showPlayerArrow {
+                NSLog("setting up player arrow for \(player.name)")
+                // draw arrow pointing to current player
+                let arrowScene = SCNScene(named: "art.scnassets/DownArrow.scn")
+                guard let labeledArrowNode = arrowScene?.rootNode.childNode(withName: "LabeledArrow", recursively: true) else { break }
+                guard let arrowNode = arrowScene?.rootNode.childNode(withName: "Arrow", recursively: true) else { break }
+                guard let labelNode = arrowScene?.rootNode.childNode(withName: "Label", recursively: true) else { break }
+
+                // set label
+                for label in labelNode.childNodes {
+                    label.removeFromParentNode()
+                }
+                let textGeometry = SCNText(string: player.name, extrusionDepth: 2)
+                playerNameNode = SCNNode(geometry: textGeometry)
+                let (min: min, max: max) = playerNameNode.boundingBox
+                playerNameNode.position = SCNVector3( -(max.x+min.x)/2, -(max.y+min.y)/2, -(max.z+min.z)/2)
+                playerNameNode.position.y = 0
+                playerNameNode.geometry?.firstMaterial?.diffuse.contents = UIColor.cyan
+                labelNode.addChildNode(playerNameNode)
+                let labelScale: CGFloat = 0.1
+                labelNode.scale = SCNVector3(labelScale,labelScale,labelScale)
+                
+
+                // label spin animation
+                let nameSpinAction = SCNAction.repeatForever(.rotateBy(x: 0, y: CGFloat(-Float.pi*2), z: 0, duration: 2))
+                labelNode.runAction(nameSpinAction)
+                labelNode.isHidden = false
+
+                // arrow spin animation
+                let arrowSpinAction = SCNAction.repeatForever(.rotateBy(x: 0, y: CGFloat(Float.pi*2), z: 0, duration: 4))
+                arrowNode.runAction(arrowSpinAction)
+                arrowNode.scale = SCNVector3(0.5,1,0.5)
+                arrowNode.isHidden = false
+
+                // arrow appear animation
+//                let arrowAppearAction = SCNAction.sequence([.scale(to: 0, duration: 0),
+//                                                             .unhide(),
+//                                                             .scale(to: 2, duration: 1)])
+//                labeledArrowNode.runAction(arrowAppearAction)
+                labeledArrowNode.isHidden = false
+                
+                labeledArrowNode.position = SCNVector3(tankNode.position.x,tankNode.position.y + 50,tankNode.position.z)
+                labeledArrowNode.scale = SCNVector3(30,30,30)
+                playerArrowNode.removeFromParentNode()
+                board.addChildNode(labeledArrowNode)
+                playerArrowNode = labeledArrowNode
+                NSLog("got to line \(#line) for player \(i)")
+
+            } else {
+                NSLog("got to line \(#line) for player \(i)")
+            }
         }
         
+
         updateHUD()
         
         // show previous trajectory for user
         prevTraj.removeFromParentNode()
-        prevTraj = SCNNode()
-        addTrajectory(trajectory: player.prevTrajectory, toNode: prevTraj, color: UIColor.yellow)
-        board.addChildNode(prevTraj)
+        if player.prevTrajectory.count > 0 {
+            prevTraj = SCNNode()
+            addTrajectory(trajectory: player.prevTrajectory, toNode: prevTraj, color: UIColor.yellow)
+            board.addChildNode(prevTraj)
+        }
         
         // update board
         boardDrawer.updateBoard()
