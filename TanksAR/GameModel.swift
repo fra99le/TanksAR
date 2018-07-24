@@ -189,6 +189,14 @@ class GameModel : Codable {
         board.bedrock.setSize(width: board.boardSize, height: board.boardSize)
         board.colors.setSize(width: board.boardSize, height: board.boardSize) // 0=grass, 1=dirt
         
+//        // for debugging
+//        // mark board with direction information
+//        for i in 0...board.boardSize / 2 {
+//            for j in 0...20 {
+//                setColorIndex(longitude: i, latitude: j, to: 1)
+//            }
+//        }
+        
         // Note: drawing random lines on the board before diamond-square might allow for seeing lines of mountains or valleys
         board.surface.fillUsingDiamondSquare(withMinimum: 10.0/255.0, andMaximum: 255.0/255.0)
         //board.bedrock.fillUsingDiamondSquare(withMinimum: 5.0/255.0, andMaximum: 10.0/255.0)
@@ -671,7 +679,7 @@ class GameModel : Codable {
         
         board.currentPlayer = (board.currentPlayer + 1) % board.players.count
         while !roundEnded && board.players[board.currentPlayer].hitPoints <= 0 {
-            NSLog("skipping downed player )\(board.currentPlayer)")
+            NSLog("skipping downed player \(board.currentPlayer)")
             board.currentPlayer = (board.currentPlayer + 1) % board.players.count
         }
         print("Player \(board.currentPlayer) now active.")
