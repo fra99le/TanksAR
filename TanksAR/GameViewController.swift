@@ -74,6 +74,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     @IBOutlet weak var exitButton: UIButton!
     @IBOutlet var powerSlider: UISlider!
     @IBOutlet weak var hudStackView: UIStackView!
+    @IBOutlet weak var hudBackground: UIView!
     
     @IBOutlet weak var manualTrainButton: UIButton!
     @IBOutlet weak var azimuthLabel: UILabel!
@@ -552,6 +553,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         playerScoreLabel.isHidden = true
         roundLabel.isHidden = true
         hudStackView.isHidden = true
+        hudBackground.isHidden = true
         
         // remove board and tanks
         board.removeFromParentNode()
@@ -710,6 +712,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         manualTrainButton.isEnabled = true
         manualTrainButton.isHidden = false
         hudStackView.isHidden = false
+        hudBackground.isHidden = false
         playerNameLabel.isHidden = false
         playerScoreLabel.isHidden = false
         roundLabel.isHidden = false
@@ -729,6 +732,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         manualTrainButton.isEnabled = false
         manualTrainButton.isHidden = true
         hudStackView.isHidden = false
+        hudBackground.isHidden = false
         playerNameLabel.isHidden = false
         playerScoreLabel.isHidden = false
         roundLabel.isHidden = false
