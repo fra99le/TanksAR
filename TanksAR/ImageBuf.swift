@@ -9,6 +9,8 @@
 import Foundation
 import UIKit
 
+// Note: textured drawer should have slightly noisy green and brown images.
+
 // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
 struct PixelData {
     var a:UInt8 = 255
@@ -22,7 +24,7 @@ class ImageBuf : Codable {
     var height: Int = 0
     var pixels: [CGFloat] = []
     var pngBuffer: Data?
-    let noiseLevel: Float = 10
+    var noiseLevel: Float = 10
     //let noiseLevel: Float = 0
     
     init() {
@@ -68,56 +70,111 @@ class ImageBuf : Codable {
         
     }
     
-    // see: http://www.lighthouse3d.com/opengl/terrain/index.php?mpd2
-    
     func isPowerOfTwo(_ number: Int) -> Bool {
         return (number&(number-1)) == 0
     }
     
     // see: https://en.wikipedia.org/wiki/Diamond-square_algorithm
     // also: https://stackoverflow.com/questions/7549883/smoothing-issue-with-diamond-square-algorithm
-    func doDiamondSquare() {
+    // perhaps: http://www.lighthouse3d.com/opengl/terrain/index.php?mpd2
+    func doDiamondSquare(withMinimum: Float = 0, andMaximum: Float = 1) {
         guard isPowerOfTwo(width-1) else { return }
         guard isPowerOfTwo(height-1) else { return }
 
         NSLog("\(#function) started")
 
+        noiseLevel = andMaximum - withMinimum
+        var values: [Float] = []
+        var minValue = 2*noiseLevel
+        var maxValue = -2*noiseLevel
+        for _ in 0..<5 {
+            let value = Float(drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
+            minValue = min(minValue,value)
+            maxValue = max(maxValue,value)
+            values.append(value)
+        }
+
+        // rescale initial values to cover min-max range
+        for i in 0..<5 {
+            let newValue = (values[i] - minValue) * (andMaximum - withMinimum) / (maxValue - minValue) + withMinimum
+            values[i] = newValue
+        }
+        //values = [withMinimum, andMaximum/2, andMaximum/2, andMaximum, andMaximum]
+        //values = [andMaximum, andMaximum, andMaximum, andMaximum, andMaximum]
+        NSLog("first five values: \(values) for range (\(withMinimum),\(andMaximum))")
+        
         // randomly assign corners
-        setPixel(x: 0, y: 0, value: drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
-        setPixel(x: 0, y: height-1, value: drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
-        setPixel(x: width-1, y: 0, value: drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
-        setPixel(x: width-1, y: height-1, value: drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
+        setPixel(x: 0, y: 0, value: CGFloat(values[0]))
+        setPixel(x: 0, y: height-1, value: CGFloat(values[1]))
+        setPixel(x: width-1, y: 0, value: CGFloat(values[2]))
+        setPixel(x: width-1, y: height-1, value: CGFloat(values[3]))
+        setPixel(x: width/2, y: height/2, value: CGFloat(values[4]))
 
         // make recursive call
-        doDiamondSquare(left: 0, right: width-1, top: 0, bottom: height-1)
+        //doDiamondSquare(left: 0, right: width-1, top: 0, bottom: height-1)
+        
+        // iterative version
+        var size = width-1
+        while size > 1 {
+            let halfSize = size/2
+
+            // do diamonds
+            var j = size / 2
+            while j < height {
+                var i = size / 2
+                while i < width {
+                    diamondSquareStep(x: i, y: j, size: halfSize, mode: .diamond)
+                    i += size
+                }
+                j += size
+            }
+
+            // do squares
+            j = 0
+            while j <= (height-size) {
+                var i = 0
+                while i <= (width-size) {
+                    diamondSquareStep(x: i+halfSize, y: j, size: halfSize, mode: .square)
+                    diamondSquareStep(x: i, y: j+halfSize, size: halfSize, mode: .square)
+                    diamondSquareStep(x: i+halfSize, y: j+size, size: halfSize, mode: .square)
+                    diamondSquareStep(x: i+size, y: j+halfSize, size: halfSize, mode: .square)
+
+                    i += size
+                }
+                j += size
+            }
+
+            size /= 2
+        }
         
         NSLog("\(#function) finished")
 
     }
     
-    func doDiamondSquare(left: Int, right: Int, top: Int, bottom: Int) {
-        if (right-1) <= left || (bottom-1) <= top { return }
-        
-        // compute center location
-        let centerX = (left + right) / 2
-        let centerY = (top + bottom) / 2
-        let size = centerX - left
-        
-        // compute center (diamond step)
-        diamondStep(x: centerX, y: centerY, size: size)
-        
-        // compute edge centers (square step)
-        squareStep(x: centerX, y: top, size: size) // top
-        squareStep(x: left, y: centerY, size: size) // left
-        squareStep(x: centerX, y: bottom, size: size) // bottom
-        squareStep(x: right, y: centerY, size: size) // right
-        
-        // perform recursions
-        doDiamondSquare(left: left, right: centerX, top: top, bottom: centerY) // upper left
-        doDiamondSquare(left: centerX, right: right, top: top, bottom: centerY) // upper left
-        doDiamondSquare(left: left, right: centerX, top: centerY, bottom: bottom) // lower left
-        doDiamondSquare(left: centerX, right: right, top: centerY, bottom: bottom) // lower right
-    }
+//    // This is broken!!!
+//    func doDiamondSquare(left: Int, right: Int, top: Int, bottom: Int) {
+//        if (right-1) <= left || (bottom-1) <= top { return }
+//
+//        // compute center location
+//        let centerX = (left + right) / 2
+//        let centerY = (top + bottom) / 2
+//        let size = centerX - left
+//
+//        // compute center (diamond step)
+//        diamondStep(x: centerX, y: centerY, size: size)
+//
+//        // compute edge centers (square step)
+//        squareStep(x: centerX, y: top, size: size) // top
+//        squareStep(x: left, y: centerY, size: size) // left
+//        squareStep(x: centerX, y: bottom, size: size) // bottom
+//        squareStep(x: right, y: centerY, size: size) // right
+//
+//        // perform recursions
+//        doDiamondSquare(left: left, right: centerX, top: top, bottom: centerY) // upper left
+//        doDiamondSquare(left: centerX, right: right, top: top, bottom: centerY) // upper left
+//        doDiamondSquare(left: left, right: centerX, top: centerY, bottom: bottom) // lower left
+//        doDiamondSquare(left: centerX, right: right, top: centerY, bottom: bottom) // lower right
+//    }
     
     func median(of: [Float]) -> Float {
         let sorted = of.sorted()
@@ -135,6 +192,7 @@ class ImageBuf : Codable {
     }
     
     func diamondSquareStep(x: Int, y: Int, size: Int, mode: DiamondSquare) {
+        //NSLog("\(#function): x,y = \(x),\(y); size=\(size); mode=\(mode)")
         var sum: CGFloat = 0.0
         var count = 0
         //var values: [Float] = []
@@ -171,8 +229,8 @@ class ImageBuf : Codable {
 
         let sizeRatio = 1 * Double(size) / Double(width)
         let randomScale = Double(noiseLevel) * pow(sizeRatio, 1)
-        let noise = 2*(drand48()*randomScale - randomScale/2)
-        //let noise = CGFloat(0)
+        let noise = drand48()*randomScale - randomScale/2
+        //let noise: Double = 0
         let value = avg + noise
         
         setPixel(x: x, y: y, value: CGFloat(value))
@@ -193,7 +251,7 @@ class ImageBuf : Codable {
         guard isPowerOfTwo(height-1) else { return }
         
         // apply diamond-square algorithm
-        doDiamondSquare()
+        doDiamondSquare(withMinimum: withMinimum, andMaximum: andMaximum)
 
         // find min/max values
         var minValue = pixels[0]
@@ -209,7 +267,7 @@ class ImageBuf : Codable {
         // rescale to min/max values
         let min = CGFloat(withMinimum)
         let max = CGFloat(andMaximum)
-        if maxValue-minValue >= 0.01 {
+        if maxValue-minValue >= 0.0001 {
             for i in 0..<pixels.count {
                 let r = pixels[i]
                 
