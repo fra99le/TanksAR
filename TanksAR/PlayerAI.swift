@@ -140,8 +140,8 @@ class PlayerAI : Codable {
         let ret = nelderMead.nextPoint()
         
         // convert new sample to polar coordinates
-        var (retAzi, retAlt, retVel) = toSpherical(xVel: ret[0], yVel: ret[1], zVel: ret[2])
-        retVel = min(retVel, gameModel.maxPower)
+        let (retAzi, retAlt, retVel) = toSpherical(xVel: ret[0], yVel: ret[1], zVel: ret[2])
+        //retVel = min(retVel, gameModel.maxPower)
         let (retXvel, retYvel, retZvel) = fromSpherical(azi: retAzi, alt: retAlt, velocity: retVel)
         NSLog("returning firing parameters (azi,alt,vel) = \(retAzi),\(retAlt),\(retVel), or as vectors (x,y,z) = \(retXvel),\(retYvel),\(retZvel))")
         
