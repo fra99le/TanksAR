@@ -25,8 +25,6 @@
 		53522CAD20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
 		53522CAE20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
 		53522CB020DCC41B00DDB71B /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
-		53522CB120DCC41B00DDB71B /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
-		53522CB220DCC41B00DDB71B /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
 		53527CE220D1DB36005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		53527CE320D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		53527CE420D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
@@ -353,7 +351,6 @@
 			files = (
 				5396120F20D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
 				53EEDB7F20C83C4700B8B71D /* TanksARTests.swift in Sources */,
-				53522CB120DCC41B00DDB71B /* GameViewDrawer.swift in Sources */,
 				53522CAD20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
 				53EEDB9F20C84A3E00B8B71D /* GameModel.swift in Sources */,
 				5318F3E720D38B4F00377161 /* NelderMead.swift in Sources */,
@@ -370,7 +367,6 @@
 			files = (
 				5396121020D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
 				53EEDB8A20C83C4700B8B71D /* TanksARUITests.swift in Sources */,
-				53522CB220DCC41B00DDB71B /* GameViewDrawer.swift in Sources */,
 				53522CAE20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
 				53EEDBA020C84A3E00B8B71D /* GameModel.swift in Sources */,
 				5318F3E820D38B4F00377161 /* NelderMead.swift in Sources */,
