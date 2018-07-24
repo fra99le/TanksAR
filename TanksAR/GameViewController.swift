@@ -635,7 +635,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         if let ai = gameModel.board.players[fireResult.playerID].ai,
             let impact = fireResult.trajectory.last {
             // player is an AI
-            ai.recordResult(gameModel: gameModel, azimuth: tank.azimuth, altitude: tank.altitude, velocity: tank.velocity,
+            _ = ai.recordResult(gameModel: gameModel, azimuth: tank.azimuth, altitude: tank.altitude, velocity: tank.velocity,
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
         }
 
@@ -673,7 +673,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
             // player is an AI
             disableUI()
-            let (azi, alt, vel) = ai.fireParameters(gameModel: gameModel, players: gameModel.board.players, num: 1000)
+            let (azi, alt, vel) = ai.fireParameters(gameModel: gameModel, players: gameModel.board.players, num: 20)
             NSLog("ai firing parameters, azi,alt,vel: (\(azi),\(alt),\(vel))")
             gameModel.setTankAim(azimuth: azi, altitude: alt)
             gameModel.setTankPower(power: vel)
