@@ -137,7 +137,8 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
             let score = HighScore(name: player.name,
                                   score: player.score,
                                   date: Date(),
-                                  config: gameConfig)
+                                  config: gameConfig,
+                                  stats: player.stats)
             highScores.addHighScore(score: score)
             
             if score.score > winnerScore {
