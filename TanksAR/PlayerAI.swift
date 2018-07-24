@@ -75,7 +75,7 @@ class PlayerAI : Codable {
     }
     
     func recordResult(gameModel: GameModel, azimuth: Float, altitude: Float, velocity: Float,
-                      impactX: Float, impactY: Float, impactZ: Float) {
+                      impactX: Float, impactY: Float, impactZ: Float) -> Float {
         let (xVel, yVel, zVel) = fromSpherical(azi: azimuth, alt: altitude, velocity: velocity)
         //let (azi2, alt2, vel2) = toSpherical(xVel: xVel, yVel: yVel, zVel: zVel)
         //NSLog("\(#function): \(azimuth),\(altitude),\(velocity) -> linear -> \(azi2),\(alt2),\(vel2)")
@@ -88,14 +88,16 @@ class PlayerAI : Codable {
         // compute next point
         // pick target player
         let nextPlayer = getNextPlayerID(gameModel: gameModel)
-        NSLog("\(#function): \(gameModel.board.players[gameModel.board.currentPlayer].name) targetting player \(nextPlayer) (\(gameModel.board.players[nextPlayer].name))")
+        //NSLog("\(#function): \(gameModel.board.players[gameModel.board.currentPlayer].name) targetting player \(nextPlayer) (\(gameModel.board.players[nextPlayer].name))")
         let targetPlayer = gameModel.board.players[nextPlayer]
         let targetTank = targetPlayer.tank
         
         // get dist to target
         let dist = distToTank(from: newSample, toTank: targetTank)
-        NSLog("\(#function): last round for AI was \(dist) units from target (\(targetTank.position)) -> (\(impactX),\(impactY),\(impactZ))")
+        //NSLog("\(#function): last round for AI was \(dist) units from target (\(targetTank.position)) -> (\(impactX),\(impactY),\(impactZ))")
         nelderMead.addResult(parameters:[xVel,yVel,zVel], value: dist)
+        
+        return dist
     }
     
     func fireParameters(gameModel: GameModel, players: [Player]) -> (azimuth: Float, altitude: Float, velocity: Float) {
@@ -138,7 +140,8 @@ class PlayerAI : Codable {
         let ret = nelderMead.nextPoint()
         
         // convert new sample to polar coordinates
-        let (retAzi, retAlt, retVel) = toSpherical(xVel: ret[0], yVel: ret[1], zVel: ret[2])
+        var (retAzi, retAlt, retVel) = toSpherical(xVel: ret[0], yVel: ret[1], zVel: ret[2])
+        retVel = min(retVel, gameModel.maxPower)
         let (retXvel, retYvel, retZvel) = fromSpherical(azi: retAzi, alt: retAlt, velocity: retVel)
         NSLog("returning firing parameters (azi,alt,vel) = \(retAzi),\(retAlt),\(retVel), or as vectors (x,y,z) = \(retXvel),\(retYvel),\(retZvel))")
         
@@ -150,7 +153,8 @@ class PlayerAI : Codable {
         // get next point
         var nextParams = fireParameters(gameModel: gameModel, players: players)
         
-        for _ in 0..<num {
+        var minDist: Float = 1_000_000
+        for i in 0..<num {
             //NSLog("nextParams: \(nextParams)")
             // get muzzle velocity
             let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
@@ -163,27 +167,41 @@ class PlayerAI : Codable {
             let zVel = power * sin(alt)
             
             //NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
-            let tankHeight: Float = 14.52 // 0.625+0.827 = 1.452 * tankScale
             let velocity = Vector3(xVel, yVel, zVel)
-            
-            // convert to model coordinate space
-            // Note: This position is very wrong, and could be leading to incorrect solutions.
-            var muzzlePosition = tank.position
-            muzzlePosition.z += tankHeight
             let muzzleVelocity = velocity
+
+            // Note: This position is very wrong, and could be leading to incorrect solutions.
+            let tankHeight: Float = 14.52 // 0.625+0.827 = 1.452 * tankScale
+            let barrelLength: Float = 20
+            var muzzlePosition = tank.position
+            muzzlePosition.x += -sin(azi) * cos(alt) * barrelLength
+            muzzlePosition.y += -cos(azi) * cos(alt) * barrelLength
+            muzzlePosition.z += tankHeight + sin(alt) * barrelLength
             
             // compute result
             //NSLog("computing trajectory for muzzlePosition: \(muzzlePosition) and muzzleVelocity: \(muzzleVelocity)")
-            let trajectory = gameModel.computeTrajectory(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity, withTimeStep: 0.02, ignoreTanks: true)
+            let trajectory = gameModel.computeTrajectory(muzzlePosition: muzzlePosition,
+                                                         muzzleVelocity: muzzleVelocity,
+                                                         withTimeStep: 0.02,
+                                                         ignoreTanks: true)
             let impact = trajectory.last!
             //NSLog("impact at \(impact), \(trajectory.count) iterations.")
             
             // add it's result
-            recordResult(gameModel: gameModel, azimuth: nextParams.azimuth, altitude: nextParams.altitude, velocity: nextParams.velocity,
+            let dist = recordResult(gameModel: gameModel, azimuth: nextParams.azimuth, altitude: nextParams.altitude, velocity: nextParams.velocity,
                          impactX: impact.x, impactY: impact.y, impactZ: impact.z)
+            
+            minDist = min(minDist,dist)
+            if dist < 1 {
+                NSLog("dist down to \(dist) after \(i) of \(num) iterations.")
+                return nextParams
+            } else if i > 100 {
+                NSLog("dist is \(dist) after \(i) of \(num) iterations (minimum was \(minDist)).")
+            }
             
             nextParams = fireParameters(gameModel: gameModel, players: players)
         }
+        NSLog("Exhausted \(num) iterations finding firing solution!!!  Minimum distance found was \(minDist).")
         
         return nextParams
     }
