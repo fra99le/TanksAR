@@ -67,6 +67,10 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
         let contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height, right: 0.0)
         scrollView.contentInset = contentInset
         scrollView.scrollIndicatorInsets = contentInset
+        
+        // scroll to name field
+        let nameFieldFrame = playerNameField.frame
+        scrollView.setContentOffset(CGPoint(x: 0, y: nameFieldFrame.origin.y + 10), animated: true)
     }
     
     @objc func keyboardWillHide(_ notification: NSNotification) {
