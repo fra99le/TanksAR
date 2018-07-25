@@ -127,7 +127,10 @@ class GameViewDrawer {
         var message = "Round Ended"
         var winner = "Unknown"
         var points: Int64 = -1
-        if gameModel.board.currentRound > gameModel.board.totalRounds {
+        if gameModel.board.totalRounds == 0 && fireResult.humanLeft == 0 {
+            message = "Game Over!\n\(gameModel.board.players[0].name) earned \(gameModel.board.players[0].score) points."
+        } else if gameModel.board.currentRound > gameModel.board.totalRounds
+            && gameModel.board.totalRounds>0 {
             // find winner
             for player in gameModel.board.players {
                 if player.score > points {
@@ -154,7 +157,8 @@ class GameViewDrawer {
                 message = "No winner in round \(lastRound)\n\(winner) currently winning."
             }
         }
-
+        NSLog("round transition messages is: \(message)")
+        
         // create message and add it to board
         let textGeometry = SCNText(string: message, extrusionDepth: 2)
         textGeometry.alignmentMode = kCAAlignmentCenter

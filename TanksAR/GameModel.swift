@@ -161,6 +161,7 @@ struct FireResult {
     
     var newRound: Bool
     var roundWinner: String?
+    var humanLeft: Int = 0
 }
 
 // Note: For the model x,y are surface image coordinates, and z is elevation
@@ -652,14 +653,28 @@ class GameModel : Codable {
         let finalColor = ImageBuf(board.colors)
         
         // check for round winner before checking/starting new round
+        // and check for remaining human players
         var roundWinner: String? = nil
+        var humansLeft = 0
         for player in board.players {
             if player.hitPoints > 0 {
                 roundWinner = player.name
+                
+                if player.ai == nil {
+                    // not an AI
+                    NSLog("\(player.name) is still alive with \(player.hitPoints) hit points")
+                    humansLeft += 1
+                }
             }
         }
+        NSLog("\(humansLeft) humans left")
 
-        let roundEnded = roundCheck()
+        var roundEnded = false
+        if board.totalRounds == 0 && humansLeft == 0 {
+            roundEnded = true
+        } else {
+            roundEnded = roundCheck()
+        }
         
         if !roundEnded {
             // update tank elevations
@@ -690,7 +705,8 @@ class GameModel : Codable {
                                             bottomColor: bottomColors,
                                             finalColor: finalColor,
                                             newRound: roundEnded,
-                                            roundWinner: roundWinner)
+                                            roundWinner: roundWinner,
+                                            humanLeft: humansLeft)
         
         board.currentPlayer = (board.currentPlayer + 1) % board.players.count
         while !roundEnded && board.players[board.currentPlayer].hitPoints <= 0 {

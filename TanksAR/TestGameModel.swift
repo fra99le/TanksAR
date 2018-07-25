@@ -127,7 +127,8 @@ class TestGameModel : GameModel {
                                             bottomColor: bottomColors,
                                             finalColor: finalColor,
                                             newRound: roundEnded,
-                                            roundWinner: roundWinner)
+                                            roundWinner: roundWinner,
+                                            humanLeft: 1)
         
         board.currentPlayer = (board.currentPlayer + 1) % board.players.count
         while !roundEnded && board.players[board.currentPlayer].hitPoints <= 0 {

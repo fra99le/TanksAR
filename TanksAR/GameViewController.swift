@@ -639,28 +639,21 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
         }
 
-        if humanLeft > 0 {
+        if fireResult.humanLeft > 0 {
             boardDrawer.timeScaling = 3
         }
         
         currTraj.removeFromParentNode()
         boardDrawer.animateResult(fireResult: fireResult, from: self)
         roundChanged = fireResult.newRound
+
+        if gameConfig.numRounds == 0 && fireResult.humanLeft == 0 {
+            roundChanged = true
+        }
         
         NSLog("\(#function) finished")
     }
     
-    
-//    func animationDidStart(_ anim: CAAnimation) {
-//        NSLog("Animation started")
-//    }
-//    
-//    func animationDidStop(_ animation: CAAnimation, finished: Bool) {
-//        NSLog("Animation stopped (finished: \(finished))\n\n\n")
-//        //NSLog("\tbegan at: \(animation.beginTime), with duration: \(animation.duration)")
-//
-//        finishTurn()
-//    }
     
     func finishTurn() {
         NSLog("\(#function) started")
@@ -743,10 +736,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
 
         //NSLog("\(#function) started")
         if roundChanged {
-            NSLog("round change detected")
+            NSLog("round change detected, \(humanLeft) humans left")
             roundChanged = false
             removeTanks()
-            if gameModel.board.currentRound > gameModel.board.totalRounds {
+            if (gameModel.board.totalRounds>0 && gameModel.board.currentRound > gameModel.board.totalRounds) ||
+                (gameModel.board.totalRounds==0 && humanLeft==0) {
                 NSLog("round \(gameModel.board.currentRound) > \(gameModel.board.totalRounds), game over!")
                 gameOver = true
                 gameModel.gameStarted = false
@@ -814,7 +808,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         
         playerNameLabel.text = "\(player.name)"
         playerScoreLabel.text = "Score:\n\(player.score)"
-        roundLabel.text = "Round:\n\(gameBoard.currentRound) of \(gameBoard.totalRounds)"
+        if gameBoard.totalRounds > 0 {
+            roundLabel.text = "Round:\n\(gameBoard.currentRound) of \(gameBoard.totalRounds)"
+        } else {
+            roundLabel.text = "Round:\n\(gameBoard.currentRound)"
+        }
 
         // update all tanks turrets and existence
         for i in 0..<users.count {

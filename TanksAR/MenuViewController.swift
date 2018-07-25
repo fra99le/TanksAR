@@ -13,6 +13,8 @@ struct GameState : Codable {
     var config : GameConfig
 }
 
+// Note: different difficulty settings should be added
+
 class MenuViewController: UIViewController {
 
     var gameConfig = GameConfig()
@@ -119,7 +121,8 @@ class MenuViewController: UIViewController {
     @IBOutlet weak var humansNumLabel: UILabel!
     @IBOutlet weak var aisNumLabel: UILabel!
     @IBOutlet weak var roundsNumLabel: UILabel!
-
+    @IBOutlet weak var eliminationLabel: UILabel!
+    
     @IBOutlet weak var humansStepper: UIStepper!
     @IBOutlet weak var aisStepper: UIStepper!
     @IBOutlet weak var roundsStepper: UIStepper!
@@ -170,9 +173,24 @@ class MenuViewController: UIViewController {
         humansStepper.value = Double(gameConfig.numHumans)
         aisStepper.value = Double(gameConfig.numAIs)
         roundsStepper.value = Double(gameConfig.numRounds)
+        
         humansNumLabel.text = "\(gameConfig.numHumans)"
         aisNumLabel.text = "\(gameConfig.numAIs)"
         roundsNumLabel.text = "\(gameConfig.numRounds)"
+        eliminationLabel.isHidden = true
+        humansStepper.isEnabled = true
+        humansStepper.minimumValue = 0
+        humansStepper.maximumValue = 10
+        if gameConfig.numRounds == 0 {
+            roundsNumLabel.text = "∞"
+            eliminationLabel.isHidden = false
+            humansStepper.isEnabled = false
+            humansStepper.maximumValue = 1
+            humansStepper.minimumValue = 1
+            humansNumLabel.text = "1"
+            gameConfig.numHumans = 1
+        }
+        
         var modeString = "Unknown"
         switch gameConfig.mode {
         case .blocks:
