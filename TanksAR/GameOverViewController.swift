@@ -12,6 +12,8 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
     
     var highScores: HighScoreController!
     
+    @IBOutlet weak var scrollView: UIScrollView!
+    
     @IBOutlet weak var playerNameStack: UIStackView!
     @IBOutlet weak var playerNameLabel: UILabel!
     @IBOutlet weak var playerScoreLabel: UILabel!
@@ -32,6 +34,11 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // prepare for keyboard stuff:
+        // see: https://stackoverflow.com/questions/26070242/move-view-with-keyboard-using-swift
+        NotificationCenter.default.addObserver(self, selector: #selector(GameOverViewController.keyboardWasShown), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(GameOverViewController.keyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+
         // Do any additional setup after loading the view.
         highScores = HighScoreController()
         playerNameField.delegate = self
@@ -49,6 +56,25 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
         updateUI()
     }
 
+    // see: ScrollingForm example project (p.589)
+    @objc func keyboardWasShown(_ notification: NSNotification) {
+        guard let info = notification.userInfo,
+            let keyboardFrameValue = info[UIKeyboardFrameBeginUserInfoKey] as? NSValue else { return }
+        
+        let keyboardFrame = keyboardFrameValue.cgRectValue
+        let keyboardSize = keyboardFrame.size
+        
+        let contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height, right: 0.0)
+        scrollView.contentInset = contentInset
+        scrollView.scrollIndicatorInsets = contentInset
+    }
+    
+    @objc func keyboardWillHide(_ notification: NSNotification) {
+        let contentInset = UIEdgeInsets.zero
+        scrollView.contentInset = contentInset
+        scrollView.scrollIndicatorInsets = contentInset
+    }
+    
     /*
     // MARK: - Navigation
 
@@ -69,6 +95,12 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
         return true
     }
 
+    @IBAction func playerNameModified(_ sender: UITextField) {
+        guard let newName = sender.text else { return }
+        
+        doneButton.isEnabled = checkName(newName)
+    }
+    
     func checkName(_ name: String) -> Bool {
         return name != ""
     }
