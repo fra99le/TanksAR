@@ -95,7 +95,8 @@ class PlayerAI : Codable {
         // get dist to target
         let dist = distToTank(from: newSample, toTank: targetTank)
         //NSLog("\(#function): last round for AI was \(dist) units from target (\(targetTank.position)) -> (\(impactX),\(impactY),\(impactZ))")
-        nelderMead.addResult(parameters:[xVel,yVel,zVel], value: dist)
+        // try to minimize distance from target and velocity needed to do so
+        nelderMead.addResult(parameters:[xVel,yVel,zVel], value: dist+velocity)
         
         return dist
     }
