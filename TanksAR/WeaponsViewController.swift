@@ -49,20 +49,21 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
     @IBAction func playerNameChanged(_ sender: UITextField) {
         guard let model = gameModel else { return }
         let board = model.board
-
+        let playerID = board.currentPlayer
+        
         if let newName = sender.text {
             NSLog("new name: \(newName)")
             if newName.count <= 0 {
-                model.board.players[board.currentPlayer].name = "Player \(board.currentPlayer+1)"
-                model.board.players[board.currentPlayer].didSetName = false
+                model.board.players[playerID].name = "Player \(playerID+1)"
+                model.board.players[playerID].didSetName = false
             } else {
-                model.board.players[board.currentPlayer].name = newName
-                model.board.players[board.currentPlayer].didSetName = true
+                model.board.players[playerID].name = newName
+                model.board.players[playerID].didSetName = true
             }
         } else {
             NSLog("new name missing!")
-            model.board.players[board.currentPlayer].name = "Player \(board.currentPlayer+1)"
-            model.board.players[board.currentPlayer].didSetName = false
+            model.board.players[playerID].name = "Player \(playerID+1)"
+            model.board.players[playerID].didSetName = false
         }
         updateUI()
     }
@@ -185,11 +186,12 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
 
         // update weapon id for player
         let weaponID = Int(sender.value)
-        model.board.players[board.currentPlayer].weaponID = weaponID
-        model.board.players[board.currentPlayer].weaponSizeID = min(players[board.currentPlayer].weaponSizeID,
-                                                                    model.weaponsList[weaponID].sizes.count-1)
+        let playerID = board.currentPlayer
+        model.board.players[playerID].weaponID = weaponID
+        model.board.players[playerID].weaponSizeID = min(players[playerID].weaponSizeID,
+                                                         model.weaponsList[weaponID].sizes.count-1)
         NSLog("weapon now \(weaponID)")
-        NSLog("weapon size now \(model.board.players[board.currentPlayer].weaponSizeID)")
+        NSLog("weapon size now \(model.board.players[playerID].weaponSizeID)")
 
         // update size stepper options
         weaponSizeStepper.maximumValue = Double(model.weaponsList[weaponID].sizes.count-1)
@@ -215,7 +217,8 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         guard let model = gameModel else { return }
         let board = model.board
         var players = board.players
-        let player = players[board.currentPlayer]
+        let playerID = board.currentPlayer
+        let player = players[playerID]
         let tank = player.tank
         let weaponID = player.weaponID
         let weapon = model.weaponsList[weaponID]
@@ -226,7 +229,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         creditLabel.text = "Credit: \(player.credit)"
         
         // update name
-        playerNameField.text = board.players[board.currentPlayer].name
+        playerNameField.text = board.players[playerID].name
         
         // update aiming information
         velocityStepper.minimumValue = 0

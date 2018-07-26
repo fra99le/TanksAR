@@ -299,11 +299,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         //NSLog("Screen dragged \(gesture).")
         //NSLog("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
         // determine player
-        let player = gameModel.board.currentPlayer
-        let tankNode = boardDrawer.tankNodes[player]
+        let playerID = gameModel.board.currentPlayer
+        let tankNode = boardDrawer.tankNodes[playerID]
         
         // get tank aiming values from model
-        let tank = gameModel.getTank(forPlayer: player)
+        let tank = gameModel.getTank(forPlayer: playerID)
         let currAzimuth = tank.azimuth
         let currAltitude = tank.altitude
         //NSLog("currAzimuth: \(currAzimuth), currAltitude: \(currAltitude)")
@@ -597,13 +597,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     
     func muzzleParameters() -> (muzzlePosition: Vector3, muzzleVelocity: Vector3) {
         // get location of muzzle
-        let tankNode = boardDrawer.tankNodes[gameModel.board.currentPlayer]
+        let playerID = gameModel.board.currentPlayer
+        let tankNode = boardDrawer.tankNodes[playerID]
         guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true)
             else { return (Vector3(),Vector3()) }
         let position = muzzleNode.convertPosition(muzzleNode.position, to: board)
         
         // get muzzle velocity
-        let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
+        let tank = gameModel.getTank(forPlayer: playerID)
         let power = tank.velocity
         let azi = tank.azimuth * (Float.pi/180)
         let alt = tank.altitude * (Float.pi/180)
@@ -659,7 +660,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         NSLog("\(#function) started")
 
         // do AI stuff if next player is an AI
-        if let ai = gameModel.board.players[gameModel.board.currentPlayer].ai {
+        let playerID = gameModel.board.currentPlayer
+        if let ai = gameModel.board.players[playerID].ai {
+            NSLog("player '\(gameModel.board.players[playerID].name)' is an AI.")
             if humanLeft == 0 {
                 boardDrawer.timeScaling *= 1.01
                 NSLog("timeScaling now \(boardDrawer.timeScaling)")
@@ -670,7 +673,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             NSLog("ai firing parameters, azi,alt,vel: (\(azi),\(alt),\(vel))")
             gameModel.setTankAim(azimuth: azi, altitude: alt)
             gameModel.setTankPower(power: vel)
-            let tank = gameModel.board.players[gameModel.board.currentPlayer].tank
+            let tank = gameModel.board.players[playerID].tank
             NSLog("ai firing parameters, azi,alt,vel: (\(tank.azimuth),\(tank.altitude),\(tank.velocity)) (updated)")
             updateUI()
             launchProjectile()
@@ -686,7 +689,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
                     testModel.initializeBoard()
                 }
             }
-            currentUser = gameModel.board.currentPlayer
+            currentUser = playerID
         }
 
         NSLog("\(#function) finished")
@@ -758,19 +761,20 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         }
         
         // make sure power slider matches player
-        let currentPower = gameModel.board.players[gameModel.board.currentPlayer].tank.velocity
+        let playerID = gameModel.board.currentPlayer
+        let player = gameModel.board.players[playerID]
+        let currentPower = gameModel.board.players[playerID].tank.velocity
         powerSlider.minimumValue = 0
         powerSlider.maximumValue = gameModel.maxPower
         powerSlider.setValue(currentPower, animated: false)
         
         let gameBoard = gameModel.board
-        let player = gameBoard.players[gameBoard.currentPlayer]
         if let _ = player.ai {
             // player is an AI
         } else {
             // determine minimal rotation
             let currAngle = board.eulerAngles.y
-            let destAngle = users[gameModel.board.currentPlayer].rotation
+            let destAngle = users[playerID].rotation
             let currAngleClean = atan2(sin(currAngle),cos(currAngle))
             let destAngleClean = atan2(sin(destAngle),cos(destAngle))
             var angleDiff = destAngleClean - currAngleClean
@@ -779,31 +783,31 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             } else if angleDiff < -Float.pi {
                 angleDiff += 2*Float.pi
             }
-            NSLog("old angle was \(users[gameModel.board.currentPlayer].rotation), board at \(board.eulerAngles.y)")
-            users[gameModel.board.currentPlayer].rotation = board.eulerAngles.y + angleDiff
-            NSLog("new angle is \(users[gameModel.board.currentPlayer].rotation), diff is \(angleDiff)")
+            NSLog("old angle was \(users[playerID].rotation), board at \(board.eulerAngles.y)")
+            users[playerID].rotation = board.eulerAngles.y + angleDiff
+            NSLog("new angle is \(users[playerID].rotation), diff is \(angleDiff)")
 
             // update scale and rotation for player
             let scaleNode = board
             let rotationAnimation = CABasicAnimation(keyPath: "eulerAngles.y")
             rotationAnimation.fromValue = scaleNode.eulerAngles.y
-            rotationAnimation.toValue = users[gameModel.board.currentPlayer].rotation
+            rotationAnimation.toValue = users[playerID].rotation
             rotationAnimation.beginTime = 0
             rotationAnimation.duration = 1
             scaleNode.addAnimation(rotationAnimation, forKey: "Player Rotation")
-            scaleNode.eulerAngles.y = users[gameModel.board.currentPlayer].rotation
-            //NSLog("rotating to \(rotationAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
+            scaleNode.eulerAngles.y = users[playerID].rotation
+            //NSLog("rotating to \(rotationAnimation.toValue!) for user \(playerID)")
             
             let rescaleAnimation = CABasicAnimation(keyPath: "scale")
             rescaleAnimation.fromValue = scaleNode.scale
-            let newFactor = boardScaleFactor * users[gameModel.board.currentPlayer].scaleFactor
+            let newFactor = boardScaleFactor * users[playerID].scaleFactor
             let newScale = SCNVector3(newFactor,newFactor,newFactor)
             rescaleAnimation.toValue = newScale
             rescaleAnimation.beginTime = 0
             rescaleAnimation.duration = 1
             scaleNode.addAnimation(rescaleAnimation, forKey: "Player Scaling")
             scaleNode.scale = newScale
-            //NSLog("scaling to \(rescaleAnimation.toValue!) for user \(gameModel.board.currentPlayer)")
+            //NSLog("scaling to \(rescaleAnimation.toValue!) for user \(playerID)")
         }
         
         playerNameLabel.text = "\(player.name)"
@@ -950,7 +954,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         // update board
         boardDrawer.updateBoard()
    
-        if let _ = gameModel.board.players[gameModel.board.currentPlayer].ai {
+        if let _ = gameModel.board.players[playerID].ai {
             // player is an AI
             disableUI()
         } else {
