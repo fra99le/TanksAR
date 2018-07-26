@@ -217,7 +217,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         
         let floor = candidatePlane(planeAnchor)
         node.addChildNode(floor)
-        candidatePlanes.append(floor)
+        candidatePlanes.append(node)
     }
 
     func candidatePlane(_ planeAnchor: ARPlaneAnchor) -> SCNNode {
@@ -462,9 +462,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     // MARK: - Helper methods
     func clearAllPlanes() {
         for plane in candidatePlanes {
-            plane.removeFromParentNode()
+            plane.isHidden = true
         }
-        candidatePlanes.removeAll()
+    }
+    
+    func restoreAllPlanes() {
+        for plane in candidatePlanes {
+            plane.isHidden = false
+        }
     }
     
     func placeBoard(_ atLocationOf: ARHitTestResult) {
