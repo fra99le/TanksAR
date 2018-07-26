@@ -178,17 +178,21 @@ class MenuViewController: UIViewController {
         aisNumLabel.text = "\(gameConfig.numAIs)"
         roundsNumLabel.text = "\(gameConfig.numRounds)"
         eliminationLabel.isHidden = true
-        humansStepper.isEnabled = true
         humansStepper.minimumValue = 0
-        humansStepper.maximumValue = 10
+        aisStepper.minimumValue = 0
         if gameConfig.numRounds == 0 {
             roundsNumLabel.text = "∞"
             eliminationLabel.isHidden = false
-            humansStepper.isEnabled = false
-            humansStepper.maximumValue = 1
             humansStepper.minimumValue = 1
-            humansNumLabel.text = "1"
-            gameConfig.numHumans = 1
+            aisStepper.minimumValue = 1
+            if gameConfig.numHumans < 1 {
+                gameConfig.numHumans = 1
+                humansNumLabel.text = "1"
+            }
+            if gameConfig.numAIs < 1 {
+                gameConfig.numAIs = 1
+                aisNumLabel.text = "1"
+            }
         }
         
         var modeString = "Unknown"
