@@ -836,6 +836,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
 
             // set colors to highlight current player
             var color = UIColor.darkGray
+            if gameModel.board.totalRounds == 0 {
+                // For unlimited rounds, make AIs and Humans distinctive
+                if player.ai != nil {
+                    // Als
+                    color = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
+                } else {
+                    // humans
+                    color = #colorLiteral(red: 0.004859850742, green: 0.09608627111, blue: 0.5749928951, alpha: 1)
+                }
+            }
             var showAimGuide = false
             var showWind = false
             var showPlayerArrow = false
