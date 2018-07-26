@@ -46,25 +46,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     var gameModel: GameModel = GameModel()
     var users: [UserConfig] = []
     var currentUser = 0
-    var humanLeft: Int {
-        let players = gameModel.board.players
-        // count human players left
-        var num = 0
-        for player in players {
-            if let _ = player.ai {
-                // player is an AI
-            } else {
-                if player.hitPoints > 0 {
-                    num += 1
-                }
-            }
-        }
-        NSLog("\(num) humans left")
-        return num
-    }
+    var humanLeft: Int = 0
     var saveStateController: UIViewController? = nil
     var roundChanged: Bool = false
-    var gameOver = false
     var playerNameNode = SCNNode()
     var playerArrowNode = SCNNode()
     
@@ -148,7 +132,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         
         // start a game
         removeTanks()
-        if !gameModel.gameStarted && !gameOver {
+        if !gameModel.gameStarted && !gameModel.gameOver {
             NSLog("\(#function) starting \(gameConfig.numRounds) round game. (gameStarted=\(gameModel.gameStarted))")
             gameModel.startGame(withConfig: gameConfig)
             updateDrawer()
@@ -413,7 +397,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         gameModel.gameStarted = false
         disableUI()
         unplaceBoard()
-        gameOver = true
+        gameModel.gameOver = true
         users = []
         if let saveStateController = saveStateController as? MenuViewController {
             saveStateController.gameState = nil
@@ -639,6 +623,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             _ = ai.recordResult(gameModel: gameModel, azimuth: tank.azimuth, altitude: tank.altitude, velocity: tank.velocity,
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
         }
+        humanLeft = fireResult.humanLeft
 
         if fireResult.humanLeft > 0 {
             boardDrawer.timeScaling = 3
@@ -738,18 +723,19 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         guard boardPlaced else { return }
 
         //NSLog("\(#function) started")
-        if roundChanged {
+        if roundChanged || gameModel.gameOver {
             NSLog("round change detected, \(humanLeft) humans left")
             roundChanged = false
             removeTanks()
-            if (gameModel.board.totalRounds>0 && gameModel.board.currentRound > gameModel.board.totalRounds) ||
-                (gameModel.board.totalRounds==0 && humanLeft==0) {
+            if gameModel.gameOver {
                 NSLog("round \(gameModel.board.currentRound) > \(gameModel.board.totalRounds), game over!")
-                gameOver = true
                 gameModel.gameStarted = false
                 performSegue(withIdentifier: "Game Over", sender: nil)
                 return
             }
+            // Game model might change next player to start new round (e.g. unlimited rounds mode)
+            currentUser = gameModel.board.currentPlayer
+            
             NSLog("Starting round \(gameModel.board.currentRound) of \(gameModel.board.currentRound).")
             addTanks()
             
@@ -759,6 +745,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
 
         }
+        humanLeft = gameConfig.numHumans
         
         // make sure power slider matches player
         let playerID = gameModel.board.currentPlayer

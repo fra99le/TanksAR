@@ -84,15 +84,8 @@ class TestGameModel : GameModel {
         let final = ImageBuf(board.surface)
         let finalColor = ImageBuf(board.colors)
         
-        // check for round winner before checking/starting new round
-        var roundWinner: String? = nil
-        for player in board.players {
-            if player.hitPoints > 0 {
-                roundWinner = player.name
-            }
-        }
-        
-        var roundEnded = roundCheck()
+        // check for round end
+        var (roundEnded, roundWinner, _, humansLeft) = roundCheck()
         if board.currentPlayer == board.players.count - 1 {
             roundEnded = true
             board.currentRound += 1
@@ -128,7 +121,7 @@ class TestGameModel : GameModel {
                                             finalColor: finalColor,
                                             newRound: roundEnded,
                                             roundWinner: roundWinner,
-                                            humanLeft: 1)
+                                            humanLeft: humansLeft)
         
         board.currentPlayer = (board.currentPlayer + 1) % board.players.count
         while !roundEnded && board.players[board.currentPlayer].hitPoints <= 0 {

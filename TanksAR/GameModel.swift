@@ -175,6 +175,7 @@ class GameModel : Codable {
     let maxWindSpeed: Float = 20  // up to ~45 mph
     let elevationScale: Float = 2.0
     var gameStarted: Bool = false
+    var gameOver: Bool = false
     let gravity = Float(-9.80665)
     let computerCost = 2000
     
@@ -276,6 +277,12 @@ class GameModel : Codable {
         for i in 0..<board.players.count {
             board.players[i].hitPoints = 1000
         }
+        
+        if board.totalRounds == 0 {
+            // unlimited rounds mode always starts with 'player 1'
+            board.currentPlayer = 0
+        }
+        
         gameStarted = true
     }
     
@@ -652,29 +659,7 @@ class GameModel : Codable {
         let final = ImageBuf(board.surface)
         let finalColor = ImageBuf(board.colors)
         
-        // check for round winner before checking/starting new round
-        // and check for remaining human players
-        var roundWinner: String? = nil
-        var humansLeft = 0
-        for player in board.players {
-            if player.hitPoints > 0 {
-                roundWinner = player.name
-                
-                if player.ai == nil {
-                    // not an AI
-                    NSLog("\(player.name) is still alive with \(player.hitPoints) hit points")
-                    humansLeft += 1
-                }
-            }
-        }
-        NSLog("\(humansLeft) humans left")
-
-        var roundEnded = false
-        if board.totalRounds == 0 && humansLeft == 0 {
-            roundEnded = true
-        } else {
-            roundEnded = roundCheck()
-        }
+        let (roundEnded, roundWinner, _, humansLeft) = roundCheck()
         
         if !roundEnded {
             // update tank elevations
@@ -708,10 +693,12 @@ class GameModel : Codable {
                                             roundWinner: roundWinner,
                                             humanLeft: humansLeft)
         
-        board.currentPlayer = (board.currentPlayer + 1) % board.players.count
-        while !roundEnded && board.players[board.currentPlayer].hitPoints <= 0 {
-            NSLog("skipping downed player \(board.currentPlayer)")
+        if board.totalRounds > 0 || !roundEnded {
             board.currentPlayer = (board.currentPlayer + 1) % board.players.count
+            while !roundEnded && board.players[board.currentPlayer].hitPoints <= 0 {
+                NSLog("skipping downed player \(board.currentPlayer)")
+                board.currentPlayer = (board.currentPlayer + 1) % board.players.count
+            }
         }
         print("Player \(board.currentPlayer) now active.")
         
@@ -1010,16 +997,43 @@ class GameModel : Codable {
         }
     }
     
-    func roundCheck() -> Bool {
+    func roundCheck() -> (Bool, String?, String, Int) {
+
+        // check for round winner before checking/starting new round
+        // and check for remaining human players
         var playersLeft = 0
+        var humansLeft = 0
+        var roundWinner: String? = nil
+        var winnerName: String = board.players[0].name
+        var winnerPoints: Int64 = board.players[0].score
         for player in board.players {
             if player.hitPoints > 0 {
+                roundWinner = player.name
                 playersLeft += 1
+
+                if player.score > winnerPoints {
+                    winnerName = player.name
+                    winnerPoints = player.score
+                }
+                
+                if player.ai == nil {
+                    // not an AI
+                    NSLog("\(player.name) is still alive with \(player.hitPoints) hit points")
+                    humansLeft += 1
+                }
             }
         }
+        NSLog("\(playersLeft), players left, \(humansLeft) of those are humans.")
+        if let winner = roundWinner {
+            NSLog("\(winner) winning with \(winnerPoints) points.")
+        }
         
-        let newRound = playersLeft <= 1
-        if newRound {
+        var roundEnded = playersLeft <= 1 // normal round end condition
+        
+        // handle unlimited rounds
+        roundEnded = roundEnded || (board.totalRounds == 0 && (humansLeft <= 0 || humansLeft == playersLeft))
+
+        if roundEnded {
             // apply round bonuses
             NSLog("Round ended")
             for i in 0..<board.players.count {
@@ -1030,11 +1044,20 @@ class GameModel : Codable {
                 }
                 board.players[i].prevTrajectory = []
             }
+            
+            // update current round
             board.currentRound += 1
-            startRound()
+            
+            // check for game over condition
+            if (board.totalRounds > 0 && board.currentRound > board.totalRounds) ||
+                (board.totalRounds == 0 && humansLeft == 0) {
+                gameOver = true
+            } else {
+                startRound()
+            }
         }
         
-        return newRound
+        return (roundEnded, roundWinner, winnerName, humansLeft)
     }
     
     func adjustWeapon() {

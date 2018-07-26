@@ -230,7 +230,7 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
                 dest.gameConfig = gameConfig
                 dest.gameModel = GameModel()
                 //dest.gameModel = TestGameModel()    // for debugging
-                dest.gameOver = false
+                dest.gameModel.gameOver = false
             } else {
                 NSLog("Unknown segue identifier: \(segue.identifier!)")
             }
