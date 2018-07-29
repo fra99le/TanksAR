@@ -165,13 +165,24 @@ class GameViewDrawer {
         let textGeometry = SCNText(string: message, extrusionDepth: 2)
         textGeometry.alignmentMode = kCAAlignmentCenter
         let msgNode = SCNNode(geometry: textGeometry)
-        let (min: min, max: max) = msgNode.boundingBox
-        NSLog("bounding box: \(min) -> \(max)")
-        msgNode.position = SCNVector3( -(max.x-min.x)/2, -(max.y-min.y)/2, -(max.z-min.z)/2)
+        let (min: boundingMin, max: boundingMax) = msgNode.boundingBox
+        NSLog("bounding box: \(boundingMin) -> \(boundingMax)")
+        msgNode.position = SCNVector3( -(boundingMax.x-boundingMin.x)/2,
+                                       -(boundingMax.y-boundingMin.y)/2,
+                                       -(boundingMax.z-boundingMin.z)/2 )
         msgNode.geometry?.firstMaterial?.diffuse.contents = UIColor.cyan
         
+        // find higest point on map
+        var maxElevation: Float = -1
+        for j in 0..<1025 {
+            for i in 0..<1025 {
+                let elevation = gameModel.getElevation(longitude: i, latitude: j)
+                maxElevation = max(elevation, maxElevation)
+            }
+        }
+        
         let spinNode = SCNNode()
-        spinNode.position = SCNVector3(0,500,0)
+        spinNode.position = SCNVector3(0,maxElevation+10,0)
         spinNode.scale = SCNVector3(8,8,8)
         spinNode.isHidden = true
 
