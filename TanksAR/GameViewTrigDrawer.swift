@@ -347,9 +347,9 @@ class GameViewTrigDrawer : GameViewDrawer {
                     displaceArr.append(isDisplaced)
                     
                     // exactly one must be true
-                    assert(isDropping  && !isUnchanged && !isDisplaced)
-                    assert(!isDropping && isUnchanged && !isDisplaced)
-                    assert(!isDropping && !isUnchanged && isDisplaced)
+                    assert( (isDropping  && !isUnchanged && !isDisplaced)
+                            || (!isDropping && isUnchanged && !isDisplaced)
+                            || (!isDropping && !isUnchanged && isDisplaced) )
                 }
                 
                 // deal with both sub-triangles
@@ -614,15 +614,15 @@ class GameViewTrigDrawer : GameViewDrawer {
 
                         var slightOffset0 = Vector3()
                         var slightOffset1 = Vector3()
-                        if normalChanged[k] {
+                        if useNormals && normalChanged[k] {
                             // slightly raise points where normals change, so it doens't interfere with newBottom
                             let offset0 = vectorNormalize(norm0)
                             let offset1 = vectorNormalize(norm1)
                             slightOffset0 = vectorScale(offset0, by: 0.1)
                             slightOffset1 = vectorScale(offset1, by: 0.1)
                         }
-                        let vertex0 = vectorAdd(Vector3(xArr[k],xArr[k],z0), slightOffset0)
-                        let vertex1 = vectorAdd(Vector3(xArr[k],xArr[k],z1), slightOffset1)
+                        let vertex0 = vectorAdd(Vector3(xArr[k], yArr[k], z0), slightOffset0)
+                        let vertex1 = vectorAdd(Vector3(xArr[k], yArr[k], z1), slightOffset1)
                         dropVertices0.append(fromModelSpace(vertex0))
                         dropVertices1.append(fromModelSpace(vertex1))
                         
