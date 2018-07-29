@@ -311,6 +311,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                 var dropArr: [Bool] = []
                 var displaceArr: [Bool] = []
                 var unchangedArr: [Bool] = []
+                var normalChanged: [Bool] = []
                 for k in 0...3 {
                     let x = xArr[k]
                     let y = yArr[k]
@@ -323,6 +324,13 @@ class GameViewTrigDrawer : GameViewDrawer {
                     let new = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x), latitude: Int(y))
                     // NSLog("\(#function) i,j: \(i),\(j), k: \(k), current: \(current), top: \(top), middle: \(middle), bottom: \(bottom)")
                     
+                    if useNormals {
+                        // check normals before and after for each vertex
+                        let preNorm = gameModel.getNormal(fromMap: fireResult.top, longitude: Int(x), latitude: Int(y))
+                        let postNorm = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(x), latitude: Int(y))
+                        normalChanged.append(preNorm.x != postNorm.x || preNorm.y != postNorm.y || preNorm.z != postNorm.z)
+                    }
+                   
                     // record elevations for each point
                     currentArr.append(CGFloat(current))
                     topArr.append(CGFloat(top))
@@ -331,9 +339,17 @@ class GameViewTrigDrawer : GameViewDrawer {
                     newArr.append(CGFloat(new))
                     
                     // record booleans for different animation conditions
-                    dropArr.append(top > middle && middle > bottom)
-                    displaceArr.append(bottom != current && middle > top)
-                    unchangedArr.append(new == current)
+                    let isDropping = top >= middle && middle > bottom
+                    let isUnchanged = new == current
+                    let isDisplaced = !isDropping && !isUnchanged
+                    dropArr.append(isDropping)
+                    unchangedArr.append(isUnchanged)
+                    displaceArr.append(isDisplaced)
+                    
+                    // exactly one must be true
+                    assert(isDropping  && !isUnchanged && !isDisplaced)
+                    assert(!isDropping && isUnchanged && !isDisplaced)
+                    assert(!isDropping && !isUnchanged && isDisplaced)
                 }
                 
                 // deal with both sub-triangles
@@ -343,6 +359,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                     var dropIdxs: [Int] = []
                     var displaceIdxs: [Int] = []
                     var unchangedIdxs: [Int] = []
+                    var normChangeIdxs: [Int] = []
                     for idx in p {
                         if dropArr[idx] {
                             dropIdxs.append(idx)
@@ -353,6 +370,9 @@ class GameViewTrigDrawer : GameViewDrawer {
                         }
                         if !dropArr[idx] && !displaceArr[idx] {
                             unchangedIdxs.append(idx)
+                        }
+                        if useNormals && normalChanged[idx] {
+                            normChangeIdxs.append(idx)
                         }
                     }
                     
@@ -366,6 +386,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                     let numDropping = dropIdxs.count
                     let numDisplaced = displaceIdxs.count
                     let numUnchanged = unchangedIdxs.count
+                    let numNormChanged = normChangeIdxs.count
                     assert (numDropping+numDisplaced+numUnchanged == 3)
                     
                     // enumeration of possible triangles:
@@ -383,23 +404,23 @@ class GameViewTrigDrawer : GameViewDrawer {
                     // 9: 1,1,1    one of each
                     
                     // for debugging
-//                    showOnly = dropCases[4]
-//                    NSLog("MANUALLY SET: \(showOnly)")
+//                    showOnly = dropCases[2]
+//                    //NSLog("MANUALLY SET: \(showOnly)")
 //                    if !(numDropping==showOnly[0] && numDisplaced==showOnly[1] && numUnchanged==showOnly[2]) {
 //                        //NSLog("SKIPPING \(numDropping),\(numDisplaced),\(numUnchanged)")
 //                        continue
 //                    }
                     //NSLog("GOT HERE!!!! \(numDropping),\(numDisplaced),\(numUnchanged)")
 
-                    // NOTE: Should try recording a distribution here, so make sure all cases are covered
+                    // NOTE: Should try recording a distribution here, so make sure all cases are covered by TestGameModel
 
-                    if numDropping == 0 /* && !useNormals */ {
+                    if numDropping == 0 && (!useNormals || numNormChanged == 0) {
                         // nothing dropping, why animate it?
                         // Unless of course the normals will be affected by nearby points.
                         continue
                     }
                     
-                    if numUnchanged == 3 /* && !useNormals */ {
+                    if numUnchanged == 3 && (!useNormals || numNormChanged == 0) {
                         // 0,0,3
                         // nothing happened, why animate it?
                         // Unless of course the normals will be affected by nearby points.
@@ -407,10 +428,17 @@ class GameViewTrigDrawer : GameViewDrawer {
                     }
 
                     let explosionZ = CGFloat((fireResult.trajectory.last?.z)!)
+                    if numDisplaced == 3 && (bottomArr[displaceIdxs[0]] < explosionZ) {
+                        // 0,3,0
+                        // All changes happen behind the explosion, why animate it?
+                        // Unless of course the normals will be affected by nearby points.
+                        continue
+                    }
+
                     if (numDropping == 1 && numUnchanged == 2) &&
                         (bottomArr[unchangedIdxs[0]] < explosionZ) {
                         // 1,0,2
-                        // problematic for .generative weapons near the edges
+                        // this is a detached edge of the dropping surface
                         continue
                     } else if (numDropping == 2 && numUnchanged == 1) &&
                         (bottomArr[unchangedIdxs[0]] < explosionZ) {
@@ -536,14 +564,14 @@ class GameViewTrigDrawer : GameViewDrawer {
                         continue
                     }
                     
-                    if (numDropping == 2 && numDisplaced == 1) ||
-                        (numDropping == 1 && numDisplaced == 2) ||
-                        (numDropping == 1 && numDisplaced == 1 && numUnchanged == 1) {
-                        // 2,1,0
-                        // 1,2,0
-                        // 1,1,1
+                    if (numDropping == 2 && numDisplaced == 1)
+                        || (numDropping == 1 && numDisplaced == 2)
+                        || (numDropping == 1 && numDisplaced == 1 && numUnchanged == 1) {
+                        // 2,1,0 -> 3,0,0
+                        // 1,2,0 -> 3,0,0
+                        // 1,1,1 -> 2,0,1
                         
-                        // rewrite as a numDropping = 3 where displaced vertices are dropping with middle==top
+                        // rewrite displaced vertices as dropping with middle==top
                         for idx in displaceIdxs {
                             middleArr[idx] = topArr[idx]
                             displaceArr[idx] = false
@@ -566,19 +594,37 @@ class GameViewTrigDrawer : GameViewDrawer {
                         } else if displaceArr[k] {
                             z0 = bottomArr[k]
                             z1 = bottomArr[k]
-                            norm0 = gameModel.getNormal(fromMap: fireResult.bottom, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            var norm0surf = fireResult.bottom
+                            if topArr[k] == bottomArr[k] {
+                                // if displacement was upwards (i.e. .generative),
+                                // norm0 should be from .top.
+                                norm0surf = fireResult.top
+                            }
+                            norm0 = gameModel.getNormal(fromMap: norm0surf, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                             norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                         } else if unchangedArr[k] {
                             z0 = currentArr[k]
-                            z1 = currentArr[k]
+                            z1 = newArr[k]
                             norm0 = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                             norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                         } else {
                             NSLog("This is bad (line \(#line)), i,j=\(i),\(j); k=\(k), \(dropArr[k]), \(displaceArr[k]), \(unchangedArr[k])")
                             NSLog("\(currentArr[k]) -> \(topArr[k]) > \(middleArr[k]) > \(bottomArr[k]) -> \(newArr[k])")
                         }
-                        dropVertices0.append(fromModelSpace(Vector3(xArr[k], yArr[k], z0)))
-                        dropVertices1.append(fromModelSpace(Vector3(xArr[k], yArr[k], z1)))
+
+                        var slightOffset0 = Vector3()
+                        var slightOffset1 = Vector3()
+                        if normalChanged[k] {
+                            // slightly raise points where normals change, so it doens't interfere with newBottom
+                            let offset0 = vectorNormalize(norm0)
+                            let offset1 = vectorNormalize(norm1)
+                            slightOffset0 = vectorScale(offset0, by: 0.1)
+                            slightOffset1 = vectorScale(offset1, by: 0.1)
+                        }
+                        let vertex0 = vectorAdd(Vector3(xArr[k],xArr[k],z0), slightOffset0)
+                        let vertex1 = vectorAdd(Vector3(xArr[k],xArr[k],z1), slightOffset1)
+                        dropVertices0.append(fromModelSpace(vertex0))
+                        dropVertices1.append(fromModelSpace(vertex1))
                         
                         dropNormals0.append(fromModelScale(norm0))
                         dropNormals1.append(fromModelScale(norm1))
@@ -606,11 +652,10 @@ class GameViewTrigDrawer : GameViewDrawer {
                             norm0 = gameModel.getNormal(fromMap: fireResult.bottom, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                             norm1 = gameModel.getNormal(fromMap: fireResult.bottom, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                         } else if unchangedArr[k] {
-                            z0 = bottomArr[k] + (topArr[k] - middleArr[k])
-                            z1 = bottomArr[k] // should be ~ half way between middle and bottom for dropping vertices
-                            // these normals don't really make sense
-                            norm0 = gameModel.getNormal(fromMap: fireResult.middle, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: fireResult.bottom, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            z0 = currentArr[k]
+                            z1 = newArr[k]
+                            norm0 = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                         } else {
                             NSLog("This is bad (line \(#line)), i,j=\(i),\(j); k=\(k), \(dropArr[k]), \(displaceArr[k]), \(unchangedArr[k])")
                             NSLog("\(currentArr[k]) -> \(topArr[k]) > \(middleArr[k]) > \(bottomArr[k]) -> \(newArr[k])")
