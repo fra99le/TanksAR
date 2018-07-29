@@ -181,7 +181,6 @@ class GameViewDrawer {
                 maxElevation = max(elevation, maxElevation)
             }
         }
-        NSLog("\(#function): max elevation is \(maxElevation)")
         
         let spinNode = SCNNode()
         spinNode.position = fromModelSpace( Vector3(Float(gameModel.board.boardSize)/2,

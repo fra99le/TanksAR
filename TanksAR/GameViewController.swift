@@ -271,8 +271,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         guard let gesture = sender as? UIPanGestureRecognizer else { return }
         guard boardDrawer.tankNodes.count > 0 else { return }
         
-        if !playerArrowNode.isHidden {
-            NSLog("Hiding player arrow")
+        if !playerArrowNode.isHidden && gesture.state == .began {
+            //NSLog("Hiding player arrow")
             // arrow appear animation
             let arrowHideAction = SCNAction.sequence([.scale(to: 0, duration: 1),
                                                       .hide(),
