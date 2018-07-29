@@ -43,7 +43,7 @@ class ScoresViewController: UIViewController {
         //NSLog("Dates identical: \(relativeDate) == \(absoluteDate)")
 
         let interval = date.timeIntervalSinceNow
-        let days = interval / 86400
+        let days = -interval / 86400
         let ret = "\(Int(days)) days ago"
         
         return ret
