@@ -20,6 +20,8 @@ class GameViewDrawer {
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var timeScaling: Double = 3
+    let explosionTime: Double = 1
+    let explosionReceedTime: Double = 1
     let dropTime: Double = 1.5
     //let dropTime: Double = 10 // for debugging purposes
 
@@ -95,8 +97,8 @@ class GameViewDrawer {
             
             let explosionActions = SCNAction.sequence([.wait(duration: currTime),
                                                        .unhide(),
-                                                       .scale(to: CGFloat(fireResult.explosionRadius), duration: 1),
-                                                       .scale(to: 1, duration: 1),
+                                                       .scale(to: CGFloat(fireResult.explosionRadius), duration: explosionTime),
+                                                       .scale(to: 0, duration: explosionReceedTime),
                                                        .hide()])
             explosionNode?.runAction(explosionActions)
 
@@ -105,13 +107,13 @@ class GameViewDrawer {
                 let player = gameModel.board.players[i]
                 if player.hitPoints <= 0 {
                     let tankNode = tankNodes[i]
-                    let hideAction = SCNAction.sequence([.wait(duration: currTime+1),
+                    let hideAction = SCNAction.sequence([.wait(duration: currTime+explosionTime),
                                                          .hide()])
                     tankNode.runAction(hideAction)
                 }
             }
         }
-        currTime += 1
+        currTime += explosionTime
         NSLog("explosion reached maximum radius at time \(currTime) and ended at \(currTime+1).")
         
         return currTime
