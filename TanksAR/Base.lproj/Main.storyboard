@@ -27,7 +27,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" alignment="center" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="EWi-5U-v3d">
                                                 <rect key="frame" x="0.0" y="0.0" width="289" height="508"/>
                                                 <subviews>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ARtillery" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Eph-xi-hCC">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="ARtillery" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Eph-xi-hCC">
                                                         <rect key="frame" x="74" y="0.0" width="141.5" height="48"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="40"/>
                                                         <nil key="textColor"/>
@@ -1169,6 +1169,6 @@ If no surfaces can be found, double tap to place board in the air.</string>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="niD-Ws-avX"/>
+        <segue reference="L4u-yX-l7V"/>
     </inferredMetricsTieBreakers>
 </document>
