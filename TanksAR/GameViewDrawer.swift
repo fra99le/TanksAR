@@ -24,6 +24,7 @@ class GameViewDrawer {
     let explosionReceedTime: Double = 1
     let dropTime: Double = 1.5
     //let dropTime: Double = 10 // for debugging purposes
+    let roundResultTime: Double = 10
 
     init(sceneView: ARSCNView, model: GameModel, node: SCNNode, numPerSide: Int) {
         gameModel = model
@@ -167,22 +168,25 @@ class GameViewDrawer {
         let msgNode = SCNNode(geometry: textGeometry)
         let (min: boundingMin, max: boundingMax) = msgNode.boundingBox
         NSLog("bounding box: \(boundingMin) -> \(boundingMax)")
-        msgNode.position = SCNVector3( -(boundingMax.x-boundingMin.x)/2,
-                                       -(boundingMax.y-boundingMin.y)/2,
-                                       -(boundingMax.z-boundingMin.z)/2 )
+        msgNode.position = SCNVector3( -(boundingMax.x+boundingMin.x)/2,
+                                       0,
+                                       -(boundingMax.z+boundingMin.z)/2 )
         msgNode.geometry?.firstMaterial?.diffuse.contents = UIColor.cyan
         
-        // find higest point on map
+        // find highest point on map
         var maxElevation: Float = -1
         for j in 0..<1025 {
             for i in 0..<1025 {
-                let elevation = gameModel.getElevation(longitude: i, latitude: j)
+                let elevation = gameModel.getElevation(fromMap: fireResult.final, longitude: i, latitude: j)
                 maxElevation = max(elevation, maxElevation)
             }
         }
+        NSLog("\(#function): max elevation is \(maxElevation)")
         
         let spinNode = SCNNode()
-        spinNode.position = SCNVector3(0,maxElevation+10,0)
+        spinNode.position = fromModelSpace( Vector3(Float(gameModel.board.boardSize)/2,
+                                                    Float(gameModel.board.boardSize)/2,
+                                                    maxElevation+10) )
         spinNode.scale = SCNVector3(8,8,8)
         spinNode.isHidden = true
 
@@ -194,12 +198,12 @@ class GameViewDrawer {
                                           .scale(to: 0, duration: 0),
                                           .unhide(),
                                           .scale(to: 8, duration: 1),
-                                          .rotateBy(x: 0, y: -CGFloat(Float.pi * 4), z: 0, duration: 8),
+                                          .rotateBy(x: 0, y: -CGFloat(Float.pi * 4), z: 0, duration: roundResultTime-2),
                                           .scale(to: 0, duration: 1),
                                           .hide()])
         spinNode.runAction(actions)
         
-        currTime += 5
+        currTime += roundResultTime
         NSLog("round transition ends at time \(currTime).")
 
         return currTime
