@@ -68,7 +68,7 @@ class TestGameModel : GameModel {
         board.players[board.currentPlayer].useTargetingComputer = false
         
         NSLog("firing \(weapon.name) with size \(weaponSize) and style \(weapon.style).")
-        let trajectory: [Vector3] = []
+        let trajectory: [Vector3] = [Vector3(Float(board.boardSize)/2, Float(board.boardSize)/2, 200)]
         
         // deal with impact
         let blastRadius = weaponSize
