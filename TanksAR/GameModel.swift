@@ -1108,7 +1108,7 @@ class GameModel : Codable {
             
             // check neighboring pixels
 
-            // if one is lower that current, replace queue with it
+            // if one is lower than current, replace queue with it
 
             // else (i.e. all are higher)
                 // increase level to lowest edge pixel
