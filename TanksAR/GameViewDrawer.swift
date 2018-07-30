@@ -20,8 +20,8 @@ class GameViewDrawer {
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var timeScaling: Double = 3
-    let explosionTime: Double = 1
-    let explosionReceedTime: Double = 1
+    let explosionTime: Double = 0.5
+    let explosionReceedTime: Double = 0.25
     let dropTime: Double = 1.5
     //let dropTime: Double = 10 // for debugging purposes
     let roundResultTime: Double = 10
