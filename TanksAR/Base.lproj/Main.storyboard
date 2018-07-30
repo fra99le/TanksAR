@@ -1118,10 +1118,10 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                 <rect key="frame" x="0.0" y="76" width="320" height="410"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="d5R-pH-pYE">
-                                        <rect key="frame" x="0.0" y="0.0" width="4.5" height="20.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="320" height="20.5"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text=" " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="m21-8O-VDO" userLabel="Spacer">
-                                                <rect key="frame" x="0.0" y="0.0" width="4.5" height="20.5"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="320" height="20.5"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -1131,6 +1131,7 @@ If no surfaces can be found, double tap to place board in the air.</string>
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="d5R-pH-pYE" secondAttribute="trailing" id="I8q-Sy-JDs"/>
+                                    <constraint firstItem="d5R-pH-pYE" firstAttribute="centerX" secondItem="DfL-F8-Gu8" secondAttribute="centerX" id="S6g-Hw-LY2"/>
                                     <constraint firstItem="d5R-pH-pYE" firstAttribute="leading" secondItem="DfL-F8-Gu8" secondAttribute="leading" id="XNp-ze-OAI"/>
                                     <constraint firstItem="d5R-pH-pYE" firstAttribute="top" secondItem="DfL-F8-Gu8" secondAttribute="top" id="bdq-NB-kms"/>
                                     <constraint firstAttribute="bottom" secondItem="d5R-pH-pYE" secondAttribute="bottom" id="vVD-9M-M8w"/>
