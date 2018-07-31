@@ -41,13 +41,6 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
         NSLog("\(#function) finished")
     }
     
-    override func animateExplosion(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {
-        var adjustedResult = fireResult
-        // make explosion slightly larger to obscure terrain modification
-        adjustedResult.explosionRadius *= 1.05
-        return super.animateExplosion(fireResult: adjustedResult, at: at)
-    }
-    
     override func animateResult(fireResult: FireResult, from: GameViewController) {
         super.animateResult(fireResult: fireResult, from: from, useNormals: false, colors: colors)
     }

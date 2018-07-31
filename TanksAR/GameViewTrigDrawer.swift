@@ -271,7 +271,9 @@ class GameViewTrigDrawer : GameViewDrawer {
         var currTime: CFTimeInterval = 0
         
         currTime = animateShell(fireResult: fireResult, at: currTime)
-        currTime = animateExplosion(fireResult: fireResult, at: currTime)
+        if fireResult.weaponStyle == .explosive || fireResult.weaponStyle == .generative {
+            currTime = animateExplosion(fireResult: fireResult, at: currTime)
+        }
         
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         
