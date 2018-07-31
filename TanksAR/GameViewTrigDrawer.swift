@@ -276,11 +276,6 @@ class GameViewTrigDrawer : GameViewDrawer {
             currTime = animateExplosion(fireResult: fireResult, at: currTime)
         }
         
-        // board surface animation
-        if fireResult.weaponStyle == .explosive || fireResult.weaponStyle == .generative {
-            currTime = animateDropSurface(fireResult: fireResult, from: from, useNormals: useNormals, colors: colors, at: currTime)
-        }
-        
         // setup reveal of the new bottom surface
         newBottomSurface.removeFromParentNode()
         newBottomSurface = surfaceNode(forSurface: fireResult.bottom, useNormals: false, withColors: fireResult.bottomColor, colors: colors)
@@ -312,7 +307,11 @@ class GameViewTrigDrawer : GameViewDrawer {
                              })]
         let reEdge = SCNAction.sequence(reEdgeActions)
         edgeNode.runAction(reEdge)
-        
+
+        // board surface animation
+        if fireResult.weaponStyle == .explosive || fireResult.weaponStyle == .generative {
+            currTime = animateDropSurface(fireResult: fireResult, from: from, useNormals: useNormals, colors: colors, at: currTime)
+        }
         NSLog("board settled at time \(currTime).")
         
         // deal with round transitions
