@@ -10,6 +10,8 @@ import Foundation
 
 typealias NMVector = [Float]
 
+// Note: the correctness of this has never been tested.
+
 func nmVectorAdd(_ a: NMVector, _ b: NMVector) -> NMVector {
     guard a.count == b.count else { return a }
     var sum = a

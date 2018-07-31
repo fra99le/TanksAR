@@ -80,7 +80,7 @@ class TestGameModel : GameModel {
         let oldColor = ImageBuf()
         old.copy(board.surface)
         oldColor.copy(board.colors)
-        let (top, middle, bottom, topColors, bottomColors) = applyExplosion(at: Vector3(), withRadius: weaponSize, andStyle: weapon.style)
+        let detinationResult = applyExplosion(at: Vector3(), withRadius: weaponSize, andStyle: weapon.style)
         let final = ImageBuf(board.surface)
         let finalColor = ImageBuf(board.colors)
         
@@ -111,13 +111,15 @@ class TestGameModel : GameModel {
                                             explosionRadius: blastRadius,
                                             weaponStyle: weapon.style,
                                             old: old,
-                                            top: top,
-                                            middle: middle,
-                                            bottom: bottom,
+                                            top: detinationResult.topBuf,
+                                            middle: detinationResult.middleBuf,
+                                            bottom: detinationResult.bottomBuf,
                                             final: final,
+                                            fluidPath: detinationResult.fluidPath,
+                                            fluidPuddles: detinationResult.fluidPuddles,
                                             oldColor: oldColor,
-                                            topColor: topColors,
-                                            bottomColor: bottomColors,
+                                            topColor: detinationResult.topColor,
+                                            bottomColor: detinationResult.bottomColor,
                                             finalColor: finalColor,
                                             newRound: roundEnded,
                                             roundWinner: roundWinner,
@@ -135,7 +137,7 @@ class TestGameModel : GameModel {
         return result
     }
     
-    override func applyExplosion(at: Vector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> (ImageBuf, ImageBuf, ImageBuf, ImageBuf, ImageBuf) {
+    override func applyExplosion(at: Vector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> DetonationResult {
         NSLog("\(#function) started")
         let topBuf = ImageBuf()
         let middleBuf = ImageBuf()
@@ -252,7 +254,9 @@ class TestGameModel : GameModel {
         
         NSLog("\(#function) finished")
         
-        return (topBuf, middleBuf, bottomBuf, topColor, bottomColor)
+        return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
+                                topColor: topColor, bottomColor: bottomColor,
+                                fluidPath: [], fluidPuddles: [])
     }
     
 }

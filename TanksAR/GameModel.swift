@@ -12,6 +12,11 @@ import Foundation
 import UIKit
 import SceneKit
 
+struct MapCoordinate : Hashable {
+    var x: Int
+    var y: Int
+}
+
 struct Vector3 : Codable {
     var x: Float
     var y: Float
@@ -138,6 +143,16 @@ struct Weapon : Codable {
     var style: WeaponStyle
 }
 
+struct DetonationResult {
+    var topBuf: ImageBuf
+    var middleBuf: ImageBuf
+    var bottomBuf: ImageBuf
+    var topColor: ImageBuf
+    var bottomColor: ImageBuf
+    var fluidPath: [Vector3]
+    var fluidPuddles: [[MapCoordinate:Bool]]
+}
+
 struct FireResult {
     var playerID: Int = 0
     
@@ -152,6 +167,8 @@ struct FireResult {
     var middle: ImageBuf
     var bottom: ImageBuf
     var final: ImageBuf
+    var fluidPath: [Vector3]
+    var fluidPuddles: [[MapCoordinate:Bool]]
 
     // data needed color updates properly
     var oldColor: ImageBuf
@@ -186,8 +203,14 @@ class GameModel : Codable {
                                      WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .explosive),
         Weapon(name: "Dirty Bomb", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
                                      WeaponSize(name: "regular", size: 150, cost: 2000),
-                                     WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .generative)
-        // still need MIRVs and liquid weapons
+                                     WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .generative),
+        Weapon(name: "Liquid Dirt", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
+                                            WeaponSize(name: "regular", size: 150, cost: 2000),
+                                            WeaponSize(name: "heavy", size: 300, cost: 3000)], style: .mud),
+        Weapon(name: "Napalm", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
+                                            WeaponSize(name: "regular", size: 150, cost: 2000),
+                                            WeaponSize(name: "heavy", size: 300, cost: 3000)], style: .napalm),
+        // still need MIRVs
         ]
     
     func generateBoard() {
@@ -654,8 +677,10 @@ class GameModel : Codable {
         let sizeID = board.players[board.currentPlayer].weaponSizeID
         let old = ImageBuf(board.surface)
         let oldColor = ImageBuf(board.colors)
-        let (top, middle, bottom, topColors, bottomColors) = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
-        damageCheck(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
+        let detinationResult = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
+        if weapon.style == .explosive {
+            damageCheck(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
+        }
         let final = ImageBuf(board.surface)
         let finalColor = ImageBuf(board.colors)
         
@@ -681,13 +706,15 @@ class GameModel : Codable {
                                             explosionRadius: blastRadius,
                                             weaponStyle: weapon.style,
                                             old: old,
-                                            top: top,
-                                            middle: middle,
-                                            bottom: bottom,
+                                            top: detinationResult.topBuf,
+                                            middle: detinationResult.middleBuf,
+                                            bottom: detinationResult.bottomBuf,
                                             final: final,
+                                            fluidPath: detinationResult.fluidPath,
+                                            fluidPuddles: detinationResult.fluidPuddles,
                                             oldColor: oldColor,
-                                            topColor: topColors,
-                                            bottomColor: bottomColors,
+                                            topColor: detinationResult.topColor,
+                                            bottomColor: detinationResult.bottomColor,
                                             finalColor: finalColor,
                                             newRound: roundEnded,
                                             roundWinner: roundWinner,
@@ -797,14 +824,16 @@ class GameModel : Codable {
         return trajectory
     }
     
-    func applyExplosion(at: Vector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> (ImageBuf, ImageBuf, ImageBuf, ImageBuf, ImageBuf) {
+    func applyExplosion(at: Vector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> DetonationResult {
         NSLog("\(#function) started")
         let topBuf = ImageBuf()
         let middleBuf = ImageBuf()
         let bottomBuf = ImageBuf()
         let topColor = ImageBuf()
         let bottomColor = ImageBuf()
-
+        var fluidPath: [Vector3] = []
+        var fluidPuddles: [[MapCoordinate: Bool]] = []
+        
         NSLog("starting image buffer copies")
         topBuf.copy(board.surface)
         middleBuf.copy(board.surface)
@@ -817,93 +846,238 @@ class GameModel : Codable {
         let style = andStyle
         
         // update things in the radius of the explosion
-        for j in Int(at.y-withRadius)...Int(at.y+withRadius) {
-            for i in Int(at.x-withRadius)...Int(at.x+withRadius) {
-                let xDiff = at.x - Float(i)
-                let yDiff = at.y - Float(j)
-                
-                let horizDist = sqrt(xDiff*xDiff + yDiff*yDiff)
-                guard withRadius >= horizDist else { continue }
-                
-                // get z component of sphere at i,j
-                // a^2 = c^2 - b^2
-                // c = withRadius
-                // b = horizDist
-                let vertSize = sqrt(withRadius*withRadius - horizDist*horizDist)
-                
-                let currElevation = getElevation(longitude: i, latitude: j)
-                let expTop = at.z + vertSize
-                let expBottom = at.z - vertSize
-                
-                if style == .explosive  {
-                    let top = currElevation
-                    let middle = expTop
-                    let bottom = min(currElevation, expBottom)
+        if style == .explosive || style == .generative {
+            for j in Int(at.y-withRadius)...Int(at.y+withRadius) {
+                for i in Int(at.x-withRadius)...Int(at.x+withRadius) {
+                    let xDiff = at.x - Float(i)
+                    let yDiff = at.y - Float(j)
                     
-                    setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
-                    setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
-                    setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
+                    let horizDist = sqrt(xDiff*xDiff + yDiff*yDiff)
+                    guard withRadius >= horizDist else { continue }
                     
-                    // update elevation map
-                    let newElevation = min(currElevation, bottom + max(0,top-middle))
-                    setElevation(longitude: i, latitude: j, to: newElevation)
+                    // get z component of sphere at i,j
+                    // a^2 = c^2 - b^2
+                    // c = withRadius
+                    // b = horizDist
+                    let vertSize = sqrt(withRadius*withRadius - horizDist*horizDist)
                     
-                    // update color map
-                    if expTop > currElevation && expBottom < currElevation {
-                        // explosion pokes out of the ground, mark crater below
-                        setColorIndex(longitude: i, latitude: j, to: 1) // make crater brown
-                    }
-                    if expBottom < currElevation {
-                        // set color for bottom below any dropping blocks
-                        setColorIndex(forMap: bottomColor, longitude: i, latitude: j, to: 1)
-                    }
-                } else if style == .generative {
-                    let top = expTop
-                    let middle = expBottom
-                    var bottom = currElevation
+                    let currElevation = getElevation(longitude: i, latitude: j)
+                    let expTop = at.z + vertSize
+                    let expBottom = at.z - vertSize
                     
-                    // update actual map
-                    var newElevation = currElevation
-                    if middle > currElevation {
-                        newElevation = currElevation + (top - middle) // new chunk is elevated
-                    } else if top > currElevation {
-                        newElevation = top // new chunk crosses old surface
-                        bottom = top // top is new final surface
-                    } else if top <= currElevation {
-                        newElevation = currElevation // new chunk below old surface
-                    } else {
-                        newElevation = currElevation * 1.1
-                        //NSLog("Unconsidered case, this is wierd! top: \(top), middle: \(middle), bottom: \(bottom), curr: \(currElevation)")
+                    if style == .explosive  {
+                        let top = currElevation
+                        let middle = expTop
+                        let bottom = min(currElevation, expBottom)
+                        
+                        setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
+                        setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
+                        setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
+                        
+                        // update elevation map
+                        let newElevation = min(currElevation, bottom + max(0,top-middle))
+                        setElevation(longitude: i, latitude: j, to: newElevation)
+                        
+                        // update color map
+                        if expTop > currElevation && expBottom < currElevation {
+                            // explosion pokes out of the ground, mark crater below
+                            setColorIndex(longitude: i, latitude: j, to: 1) // make crater brown
+                        }
+                        if expBottom < currElevation {
+                            // set color for bottom below any dropping blocks
+                            setColorIndex(forMap: bottomColor, longitude: i, latitude: j, to: 1)
+                        }
+                    } else if style == .generative {
+                        let top = expTop
+                        let middle = expBottom
+                        var bottom = currElevation
+                        
+                        // update actual map
+                        var newElevation = currElevation
+                        if middle > currElevation {
+                            newElevation = currElevation + (top - middle) // new chunk is elevated
+                        } else if top > currElevation {
+                            newElevation = top // new chunk crosses old surface
+                            bottom = top // top is new final surface
+                        } else if top <= currElevation {
+                            newElevation = currElevation // new chunk below old surface
+                        } else {
+                            newElevation = currElevation * 1.1
+                            //NSLog("Unconsidered case, this is wierd! top: \(top), middle: \(middle), bottom: \(bottom), curr: \(currElevation)")
+                        }
+                        //                    if( newElevation != currElevation) {
+                        //                        NSLog("generative level change: \(currElevation) -> \(newElevation) at \(i),\(j)")
+                        //                    }
+                        setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
+                        setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
+                        setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
+                        setElevation(longitude: i, latitude: j, to: newElevation)
+                        
+                        // update colors
+                        if expTop > currElevation {
+                            // dirt will be the new top
+                            setColorIndex(longitude: i, latitude: j, to: 1) // make dirt piles brown
+                            setColorIndex(forMap: topColor, longitude: i, latitude: j, to: 1)
+                        }
+                        if expTop > currElevation && expBottom < currElevation {
+                            // dirt is on top, and won't fall
+                            setColorIndex(forMap: bottomColor, longitude: i, latitude: j, to: 1)
+                        }
                     }
-//                    if( newElevation != currElevation) {
-//                        NSLog("generative level change: \(currElevation) -> \(newElevation) at \(i),\(j)")
-//                    }
-                    setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
-                    setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
-                    setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
-                    setElevation(longitude: i, latitude: j, to: newElevation)
-                    
-                    // update colors
-                    if expTop > currElevation {
-                        // dirt will be the new top
-                        setColorIndex(longitude: i, latitude: j, to: 1) // make dirt piles brown
-                        setColorIndex(forMap: topColor, longitude: i, latitude: j, to: 1)
-                    }
-                    if expTop > currElevation && expBottom < currElevation {
-                        // dirt is on top, and won't fall
-                        setColorIndex(forMap: bottomColor, longitude: i, latitude: j, to: 1)
-                    }
-                } else {
-                    NSLog("\(#function) doesn't handle \(andStyle) style.")
                 }
             }
-
+        } else if style == .napalm || style == .mud {
+            let volume = pow(withRadius,2)
+            let (path, puddles) = fluidFill(startX: at.x, startY: at.y, totalVolume: volume, andStyle: style)
+            fluidPath = path
+            fluidPuddles = puddles
+        } else {
+            NSLog("\(#function) doesn't handle \(andStyle) style.")
         }
+        
         NSLog("\(#function) finished")
 
-        return (topBuf, middleBuf, bottomBuf, topColor, bottomColor)
+        return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
+                                topColor: topColor, bottomColor: bottomColor,
+                                fluidPath: fluidPath, fluidPuddles: fluidPuddles)
     }
     
+    func fluidFill(startX: Float, startY: Float, totalVolume: Float, andStyle: WeaponStyle = WeaponStyle.napalm) -> ([Vector3], [[MapCoordinate: Bool]]) {
+        NSLog("\(#function) started with totalVolume: \(totalVolume)")
+        
+        // trace path of fluid (these get returned for animation purposes)
+        var fullPath: [Vector3] = []
+        
+        // track state needed
+        var remainingVolume = totalVolume
+        var queue = PriorityQueue<Pair<Float, MapCoordinate>>()
+        var fringe: [MapCoordinate: Bool] = [:]
+
+        // set start point
+        let startCoord = MapCoordinate(x: Int(startX), y: Int(startY))
+        let startElevation = getElevation(longitude: startCoord.x, latitude: startCoord.y)
+        queue.enqueue(Pair(key: startElevation, value: startCoord))
+        
+        var currentArea: Float = 0
+        var previousElevation = startElevation
+        
+        // need a priority queue of edge pixels ordered by height
+        while remainingVolume > 0 && queue.size > 0 {
+            // get lowest pixel from queue
+            guard let lowest = queue.dequeue() else { remainingVolume = 0; continue }
+
+            // enqueue neighboring pixels
+            for j in -1...1 {
+                for i in -1...1 {
+                    guard (i != 0 || j != 0) else { continue }
+                    
+                    let x = lowest.value.x + i
+                    let y = lowest.value.y + j
+                    
+                    guard (x>=0) &&
+                          (y>=0) &&
+                          (x<board.boardSize) &&
+                          (y<board.boardSize) else { continue }
+                    
+                    let coordinate = MapCoordinate(x: x, y: y)
+                    let enqueuedAlready = fringe[coordinate] ?? false
+                    if !enqueuedAlready {
+                        let elevation = getElevation(longitude: x, latitude: y)
+                        queue.enqueue(Pair(key: elevation, value: coordinate))
+                        fringe[coordinate] = true
+                        //NSLog("\(#function): added \(coordinate.x),\(coordinate.y) to fringe with elevation \(elevation)")
+                    }
+                }
+            }
+            
+            // if one is lower than current, replace queue with it
+            fullPath.append(Vector3(Float(lowest.value.x), Float(lowest.value.y), lowest.key))
+            if lowest.key < previousElevation {
+                //NSLog("\(#function): moved down to \(lowest.key) at \(lowest.value.x),\(lowest.value.y)")
+                // if puddle set is non-empty, update surface accordingly
+                if andStyle == .mud {
+                    // leave mud trail
+                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowest.key + 1)
+                    setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 1)
+                } else if andStyle == .napalm {
+                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowest.key - 1)
+                    //setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 2) // scorched color
+                }
+                remainingVolume -= 1
+                currentArea = 0
+            } else  {
+                //NSLog("\(#function): filled up to \(lowest.key) at \(lowest.value.x),\(lowest.value.y)")
+                // new value is higher, so level is rising
+                // increase level to lowest edge pixel
+                // its neighbors were added to queue already
+                
+                // compute volume used in level rise
+                let volumeAdded = currentArea * (lowest.key - previousElevation)
+                
+                // update volume left
+                remainingVolume -= volumeAdded
+                
+                // add new coordinate to area total
+                currentArea += 1
+            }
+
+            previousElevation = lowest.key
+
+            //NSLog("\(#function): remaining volume now \(remainingVolume), previousElevation: \(previousElevation)")
+        }
+        NSLog("\(#function): path length: \(fullPath.count)")
+        
+        // go through path backwards to find the level that each point will fill to updating actual surface
+        var filledPath = fullPath
+        NSLog("\(#function): filled path length: \(filledPath.count), previousElevation=\(previousElevation)")
+        var maxLevel = previousElevation
+        for i in 1...filledPath.count {
+            let pos = filledPath.count - i
+            let currPos = filledPath[pos]
+            maxLevel = max(maxLevel,currPos.z)
+
+            filledPath[pos].z = maxLevel
+            if andStyle == .mud {
+                setElevation(longitude: Int(currPos.x), latitude: Int(currPos.y), to: maxLevel)
+                setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 1)
+            } else {
+                //setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 2)
+            }
+        }
+        // fillPath should now be monotonically decreasing in z
+
+        // extract puddle sets from filledPath
+        var puddleSets: [[MapCoordinate:Bool]] = []
+        var puddleSet: [MapCoordinate:Bool] = [:]
+        var path: [Vector3] = []
+        for i in 0..<fullPath.count {
+            if fullPath[i].z == filledPath[i].z {
+                // not in a puddle set
+                if puddleSet.count > 0 {
+                    NSLog("Adding puddle set with \(puddleSet.count) points")
+                    puddleSets.append(puddleSet)
+                    puddleSet = [:]
+                }
+                path.append(fullPath[i])
+            } else {
+                let coord = MapCoordinate(x: Int(fullPath[i].x), y: Int(fullPath[i].y))
+                puddleSet[coord] = true
+            }
+        }
+        if puddleSet.count > 0 {
+            NSLog("Adding puddle set with \(puddleSet.count) points")
+            puddleSets.append(puddleSet)
+            puddleSet = [:]
+        }
+
+        NSLog("filled path has length \(filledPath.count)")
+        NSLog("path has length \(fullPath.count), \(puddleSets.count) puddles sets")
+
+        NSLog("\(#function) finished")
+        
+        return (path, puddleSets)
+    }
+
     func distance(from: Vector3, to: Vector3) -> Float {
         let xDiff = from.x - to.x
         let yDiff = from.y - to.y
@@ -1097,28 +1271,4 @@ class GameModel : Codable {
 //        return (winner, maxScore)
 //    }
     
-    func fluidFill(startX: Int, startY: Int, totalVolume: Float) {
-        NSLog("\(#function) started")
-
-        var remainingVolume = totalVolume
-        
-        // need a priority queue of edge pixels ordered by height
-        while remainingVolume > 0 {
-            // get lowest pixel from queue
-            
-            // check neighboring pixels
-
-            // if one is lower than current, replace queue with it
-
-            // else (i.e. all are higher)
-                // increase level to lowest edge pixel
-                // add its neighbors to neighbor queue
-                // compute volume used in level raise
-                let volumeAdded = Float(1)
-                // update volume left
-                remainingVolume -= volumeAdded
-        }
-        NSLog("\(#function) started")
-
-    }
 }
