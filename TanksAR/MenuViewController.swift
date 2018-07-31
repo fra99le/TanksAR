@@ -14,6 +14,7 @@ struct GameState : Codable {
 }
 
 // Note: different difficulty settings should be added
+// Note: Should have an alert when starting a new game when resume is an option
 
 class MenuViewController: UIViewController {
 

@@ -10,6 +10,9 @@ import UIKit
 import SceneKit
 import ARKit
 
+// Note: board placement doesn't seem to work when resuming if the app didn't fully quit
+// Note: player changes strangely on a new round in unlimited round mode
+
 struct UserConfig {
     var scaleFactor: Float
     var rotation: Float

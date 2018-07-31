@@ -10,6 +10,9 @@ import Foundation
 import SceneKit
 import ARKit
 
+// Note: Drawers should be responsible for adding/removing/updating the tanks
+// Note: The 'users' array should also be in the Drawer
+
 class GameViewDrawer {
 
     var gameModel: GameModel! = nil
