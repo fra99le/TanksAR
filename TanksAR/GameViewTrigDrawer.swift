@@ -267,29 +267,84 @@ class GameViewTrigDrawer : GameViewDrawer {
     
     func animateResult(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green]) {
 
-        NSLog("NEW \(#function) started")
+        NSLog("\(#function) started")
         var currTime: CFTimeInterval = 0
         
+        // explosion
         currTime = animateShell(fireResult: fireResult, at: currTime)
         if fireResult.weaponStyle == .explosive || fireResult.weaponStyle == .generative {
             currTime = animateExplosion(fireResult: fireResult, at: currTime)
         }
         
+        // board surface animation
+        if fireResult.weaponStyle == .explosive || fireResult.weaponStyle == .generative {
+            currTime = animateDropSurface(fireResult: fireResult, from: from, useNormals: useNormals, colors: colors, at: currTime)
+        }
+        
+        // setup reveal of the new bottom surface
+        newBottomSurface.removeFromParentNode()
+        newBottomSurface = surfaceNode(forSurface: fireResult.bottom, useNormals: false, withColors: fireResult.bottomColor, colors: colors)
+        newBottomSurface.isHidden = true
+        board.addChildNode(newBottomSurface)
+        
+        surface.name = "The Surface"
+        let hideOldSurface = SCNAction.sequence([.wait(duration: currTime),
+                                                 .hide()])
+        let showNewSurface = SCNAction.sequence([.wait(duration: currTime),
+                                                 .unhide()])
+        surface.runAction(hideOldSurface)
+        newBottomSurface.runAction(showNewSurface)
+        
+        // setup reveal of new edges
+        let newEdgeGeometry = edgeGeometry(forSurface: fireResult.bottom)
+        newEdgeGeometry.firstMaterial = edgeNode.geometry?.firstMaterial
+        edgeNode.name = "The Edge"
+        edgeNode.morpher = SCNMorpher()
+        edgeNode.morpher?.targets = [edgeNode.geometry!, newEdgeGeometry]
+        
+        // add actions to reveal new surface and edges
+        let reEdgeActions = [.wait(duration: currTime),
+                             SCNAction.customAction(duration: 0, action: {node, time in
+                                if time == 0 && (node.morpher?.targets.count)! >= 2 {
+                                    // must used setWeight, array notation will crash
+                                    node.morpher?.setWeight(1, forTargetAt: 1)
+                                }
+                             })]
+        let reEdge = SCNAction.sequence(reEdgeActions)
+        edgeNode.runAction(reEdge)
+        
+        NSLog("board settled at time \(currTime).")
+        
+        // deal with round transitions
+        currTime = animateRoundResult(fireResult: fireResult, at: currTime)
+        
+        // wait for animations to end
+        let delay = SCNAction.sequence([.wait(duration: currTime)])
+        board.runAction(delay,
+                        completionHandler: { DispatchQueue.main.async { from.finishTurn() } })
+        
+        
+        NSLog("\(#function) finished")
+    }
+    
+    func animateDropSurface(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval) -> CFTimeInterval {
+        var currTime = time
         let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
         
         // for debugging purposes only!
-//        let dropCases = [[3,0,0],
-//                         [0,3,0], // weird
-//                         [0,0,3],
-//                         [2,1,0],
-//                         [2,0,1],
-//                         [1,2,0],
-//                         [0,2,1], // broken (has false, false, false)
-//                         [1,0,2],
-//                         [0,1,2],
-//                         [1,1,1]]
-//        var showOnly = dropCases[gameModel.board.currentRound-1]
-//        NSLog("ROUND \(gameModel.board.currentRound): \(showOnly)")
+        //        let dropCases = [[3,0,0],
+        //                         [0,3,0], // weird
+        //                         [0,0,3],
+        //                         [2,1,0],
+        //                         [2,0,1],
+        //                         [1,2,0],
+        //                         [0,2,1], // broken (has false, false, false)
+        //                         [1,0,2],
+        //                         [0,1,2],
+        //                         [1,1,1]]
+        //        var showOnly = dropCases[gameModel.board.currentRound-1]
+        //        NSLog("ROUND \(gameModel.board.currentRound): \(showOnly)")
+        
 
         // draw dropping surfaces
         var dropVertices0: [SCNVector3] = []
@@ -675,40 +730,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                 }
             }
         }
-        
-        // setup reveal of the new bottom surface
-        newBottomSurface.removeFromParentNode()
-        newBottomSurface = surfaceNode(forSurface: fireResult.bottom, useNormals: false, withColors: fireResult.bottomColor, colors: colors)
-        newBottomSurface.isHidden = true
-        //newBottomSurface.position = SCNVector3(0,-1,0) // to avoid overlapping surfaces
-        board.addChildNode(newBottomSurface)
-        
-        surface.name = "The Surface"
-        let hideOldSurface = SCNAction.sequence([.wait(duration: currTime),
-                                                 .hide()])
-        let showNewSurface = SCNAction.sequence([.wait(duration: currTime),
-                                                 .unhide()])
-        surface.runAction(hideOldSurface)
-        newBottomSurface.runAction(showNewSurface)
-        
-        // setup reveal of new edges
-        let newEdgeGeometry = edgeGeometry(forSurface: fireResult.bottom)
-        newEdgeGeometry.firstMaterial = edgeNode.geometry?.firstMaterial
-        edgeNode.name = "The Edge"
-        edgeNode.morpher = SCNMorpher()
-        edgeNode.morpher?.targets = [edgeNode.geometry!, newEdgeGeometry]
-        
-        // add actions to reveal new surface and edges
-        let reEdgeActions = [.wait(duration: currTime),
-                             SCNAction.customAction(duration: 0, action: {node, time in
-                                if time == 0 && (node.morpher?.targets.count)! >= 2 {
-                                    // must used setWeight, array notation will crash
-                                    node.morpher?.setWeight(1, forTargetAt: 1)
-                                }
-                             })]
-        let reEdge = SCNAction.sequence(reEdgeActions)
-        edgeNode.runAction(reEdge)
-        
+
         // setup dropping surface
         if dropNeeded {
             // create geometry for surface
@@ -726,7 +748,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                                         node.morpher?.setWeight(pow(progress,2), forTargetAt: 1)
                                     }
                                    })
-//                                    ,
+//                                ,
 //                                   SCNAction.customAction(duration: dropTime, action: {node, time in
 //                                    if (node.morpher?.targets.count)! >= 2 {
 //                                        // must used setWeight(_:forTarget), array notation will crash
@@ -734,7 +756,7 @@ class GameViewTrigDrawer : GameViewDrawer {
 //                                        node.morpher?.setWeight(1-pow(progress,2), forTargetAt: 1)
 //                                    }
 //                                   })
-                                    ]
+            ]
             
             // remove all old drop surface(s)
             for node in dropSurfaces {
@@ -781,18 +803,8 @@ class GameViewTrigDrawer : GameViewDrawer {
             currTime += dropTime
             //currTime += dropTime
         }
-        NSLog("board settled at time \(currTime).")
         
-        // deal with round transitions
-        currTime = animateRoundResult(fireResult: fireResult, at: currTime)
-        
-        // wait for animations to end
-        let delay = SCNAction.sequence([.wait(duration: currTime)])
-        board.runAction(delay,
-                        completionHandler: { DispatchQueue.main.async { from.finishTurn() } })
-        
-        
-        NSLog("NEW \(#function) finished")
+        return currTime
     }
     
 }
