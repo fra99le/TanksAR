@@ -19,6 +19,7 @@ class GameViewDrawer {
     var sceneView: ARSCNView! = nil
     var board: SCNNode = SCNNode()
     var tankNodes: [SCNNode] = []
+    var tankScale: Float = 10
     var numPerSide: Int = 0
     var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
     var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
@@ -29,11 +30,12 @@ class GameViewDrawer {
     //let dropTime: Double = 10 // for debugging purposes
     let roundResultTime: Double = 10
 
-    init(sceneView: ARSCNView, model: GameModel, node: SCNNode, numPerSide: Int) {
+    init(sceneView: ARSCNView, model: GameModel, node: SCNNode, numPerSide: Int, tankScale: Float) {
         gameModel = model
         board = node
         self.numPerSide = numPerSide
         self.sceneView = sceneView
+        self.tankScale = tankScale
     }
     
     // these should be abstract methods, or equivilant
@@ -80,6 +82,59 @@ class GameViewDrawer {
         }
         NSLog("shell landed at time \(currTime).")
         return currTime
+    }
+    
+    func addTrajectory(trajectory: [Vector3], toNode: SCNNode, color: UIColor) {
+        let segments = 20
+        if trajectory.count > 2 {
+            var prevPos: Vector3 = trajectory.first!
+            for i in 1..<segments {
+                let newIndex = Int(Float(i) * Float(trajectory.count) / Float(segments))
+                let newPos = trajectory[newIndex]
+                
+                let joint = SCNNode(geometry: SCNSphere(radius: CGFloat(0.25*tankScale)))
+                joint.geometry?.firstMaterial?.diffuse.contents = color
+                joint.position = fromModelSpace(newPos)
+                toNode.addChildNode(joint)
+                
+                addCylinder(from: prevPos, to: newPos, toNode: toNode, color: color)
+                prevPos = newPos
+            }
+            addCylinder(from: prevPos, to: trajectory.last!, toNode: toNode, color: color)
+        }
+        
+    }
+    
+    func addCylinder(from: Vector3, to: Vector3, toNode: SCNNode, color: UIColor) {
+        let cylinder = SCNNode()
+        
+        //NSLog("Adding cylinder from \(from) to \(to).")
+        
+        let length = gameModel.distance(from: from, to: to)
+        cylinder.geometry = SCNCylinder(radius: CGFloat(0.25*tankScale), height: CGFloat(length))
+        cylinder.geometry?.firstMaterial?.diffuse.contents = color
+        
+        // get orientation
+        let viewTo = fromModelSpace(to)
+        let viewFrom = fromModelSpace(from)
+        let diff = SCNVector3(viewTo.x - viewFrom.x, viewTo.y - viewFrom.y, viewTo.z - viewFrom.z)
+        
+        let angle1 = atan2(diff.y, sqrt(diff.z*diff.z + diff.x*diff.x))
+        let angle2 = atan2(diff.z, diff.x)
+        //NSLog("diff: \(diff), angles: \(angle1*180/Float.pi),\(angle2*180/Float.pi)")
+        
+        cylinder.eulerAngles.z = Float.pi / 2 - angle1
+        
+        let gimble = SCNNode()
+        gimble.addChildNode(cylinder)
+        gimble.eulerAngles.y = Float.pi - angle2
+        
+        // get position of cylinder's gimble
+        let sum = vectorAdd(to, from)
+        let mid = vectorScale(sum, by: 0.5)
+        gimble.position = fromModelSpace(mid)
+        
+        toNode.addChildNode(gimble)
     }
     
     func animateExplosion(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {

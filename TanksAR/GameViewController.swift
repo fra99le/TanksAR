@@ -96,13 +96,13 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         // create the game board
         switch gameConfig.mode {
         case .blocks:
-            boardDrawer = GameViewBlockDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 50)
+            boardDrawer = GameViewBlockDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 50, tankScale: tankScale)
         case .plainTrigs:
-            boardDrawer = GameViewTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 100)
+            boardDrawer = GameViewTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 100, tankScale: tankScale)
         case .coloredTrigs:
-            boardDrawer = GameViewColoredTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 100)
+            boardDrawer = GameViewColoredTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 100, tankScale: tankScale)
         case .texturedTrigs:
-            boardDrawer = GameViewTexturedTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 200)
+            boardDrawer = GameViewTexturedTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 200, tankScale: tankScale)
         }
         boardDrawer.setupLighting()
     }
@@ -952,7 +952,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         prevTraj.removeFromParentNode()
         if player.prevTrajectory.count > 0 {
             prevTraj = SCNNode()
-            addTrajectory(trajectory: player.prevTrajectory, toNode: prevTraj, color: UIColor.yellow)
+            boardDrawer.addTrajectory(trajectory: player.prevTrajectory, toNode: prevTraj, color: UIColor.yellow)
             board.addChildNode(prevTraj)
         }
         
@@ -978,61 +978,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         let playerTraj = gameModel.computeTrajectory(muzzlePosition: muzzlePosition,
                                                      muzzleVelocity: muzzleVelocity,
                                                      withTimeStep: 1/3.0)
-        addTrajectory(trajectory: playerTraj, toNode: currTraj, color: UIColor.lightGray)
+        boardDrawer.addTrajectory(trajectory: playerTraj, toNode: currTraj, color: UIColor.lightGray)
         board.addChildNode(currTraj)
-    }
-    
-    func addTrajectory(trajectory: [Vector3], toNode: SCNNode, color: UIColor) {
-        let segments = 20
-        if trajectory.count > 2 {
-            var prevPos: Vector3 = trajectory.first!
-            for i in 1..<segments {
-                let newIndex = Int(Float(i) * Float(trajectory.count) / Float(segments))
-                let newPos = trajectory[newIndex]
-                
-                let joint = SCNNode(geometry: SCNSphere(radius: CGFloat(0.25*tankScale)))
-                joint.geometry?.firstMaterial?.diffuse.contents = color
-                joint.position = boardDrawer.fromModelSpace(newPos)
-                toNode.addChildNode(joint)
-                
-                addCylinder(from: prevPos, to: newPos, toNode: toNode, color: color)
-                prevPos = newPos
-            }
-            addCylinder(from: prevPos, to: trajectory.last!, toNode: toNode, color: color)
-        }
-        
-    }
-    
-    func addCylinder(from: Vector3, to: Vector3, toNode: SCNNode, color: UIColor) {
-        let cylinder = SCNNode()
-        
-        //NSLog("Adding cylinder from \(from) to \(to).")
-        
-        let length = gameModel.distance(from: from, to: to)
-        cylinder.geometry = SCNCylinder(radius: CGFloat(0.25*tankScale), height: CGFloat(length))
-        cylinder.geometry?.firstMaterial?.diffuse.contents = color
-        
-        // get orientation
-        let viewTo = boardDrawer.fromModelSpace(to)
-        let viewFrom = boardDrawer.fromModelSpace(from)
-        let diff = SCNVector3(viewTo.x - viewFrom.x, viewTo.y - viewFrom.y, viewTo.z - viewFrom.z)
-        
-        let angle1 = atan2(diff.y, sqrt(diff.z*diff.z + diff.x*diff.x))
-        let angle2 = atan2(diff.z, diff.x)
-        //NSLog("diff: \(diff), angles: \(angle1*180/Float.pi),\(angle2*180/Float.pi)")
-        
-        cylinder.eulerAngles.z = Float.pi / 2 - angle1
-        
-        let gimble = SCNNode()
-        gimble.addChildNode(cylinder)
-        gimble.eulerAngles.y = Float.pi - angle2
-        
-        // get position of cylinder's gimble
-        let sum = vectorAdd(to, from)
-        let mid = vectorScale(sum, by: 0.5)
-        gimble.position = boardDrawer.fromModelSpace(mid)
-        
-        toNode.addChildNode(gimble)
     }
 
     func updateHUD() {
