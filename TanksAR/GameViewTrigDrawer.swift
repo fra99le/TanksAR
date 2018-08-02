@@ -14,6 +14,7 @@ class GameViewTrigDrawer : GameViewDrawer {
     var surface = SCNNode()
     var newBottomSurface = SCNNode()
     var dropSurfaces: [SCNNode] = []
+    var fluidNode: SCNNode = SCNNode()
     var edgeNode = SCNNode()
     var normalSampleDist = 10
     
@@ -250,6 +251,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         if let morpher = surface.morpher {
             morpher.targets = [surface.geometry!]
         }
+        fluidNode.removeFromParentNode()
         
         NSLog("\(#function) finished")
     }
@@ -311,6 +313,8 @@ class GameViewTrigDrawer : GameViewDrawer {
         // board surface animation
         if fireResult.weaponStyle == .explosive || fireResult.weaponStyle == .generative {
             currTime = animateDropSurface(fireResult: fireResult, from: from, useNormals: useNormals, colors: colors, at: currTime)
+        } else if fireResult.weaponStyle == .mud || fireResult.weaponStyle == .napalm {
+            currTime = animateFluidFill(fireResult: fireResult, from: from, at: currTime)
         }
         NSLog("board settled at time \(currTime).")
         
@@ -806,4 +810,224 @@ class GameViewTrigDrawer : GameViewDrawer {
         return currTime
     }
     
+    func animateFluidFill(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval) -> CFTimeInterval {
+        var currTime = time
+        let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
+
+        NSLog("\(#function) fluid path has length \(fireResult.fluidPath.count).")
+        
+        var puddles: [PuddleInfo] = []
+        let minPuddleSize = Int(pow(edgeSize,2))
+        
+        // A stack or two could be useful to minimize some of the searching when building puddle sets
+        
+        // find puddle sets and drain paths (in model space)
+        let path = fireResult.fluidPath
+        var previousElevation = path[0].z
+        var wasFilling = false
+        for i in 0..<path.count {
+            let elevation = path[i].z
+            
+            if elevation < previousElevation {
+                // draining
+                if wasFilling {
+                    wasFilling = false
+
+                    // scan back to previous point with same elevation
+                    var beginPuddle = i
+                    var minZ = elevation
+                    var minPos: Int = i
+                    var searchStartPos = i - 1
+                    if let lastPuddle = puddles.last,
+                        previousElevation > lastPuddle.maxZ {
+                        // just expanding on puddle
+                        // jump to last start high point found
+                        searchStartPos = lastPuddle.start
+                        minPos = lastPuddle.minPos
+                    }
+                    var pos = searchStartPos - 1
+                    while pos >= 0 && path[pos].z <= previousElevation {
+                        //NSLog("searching for elevation \(previousElevation), path[\(pos)].z = \(path[pos].z)")
+                        if path[pos].z < minZ {
+                            minZ = path[pos].z
+                            minPos = pos
+                        }
+                        
+                        pos -= 1
+                    }
+                    beginPuddle = pos+1
+
+                    // check to see if we're just adding to the current puddle
+                    var puddleInfo = PuddleInfo(start: beginPuddle, end: i, minPos: minPos, minZ: minZ, maxZ: elevation)
+                    if let lastPuddle = puddles.last,
+                        lastPuddle.minPos == minPos {
+                        //NSLog("expanding previous puddle, minPos=\(minPos), now \(puddleInfo.start) to \(puddleInfo.end).")
+                        puddleInfo = puddles.removeLast()
+                    }
+                    
+                    // set ends of puddle
+                    puddleInfo.start = beginPuddle
+                    puddleInfo.minPos = minPos
+                    puddleInfo.minZ = minZ
+                    puddleInfo.end = i
+
+                    if puddleInfo.end - puddleInfo.start >  minPuddleSize
+                        && puddleInfo.maxZ - puddleInfo.minZ > 5 {
+                        puddles.append(puddleInfo)
+                    }
+                }
+            } else {
+                // filling
+                wasFilling = true
+            }
+
+            previousElevation = elevation
+        }
+        NSLog("\(#function): \(puddles.count) puddle sets")
+        
+        // animate drain paths and puddles filling
+        var color: UIColor!
+        if fireResult.weaponStyle == .mud {
+            color = UIColor.brown
+        } else if fireResult.weaponStyle == .napalm {
+            color = UIColor.orange
+        } else {
+            color = UIColor.red
+        }
+        
+        // for debugging purposes
+//        color = UIColor.magenta
+        
+        var previousEnd = 0
+        fluidNode = SCNNode()
+        board.addChildNode(fluidNode)
+        for puddle in puddles {
+            NSLog("puddle from \(puddle.start) to \(puddle.end) has area of \(puddle.end - puddle.start), minPos = \(puddle.minPos).")
+            let puddleStart = puddle.start
+            let puddleEnd = puddle.end
+            let puddleBottom = puddle.minPos
+            let drainStart = previousEnd
+
+            // animate path from previous puddle's end to current puddle's minPos
+            NSLog("\tanimate path from positions \(drainStart) to \(puddleBottom).")
+            // need to build dictionary for faster checking for inclusion in puddle
+            var pathPos = drainStart
+            var lastPos = pathPos
+            while pathPos <= puddleBottom {
+                if lastPos != pathPos {
+                    var pipeStart = path[lastPos]
+                    var pipeEnd = path[pathPos]
+//                    pipeStart.z += 10
+//                    pipeEnd.z += 10
+                    NSLog("\t\tadding pipe from \(pipeStart) to \(pipeEnd)")
+                    
+                    let appearNode = SCNNode()
+                    addCylinder(from: pipeStart, to: pipeEnd, toNode: appearNode, color: color)
+                    fluidNode.addChildNode(appearNode)
+                    
+                    let appearAction = SCNAction.sequence([.wait(duration: currTime),
+                                                           .unhide()])
+                    appearNode.isHidden = true
+                    appearNode.runAction(appearAction)
+                }
+
+                lastPos = pathPos
+//                pathPos += (puddleBottom - drainStart) / 10
+//                currTime += 0.1 //Note: need to base this on fluid use rates
+                pathPos += Int(edgeSize)
+                currTime += Double(1 / (CGFloat(puddleBottom - drainStart) / edgeSize))
+            }
+            
+            // animate puddle rising
+            NSLog("\tanimate puddle with area \(puddle.end - puddle.start) rising from \(puddle.minZ) to \(puddle.maxZ).")
+            // build quick lookup set
+            var puddleSet: [MapCoordinate:Float] = [:]
+            for i in puddleStart...puddleEnd {
+                let point = path[i]
+                let coord = MapCoordinate(x: Int(point.x), y: Int(point.y))
+                puddleSet[coord] = point.z
+            }
+            
+            // draw puddle surface
+            var vertices: [SCNVector3] = []
+            var texCoords: [CGPoint] = []
+            var normals: [SCNVector3] = []
+            var indices: [CInt] = []
+            var pos: CInt = 0
+            for i in 0...numPerSide {
+                for j in 0...numPerSide {
+                    
+                    let x = CGFloat(i)*edgeSize
+                    let y = CGFloat(j)*edgeSize
+                    let z = CGFloat(0)
+                    let n = Vector3(CGFloat(0),CGFloat(1),CGFloat(0))
+                    
+                    let viewCoordinates = fromModelSpace(Vector3(x,y,z))
+                    vertices.append(viewCoordinates)
+                    texCoords.append(toMapSpace(x: x, y: y))
+                    normals.append(fromModelScale(n))
+
+                    // check to see if trigs are needed in puddle set
+                    var includeTrig = false
+                    for ij in [[0,0], [0,1], [1,0], [1,1]] {
+                        let coord = MapCoordinate(x: Int(x + CGFloat(ij[0])*edgeSize),
+                                                  y: Int(y + CGFloat(ij[1])*edgeSize))
+                        if let _ = puddleSet[coord] {
+                            includeTrig = true
+                        }
+                    }
+                    
+                    if i < numPerSide && j < numPerSide &&
+                        includeTrig {
+                        indices.append(pos)
+                        indices.append(pos+1)
+                        indices.append(pos+CInt(numPerSide)+2)
+
+                        indices.append(pos)
+                        indices.append(pos+CInt(numPerSide)+2)
+                        indices.append(pos+CInt(numPerSide)+1)
+                    }
+                    pos += 1
+                }
+            }
+            NSLog("\(vertices.count) surface vertices, \(indices.count) surface indices, pos=\(pos)")
+            
+            // create geometry for puddle surface
+            let vertexSource = SCNGeometrySource(vertices: vertices)
+            let texSource = SCNGeometrySource(textureCoordinates: texCoords)
+            let elements = SCNGeometryElement(indices: indices, primitiveType: .triangles)
+            var sources = [vertexSource, texSource]
+            if useNormals {
+                let normalSource = SCNGeometrySource(normals: normals)
+                sources.append(normalSource)
+            }
+            let geometry = SCNGeometry(sources: sources, elements: [elements])
+            geometry.firstMaterial?.diffuse.contents = color
+            let puddleNode = SCNNode(geometry: geometry)
+            puddleNode.isHidden = true
+            
+            puddleNode.position = SCNVector3(0,puddle.minZ,0)
+            let fillTime = 1
+            let fillAction = SCNAction.sequence([.wait(duration: currTime),
+                                                 .unhide(),
+                                                 .move(to: SCNVector3(0,puddle.maxZ,0), duration: TimeInterval(fillTime))])
+            puddleNode.runAction(fillAction)
+            fluidNode.addChildNode(puddleNode)
+            currTime += Double(fillTime)
+            
+            // update per puddle info
+            previousEnd = puddleEnd
+        }
+        NSLog("fluid filling finished at time \(currTime)")
+        
+        return currTime
+    }
+}
+
+struct PuddleInfo {
+    var start: Int = -1
+    var end: Int = -1
+    var minPos: Int = -1
+    var minZ: Float = -1.0
+    var maxZ: Float = -1.0
 }

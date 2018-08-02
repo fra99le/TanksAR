@@ -40,6 +40,9 @@ struct Vector3 : Codable {
         self.z = Float(z)
     }
 
+    var description: String {
+        return "(\(x),\(y),\(z))"
+    }
 }
 
 func vectorAdd(_ v1: Vector3, _ v2: Vector3) -> Vector3 {
@@ -150,7 +153,6 @@ struct DetonationResult {
     var topColor: ImageBuf
     var bottomColor: ImageBuf
     var fluidPath: [Vector3]
-    var fluidPuddles: [[MapCoordinate:Bool]]
 }
 
 struct FireResult {
@@ -168,7 +170,6 @@ struct FireResult {
     var bottom: ImageBuf
     var final: ImageBuf
     var fluidPath: [Vector3]
-    var fluidPuddles: [[MapCoordinate:Bool]]
 
     // data needed color updates properly
     var oldColor: ImageBuf
@@ -711,7 +712,6 @@ class GameModel : Codable {
                                             bottom: detinationResult.bottomBuf,
                                             final: final,
                                             fluidPath: detinationResult.fluidPath,
-                                            fluidPuddles: detinationResult.fluidPuddles,
                                             oldColor: oldColor,
                                             topColor: detinationResult.topColor,
                                             bottomColor: detinationResult.bottomColor,
@@ -832,7 +832,6 @@ class GameModel : Codable {
         let topColor = ImageBuf()
         let bottomColor = ImageBuf()
         var fluidPath: [Vector3] = []
-        var fluidPuddles: [[MapCoordinate: Bool]] = []
         
         NSLog("starting image buffer copies")
         topBuf.copy(board.surface)
@@ -928,9 +927,7 @@ class GameModel : Codable {
             }
         } else if style == .napalm || style == .mud {
             let volume = pow(withRadius,2)
-            let (path, puddles) = fluidFill(startX: at.x, startY: at.y, totalVolume: volume, andStyle: style)
-            fluidPath = path
-            fluidPuddles = puddles
+            fluidPath = fluidFill(startX: at.x, startY: at.y, totalVolume: volume, andStyle: style)
         } else {
             NSLog("\(#function) doesn't handle \(andStyle) style.")
         }
@@ -939,10 +936,10 @@ class GameModel : Codable {
 
         return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
                                 topColor: topColor, bottomColor: bottomColor,
-                                fluidPath: fluidPath, fluidPuddles: fluidPuddles)
+                                fluidPath: fluidPath)
     }
     
-    func fluidFill(startX: Float, startY: Float, totalVolume: Float, andStyle: WeaponStyle = WeaponStyle.napalm) -> ([Vector3], [[MapCoordinate: Bool]]) {
+    func fluidFill(startX: Float, startY: Float, totalVolume: Float, andStyle: WeaponStyle = WeaponStyle.napalm) -> [Vector3] {
         NSLog("\(#function) started with totalVolume: \(totalVolume)")
         
         // trace path of fluid (these get returned for animation purposes)
@@ -965,6 +962,7 @@ class GameModel : Codable {
         while remainingVolume > 0 && queue.size > 0 {
             // get lowest pixel from queue
             guard let lowest = queue.dequeue() else { remainingVolume = 0; continue }
+            var lowestElevation = lowest.key
 
             // enqueue neighboring pixels
             for j in -1...1 {
@@ -991,16 +989,16 @@ class GameModel : Codable {
             }
             
             // if one is lower than current, replace queue with it
-            fullPath.append(Vector3(Float(lowest.value.x), Float(lowest.value.y), lowest.key))
-            if lowest.key < previousElevation {
+            fullPath.append(Vector3(Float(lowest.value.x), Float(lowest.value.y), lowestElevation))
+            if lowestElevation < previousElevation {
                 //NSLog("\(#function): moved down to \(lowest.key) at \(lowest.value.x),\(lowest.value.y)")
                 // if puddle set is non-empty, update surface accordingly
                 if andStyle == .mud {
                     // leave mud trail
-                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowest.key + 1)
+                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowestElevation + 1)
                     setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 1)
                 } else if andStyle == .napalm {
-                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowest.key - 1)
+                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowestElevation - 1)
                     //setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 2) // scorched color
                 }
                 remainingVolume -= 1
@@ -1012,7 +1010,13 @@ class GameModel : Codable {
                 // its neighbors were added to queue already
                 
                 // compute volume used in level rise
-                let volumeAdded = currentArea * (lowest.key - previousElevation)
+                let volumeAdded = currentArea * (lowestElevation - previousElevation)
+                if volumeAdded > remainingVolume {
+                    // no enough liquid to reach next point
+                    // adjust lowestElevation to the real final value
+                    lowestElevation = previousElevation + remainingVolume / currentArea
+                    fullPath.removeLast()
+                }
                 
                 // update volume left
                 remainingVolume -= volumeAdded
@@ -1021,22 +1025,23 @@ class GameModel : Codable {
                 currentArea += 1
             }
 
-            previousElevation = lowest.key
+            previousElevation = lowestElevation
 
             //NSLog("\(#function): remaining volume now \(remainingVolume), previousElevation: \(previousElevation)")
+        }
+        if queue.size == 0 {
+            // entire queue exhausted, so entire board must be burrieds
+            previousElevation += remainingVolume / currentArea
         }
         NSLog("\(#function): path length: \(fullPath.count)")
         
         // go through path backwards to find the level that each point will fill to updating actual surface
-        var filledPath = fullPath
-        NSLog("\(#function): filled path length: \(filledPath.count), previousElevation=\(previousElevation)")
         var maxLevel = previousElevation
-        for i in 1...filledPath.count {
-            let pos = filledPath.count - i
-            let currPos = filledPath[pos]
+        for i in 1...fullPath.count {
+            let pos = fullPath.count - i
+            let currPos = fullPath[pos]
             maxLevel = max(maxLevel,currPos.z)
 
-            filledPath[pos].z = maxLevel
             if andStyle == .mud {
                 setElevation(longitude: Int(currPos.x), latitude: Int(currPos.y), to: maxLevel)
                 setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 1)
@@ -1044,38 +1049,12 @@ class GameModel : Codable {
                 //setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 2)
             }
         }
-        // fillPath should now be monotonically decreasing in z
 
-        // extract puddle sets from filledPath
-        var puddleSets: [[MapCoordinate:Bool]] = []
-        var puddleSet: [MapCoordinate:Bool] = [:]
-        var path: [Vector3] = []
-        for i in 0..<fullPath.count {
-            if fullPath[i].z == filledPath[i].z {
-                // not in a puddle set
-                if puddleSet.count > 0 {
-                    NSLog("Adding puddle set with \(puddleSet.count) points")
-                    puddleSets.append(puddleSet)
-                    puddleSet = [:]
-                }
-                path.append(fullPath[i])
-            } else {
-                let coord = MapCoordinate(x: Int(fullPath[i].x), y: Int(fullPath[i].y))
-                puddleSet[coord] = true
-            }
-        }
-        if puddleSet.count > 0 {
-            NSLog("Adding puddle set with \(puddleSet.count) points")
-            puddleSets.append(puddleSet)
-            puddleSet = [:]
-        }
-
-        NSLog("filled path has length \(filledPath.count)")
-        NSLog("path has length \(fullPath.count), \(puddleSets.count) puddles sets")
+        NSLog("path has length \(fullPath.count)")
 
         NSLog("\(#function) finished")
         
-        return (path, puddleSets)
+        return fullPath
     }
 
     func distance(from: Vector3, to: Vector3) -> Float {

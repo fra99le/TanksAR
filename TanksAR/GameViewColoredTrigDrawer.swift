@@ -37,6 +37,7 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
         }
         
         newBottomSurface.removeFromParentNode()
+        fluidNode.removeFromParentNode()
         
         NSLog("\(#function) finished")
     }

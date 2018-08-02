@@ -116,7 +116,6 @@ class TestGameModel : GameModel {
                                             bottom: detinationResult.bottomBuf,
                                             final: final,
                                             fluidPath: detinationResult.fluidPath,
-                                            fluidPuddles: detinationResult.fluidPuddles,
                                             oldColor: oldColor,
                                             topColor: detinationResult.topColor,
                                             bottomColor: detinationResult.bottomColor,
@@ -256,7 +255,7 @@ class TestGameModel : GameModel {
         
         return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
                                 topColor: topColor, bottomColor: bottomColor,
-                                fluidPath: [], fluidPuddles: [])
+                                fluidPath: [])
     }
     
 }

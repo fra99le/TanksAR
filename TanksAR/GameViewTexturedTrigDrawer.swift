@@ -102,6 +102,7 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         }
         newBottomSurface.isHidden = true
         newBottomSurface.removeFromParentNode()
+        fluidNode.removeFromParentNode()
         
         // make tanks look 'metalic'
         //This code breaks the highligting of the active player
