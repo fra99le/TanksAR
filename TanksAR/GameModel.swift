@@ -57,8 +57,17 @@ func vectorScale(_ v1: Vector3, by: Float) -> Vector3 {
     return Vector3(v1.x*by, v1.y*by, v1.z*by)
 }
 
-func vectorNormalize(_ v: Vector3) -> Vector3 {
+func vectorLength(_ v: Vector3) -> Float {
     let length = sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
+    return length
+}
+
+func vectorNormalize(_ v: Vector3) -> Vector3 {
+    let length = vectorLength(v)
+    if length == 0 {
+        return Vector3()
+    }
+    
     return vectorScale(v, by: 1/length)
 }
 
