@@ -268,15 +268,15 @@ class GameViewDrawer {
     
     // helper methods
     func toModelSpace(_ position: SCNVector3) -> Vector3 {
-        return Vector3(position.x + Float(gameModel.board.boardSize/2),
-                       position.z + Float(gameModel.board.boardSize/2),
+        return Vector3(position.x + Float(gameModel.board.boardSize)/2,
+                       position.z + Float(gameModel.board.boardSize)/2,
                        position.y)
     }
     
     func fromModelSpace(_ position: Vector3) -> SCNVector3 {
-        return SCNVector3(x: position.x - Float(gameModel.board.boardSize/2),
+        return SCNVector3(x: position.x - Float(gameModel.board.boardSize)/2,
                           y: position.z,
-                          z: position.y - Float(gameModel.board.boardSize/2))
+                          z: position.y - Float(gameModel.board.boardSize)/2)
     }
     
     func toModelScale(_ vector: SCNVector3) -> Vector3 {
