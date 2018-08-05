@@ -29,6 +29,7 @@ class GameViewDrawer {
     let dropTime: Double = 1.5
     //let dropTime: Double = 10 // for debugging purposes
     let roundResultTime: Double = 10
+    var edgeSize: CGFloat { return CGFloat(Float(gameModel.board.boardSize-1) / Float(numPerSide)) }
 
     init(sceneView: ARSCNView, model: GameModel, node: SCNNode, numPerSide: Int, tankScale: Float) {
         gameModel = model

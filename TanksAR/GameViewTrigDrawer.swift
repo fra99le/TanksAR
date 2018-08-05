@@ -44,7 +44,6 @@ class GameViewTrigDrawer : GameViewDrawer {
     }
     
     func surfaceNode(forSurface: ImageBuf, useNormals: Bool = false, withColors: ImageBuf?, colors: [Any] = [UIColor.green]) -> SCNNode {
-        let edgeSize = CGFloat(Float(gameModel.board.boardSize) / Float(numPerSide))
         
         // draw board surface
         var vertices: [SCNVector3] = []
@@ -60,7 +59,10 @@ class GameViewTrigDrawer : GameViewDrawer {
                 let z = CGFloat(gameModel.getElevation(fromMap: forSurface, longitude: Int(x), latitude: Int(y)))
                 let n = gameModel.getNormal(fromMap: forSurface, longitude: Int(x), latitude: Int(y))
                 
-                let viewCoordinates = fromModelSpace(Vector3(x,y,z))
+                let modelCoordinates = Vector3(x,y,z)
+                let viewCoordinates = fromModelSpace(modelCoordinates)
+                //NSLog("\(i),\(j) -> model coordinates \(modelCoordinates) -> view coordinates \(viewCoordinates)")
+                
                 vertices.append(viewCoordinates)
                 texCoords.append(toMapSpace(x: x, y: y))
                 normals.append(fromModelScale(n))
@@ -126,7 +128,6 @@ class GameViewTrigDrawer : GameViewDrawer {
     
     func edgeGeometry(forSurface: ImageBuf) -> SCNGeometry {
         // draw board edges and base
-        let edgeSize = CGFloat(Float(gameModel.board.boardSize) / Float(numPerSide))
         var edgeVerts: [SCNVector3] = []
         var edgeIndices: [CInt] = []
         var pos: CInt = 0
@@ -332,7 +333,6 @@ class GameViewTrigDrawer : GameViewDrawer {
     
     func animateDropSurface(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval) -> CFTimeInterval {
         var currTime = time
-        let edgeSize = CGFloat(Float(gameModel.board.boardSize) / Float(numPerSide))
         
         // for debugging purposes only!
         //        let dropCases = [[3,0,0],

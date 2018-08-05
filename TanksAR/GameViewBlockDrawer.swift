@@ -22,7 +22,6 @@ class GameViewBlockDrawer : GameViewDrawer {
         
         // keep references to each block
         boardBlocks = Array(repeating: Array(repeating: SCNNode(), count: numPerSide), count: numPerSide)
-        let edgeSize = CGFloat(Float(gameModel.board.boardSize) / Float(numPerSide))
         
         for i in 0..<numPerSide {
             for j in 0..<numPerSide {
@@ -56,8 +55,6 @@ class GameViewBlockDrawer : GameViewDrawer {
     
     override func updateBoard() {
         //NSLog("\(#function) started")
-        let edgeSize = CGFloat(Float(gameModel.board.boardSize) / Float(numPerSide))
-        
         if boardBlocks.count == 0 {
             addBoard()
         }
