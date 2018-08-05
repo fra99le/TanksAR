@@ -162,6 +162,7 @@ struct DetonationResult {
     var topColor: ImageBuf
     var bottomColor: ImageBuf
     var fluidPath: [Vector3]
+    var fluidRemaining: [Float]
 }
 
 struct FireResult {
@@ -179,6 +180,7 @@ struct FireResult {
     var bottom: ImageBuf
     var final: ImageBuf
     var fluidPath: [Vector3]
+    var fluidRemaining: [Float]
 
     // data needed color updates properly
     var oldColor: ImageBuf
@@ -422,17 +424,11 @@ class GameModel : Codable {
         return getColor(forMap: board.colors, longitude: longitude, latitude: latitude)
     }
     
-    func getColor(forMap: ImageBuf, longitude: Int, latitude: Int) -> UIColor {
+    func getColor(forMap: ImageBuf, longitude: Int, latitude: Int,
+                  with colors: [UIColor] = [UIColor.green, UIColor.brown, UIColor.gray, UIColor.red]) -> UIColor {
         let index = getColorIndex(forMap: forMap, longitude: longitude, latitude: latitude)
         
-        if index == 0 {
-            return UIColor.green
-        } else if index == 1 {
-            return UIColor.brown
-        } else {
-            // invalid value
-            return UIColor.red
-        }
+        return colors[index % colors.count]
     }
     
     func setColorIndex(longitude: Int, latitude: Int, to: Int) {
@@ -448,24 +444,35 @@ class GameModel : Codable {
         forMap.setPixel(x: longitude, y: latitude, value: CGFloat(to))
     }
 
-    func colorMap() -> UIImage {
-        return colorMap(forMap: board.colors)
+    func colorMap(with colors: [UIColor] = [UIColor.green, UIColor.brown, UIColor.gray, UIColor.red]) -> UIImage {
+        return colorMap(forMap: board.colors, with: colors)
     }
     
-    func colorMap(forMap: ImageBuf) -> UIImage {
+    func colorMap(forMap: ImageBuf, with colors: [UIColor] = [UIColor.green, UIColor.brown, UIColor.gray, UIColor.red]) -> UIImage {
         NSLog("\(#function) started")
         let startTime : CFAbsoluteTime = CFAbsoluteTimeGetCurrent();
         
         let bitsPerComponent:Int = 8
         let bitsPerPixel:Int = 32
-        let colors = [UIColor.green, UIColor.brown]
 
         var pixelColors: [PixelData] = []
+        let colors = [UIColor.green, UIColor.brown, UIColor.gray, UIColor.red]
         for color in colors {
-            let pixelColor = PixelData(a: UInt8(color.cgColor.components![3] * 255),
-                                       r: UInt8(color.cgColor.components![0] * 255),
-                                       g: UInt8(color.cgColor.components![1] * 255),
-                                       b: UInt8(color.cgColor.components![2] * 255))
+            guard let colorComponents = color.cgColor.components else { continue }
+            var pixelColor: PixelData!
+            if colorComponents.count == 4 {
+                pixelColor = PixelData(a: UInt8(colorComponents[3] * 255),
+                                       r: UInt8(colorComponents[0] * 255),
+                                       g: UInt8(colorComponents[1] * 255),
+                                       b: UInt8(colorComponents[2] * 255))
+            } else if colorComponents.count == 2 {
+                pixelColor = PixelData(a: UInt8(colorComponents[1] * 255),
+                                       r: UInt8(colorComponents[0] * 255),
+                                       g: UInt8(colorComponents[0] * 255),
+                                       b: UInt8(colorComponents[0] * 255))
+            } else {
+                NSLog("Unhandled case, colorComponents has \(colorComponents.count) elements. \(colorComponents)")
+            }
             pixelColors.append(pixelColor)
         }
         
@@ -478,7 +485,7 @@ class GameModel : Codable {
         //NSLog("copying data into pixelArray")
         for i in 0 ..< forMap.pixels.count {
             let colorIdx = Int(forMap.pixels[i])
-            pixelArray[i] = pixelColors[colorIdx]
+            pixelArray[i] = pixelColors[colorIdx % pixelColors.count]
         }
         //NSLog("finished copying data to pixelArray")
         
@@ -689,7 +696,9 @@ class GameModel : Codable {
         let oldColor = ImageBuf(board.colors)
         let detinationResult = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
         if weapon.style == .explosive {
-            damageCheck(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
+            damageCheckForExplosion(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
+        } else if weapon.style == .napalm {
+            damageCheckForFluid(at: impactPosition, fromWeapon: weapon, with: detinationResult.fluidPath)
         }
         let final = ImageBuf(board.surface)
         let finalColor = ImageBuf(board.colors)
@@ -721,6 +730,7 @@ class GameModel : Codable {
                                             bottom: detinationResult.bottomBuf,
                                             final: final,
                                             fluidPath: detinationResult.fluidPath,
+                                            fluidRemaining: detinationResult.fluidRemaining,
                                             oldColor: oldColor,
                                             topColor: detinationResult.topColor,
                                             bottomColor: detinationResult.bottomColor,
@@ -841,6 +851,7 @@ class GameModel : Codable {
         let topColor = ImageBuf()
         let bottomColor = ImageBuf()
         var fluidPath: [Vector3] = []
+        var fluidRemaining: [Float] = []
         
         NSLog("starting image buffer copies")
         topBuf.copy(board.surface)
@@ -936,7 +947,9 @@ class GameModel : Codable {
             }
         } else if style == .napalm || style == .mud {
             let volume = pow(withRadius,2)
-            fluidPath = fluidFill(startX: at.x, startY: at.y, totalVolume: volume, andStyle: style)
+            let (path, remaining) = fluidFill(startX: at.x, startY: at.y, totalVolume: volume, andStyle: style)
+            fluidPath = path
+            fluidRemaining = remaining
         } else {
             NSLog("\(#function) doesn't handle \(andStyle) style.")
         }
@@ -945,14 +958,16 @@ class GameModel : Codable {
 
         return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
                                 topColor: topColor, bottomColor: bottomColor,
-                                fluidPath: fluidPath)
+                                fluidPath: fluidPath,
+                                fluidRemaining: fluidRemaining)
     }
     
-    func fluidFill(startX: Float, startY: Float, totalVolume: Float, andStyle: WeaponStyle = WeaponStyle.napalm) -> [Vector3] {
+    func fluidFill(startX: Float, startY: Float, totalVolume: Float, andStyle: WeaponStyle = WeaponStyle.napalm) -> ([Vector3], [Float]) {
         NSLog("\(#function) started with totalVolume: \(totalVolume)")
         
         // trace path of fluid (these get returned for animation purposes)
         var fullPath: [Vector3] = []
+        var remaining: [Float] = []
         
         // track state needed
         var remainingVolume = totalVolume
@@ -997,22 +1012,24 @@ class GameModel : Codable {
                 }
             }
             
-            // if one is lower than current, replace queue with it
+            // record newest low point
             fullPath.append(Vector3(Float(lowest.value.x), Float(lowest.value.y), lowestElevation))
+            remaining.append(remainingVolume)
+            
             if lowestElevation < previousElevation {
                 //NSLog("\(#function): moved down to \(lowest.key) at \(lowest.value.x),\(lowest.value.y)")
                 // if puddle set is non-empty, update surface accordingly
                 if andStyle == .mud {
                     // leave mud trail
                     setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowestElevation + 1)
-                    setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 1)
+                    setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 1) // dirt color
                 } else if andStyle == .napalm {
                     setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowestElevation - 1)
-                    //setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 2) // scorched color
+                    setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 2) // scorched color
                 }
                 remainingVolume -= 1
                 currentArea = 0
-            } else  {
+            } else {
                 //NSLog("\(#function): filled up to \(lowest.key) at \(lowest.value.x),\(lowest.value.y)")
                 // new value is higher, so level is rising
                 // increase level to lowest edge pixel
@@ -1054,8 +1071,10 @@ class GameModel : Codable {
             if andStyle == .mud {
                 setElevation(longitude: Int(currPos.x), latitude: Int(currPos.y), to: maxLevel)
                 setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 1)
+            } else if andStyle == .napalm {
+                setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 2)
             } else {
-                //setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 2)
+                NSLog("\(#function): Unknown style encountered! \(andStyle)")
             }
         }
 
@@ -1063,7 +1082,7 @@ class GameModel : Codable {
 
         NSLog("\(#function) finished")
         
-        return fullPath
+        return (fullPath, remaining)
     }
 
     func distance(from: Vector3, to: Vector3) -> Float {
@@ -1074,7 +1093,7 @@ class GameModel : Codable {
         return sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff)
     }
     
-    func damageCheck(at: Vector3, fromWeapon: Weapon, withSize: Int) {
+    func damageCheckForExplosion(at: Vector3, fromWeapon: Weapon, withSize: Int) {
         NSLog("\(#function) started")
 
         var totalKills = 0
@@ -1101,35 +1120,9 @@ class GameModel : Codable {
                                  (weaponSize * weaponSize) / (effectiveDist * effectiveDist))
                 NSLog("\t\tdamage: \(damage)")
                 board.players[i].hitPoints = max(0, board.players[i].hitPoints -  damage)
-                
-                if board.currentPlayer != i {
-                    board.players[board.currentPlayer].stats.kills += 1
-                    board.players[board.currentPlayer].score += Int64(damage)
-                    if board.players[i].hitPoints <= 0 {
-                        totalKills += 1
-                        board.players[board.currentPlayer].score += 1000
-                    }
-                    NSLog("\tplayer \(board.currentPlayer) score now \(board.players[board.currentPlayer].score)")
-
-                    // update max points stat
-                    board.players[board.currentPlayer].stats.maxPoints = max(board.players[board.currentPlayer].stats.maxPoints,
-                        board.players[board.currentPlayer].score)
-                } else {
-                    // player killed themself, distribute points across other players
-                    board.players[board.currentPlayer].stats.suicides += 1
-                    var playersLeft: Float = 0
-                    for player in board.players {
-                        if player.hitPoints > 0 {
-                            playersLeft += 1
-                        }
-                    }
-                    
-                    let pointsPer = damage / playersLeft
-                    for i in 0..<board.players.count {
-                        if board.players[i].hitPoints > 0 {
-                            board.players[i].score += Int64(pointsPer)
-                        }
-                    }
+                if board.players[i].hitPoints <= 0 {
+                    applyKill(board.currentPlayer, killed: i, did: damage)
+                    totalKills += 1
                 }
             }
         }
@@ -1138,6 +1131,71 @@ class GameModel : Codable {
         NSLog("\(#function) finished")
     }
 
+    func damageCheckForFluid(at: Vector3, fromWeapon: Weapon, with path: [Vector3]) {
+        NSLog("\(#function) started")
+
+        // build map (dictionary) from path
+        var puddleSet: [MapCoordinate:Float] = [:]
+        for point in path {
+            let coord = MapCoordinate(x: Int(point.x), y: Int(point.y))
+            puddleSet[coord] = point.z
+        }
+
+        var totalKills = 0
+        for i in 0..<board.players.count {
+            let tank = board.players[i].tank
+            let tankPos = tank.position
+            
+            let tankCoord = MapCoordinate(x: Int(tankPos.x), y: Int(tankPos.y))
+            if let _ = puddleSet[tankCoord] {
+                NSLog("\t\tPlayer \(board.currentPlayer) hit player \(i)")
+
+                let damage = board.players[i].hitPoints
+                NSLog("\t\tdamage: \(damage)")
+
+                board.players[i].hitPoints = 0
+                applyKill(board.currentPlayer, killed: i, did: damage)
+                totalKills += 1
+            }
+        }
+        board.players[board.currentPlayer].stats.maxKillsPerShot = max(totalKills, board.players[board.currentPlayer].stats.maxKillsPerShot)
+
+        NSLog("\(#function) finished")
+    }
+    
+    func applyKill(_ player: Int, killed: Int, did damage: Float) {
+        let i = killed
+
+        if board.currentPlayer != i {
+            board.players[board.currentPlayer].stats.kills += 1
+            board.players[board.currentPlayer].score += Int64(damage)
+            if board.players[i].hitPoints <= 0 {
+                board.players[board.currentPlayer].score += 1000
+            }
+            NSLog("\tplayer \(board.currentPlayer) score now \(board.players[board.currentPlayer].score)")
+            
+            // update max points stat
+            board.players[board.currentPlayer].stats.maxPoints = max(board.players[board.currentPlayer].stats.maxPoints,
+                                                                     board.players[board.currentPlayer].score)
+        } else {
+            // player killed themself, distribute points across other players
+            board.players[board.currentPlayer].stats.suicides += 1
+            var playersLeft: Float = 0
+            for player in board.players {
+                if player.hitPoints > 0 {
+                    playersLeft += 1
+                }
+            }
+            
+            let pointsPer = damage / playersLeft
+            for i in 0..<board.players.count {
+                if board.players[i].hitPoints > 0 {
+                    board.players[i].score += Int64(pointsPer)
+                }
+            }
+        }
+    }
+    
     func skipRound() {
         NSLog("\(#function): skipping to end of round")
         

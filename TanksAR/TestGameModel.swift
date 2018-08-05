@@ -116,6 +116,7 @@ class TestGameModel : GameModel {
                                             bottom: detinationResult.bottomBuf,
                                             final: final,
                                             fluidPath: detinationResult.fluidPath,
+                                            fluidRemaining: detinationResult.fluidRemaining,
                                             oldColor: oldColor,
                                             topColor: detinationResult.topColor,
                                             bottomColor: detinationResult.bottomColor,
@@ -249,13 +250,12 @@ class TestGameModel : GameModel {
             }
             
         }
-
         
         NSLog("\(#function) finished")
         
         return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
                                 topColor: topColor, bottomColor: bottomColor,
-                                fluidPath: [])
+                                fluidPath: [], fluidRemaining: [])
     }
     
 }

@@ -812,16 +812,20 @@ class GameViewTrigDrawer : GameViewDrawer {
     
     func animateFluidFill(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval) -> CFTimeInterval {
         var currTime = time
-        let edgeSize = CGFloat(gameModel.board.boardSize / numPerSide)
-
-        NSLog("\(#function) fluid path has length \(fireResult.fluidPath.count).")
+        let fillRate: Float = 1000
+        
+        // Defnitions:
+        // puddle: region between a local maximum and the previous point with the same elevation.
+        // drain path: region between a local maximum and the next local minimum.
+        
+        //NSLog("\(#function) fluid path has length \(fireResult.fluidPath.count), and initial volume of \(fireResult.fluidRemaining[0]).")
         
         var puddles: [PuddleInfo] = []
         let minPuddleSize = Int(pow(edgeSize,2))
         //let minPuddleSize = -1
-        
-        // A stack or two could be useful to minimize some of the searching when building puddle sets
-        
+        let minPuddleHeight: Float = 5
+        //let minPuddleHeight: Float = -1
+
         // find puddle sets and drain paths (in model space)
         let path = fireResult.fluidPath
         var previousElevation = path[0].z
@@ -829,53 +833,44 @@ class GameViewTrigDrawer : GameViewDrawer {
         for i in 0..<path.count {
             let elevation = path[i].z
             
+            if elevation == previousElevation {
+                // skip large flat regions when animating drain paths
+                // if they're important puddle filling animation will cover them
+                continue
+            }
+            
             if elevation < previousElevation {
                 // draining
                 if wasFilling {
                     wasFilling = false
 
+                    // create new puddle
+                    var puddleInfo = PuddleInfo(start: i, end: i-1, minPos: i,
+                                                minZ: elevation, maxZ: previousElevation)
+
                     // scan back to previous point with same elevation
-                    var beginPuddle = i
-                    var minZ = elevation
-                    var minPos: Int = i
                     var searchStartPos = i - 1
                     if let lastPuddle = puddles.last,
                         previousElevation > lastPuddle.maxZ {
-                        // just expanding on puddle
-                        // jump to last start high point found
+                        // expanding on puddle
+                        // jump to previous puddle's entry point
                         searchStartPos = lastPuddle.start + 1
-                        minPos = lastPuddle.minPos
+                        puddleInfo.minPos = lastPuddle.minPos
+                        puddleInfo.minZ = lastPuddle.minZ
                     }
                     var pos = searchStartPos - 1
                     while pos >= 0 && path[pos].z <= previousElevation {
                         //NSLog("searching for elevation \(previousElevation), path[\(pos)].z = \(path[pos].z)")
-                        if path[pos].z < minZ {
-                            minZ = path[pos].z
-                            minPos = pos
+                        if path[pos].z < puddleInfo.minZ {
+                            puddleInfo.minZ = path[pos].z
+                            puddleInfo.minPos = pos
                         }
                         
                         pos -= 1
                     }
-                    beginPuddle = pos+1
+                    puddleInfo.start = pos+1
 
-                    // check to see if we're just adding to the current puddle
-                    var puddleInfo = PuddleInfo(start: beginPuddle, end: i, minPos: minPos, minZ: minZ, maxZ: elevation)
-//                    if let lastPuddle = puddles.last,
-//                        lastPuddle.minPos == minPos {
-//                        //NSLog("expanding previous puddle, minPos=\(minPos), now \(puddleInfo.start) to \(puddleInfo.end).")
-//                        puddleInfo = puddles.removeLast()
-//                    }
-                    
-                    // set ends of puddle
-                    puddleInfo.start = beginPuddle
-                    puddleInfo.minPos = minPos
-                    puddleInfo.minZ = minZ
-                    puddleInfo.end = i
-
-                    if puddleInfo.end - puddleInfo.start >  minPuddleSize
-                        && puddleInfo.maxZ - puddleInfo.minZ > 5 {
-                        puddles.append(puddleInfo)
-                    }
+                    puddles.append(puddleInfo)
                 }
             } else {
                 // filling
@@ -891,40 +886,69 @@ class GameViewTrigDrawer : GameViewDrawer {
         if fireResult.weaponStyle == .mud {
             color = UIColor.brown
         } else if fireResult.weaponStyle == .napalm {
-            color = UIColor.orange
-        } else {
             color = UIColor.red
+        } else {
+            color = UIColor.black
         }
         
         // for debugging purposes
 //        color = UIColor.magenta
         
         var previousEnd = 0
-        var previousMax: Float = -1
-        var previousBottom = 0
+        var bottomFilledTo: [Int:Float] = [:]
+
         fluidNode = SCNNode()
         board.addChildNode(fluidNode)
-        for puddle in puddles {
+        var puddleSet: [MapCoordinate:Float] = [:]
+        for i in 0..<puddles.count {
+            NSLog("animating puddle \(i+1) of \(puddles.count)")
+            let puddle  = puddles[i]
+
+            // skip super small puddles
+            let puddleSize = puddle.end - puddle.start
+            let puddleHeight = puddle.maxZ - puddle.minZ
+            if  puddleSize <  minPuddleSize
+                || puddleHeight < minPuddleHeight {
+                NSLog("skipping small puddle")
+                continue
+            }
+
+            // check for redundant puddles
+            if i+1 < puddles.count {
+                let nextPuddle = puddles[i+1]
+                if nextPuddle.start <= puddle.start &&
+                    nextPuddle.end >= puddle.end {
+                    // next puddle covers this one
+                    NSLog("skipping redundant puddle (next puddle covers it)")
+                    continue
+                }
+            }
+
             //NSLog("puddle from \(puddle.start) to \(puddle.end) has area of \(puddle.end - puddle.start), minPos = \(puddle.minPos).")
-            let puddleStart = puddle.start
+            //let puddleStart = puddle.start
             let puddleEnd = puddle.end
             let puddleBottom = puddle.minPos
             let drainStart = previousEnd
 
-            // animate path from previous puddle's end to current puddle's minPos
-            if path[drainStart].z > path[puddleBottom].z {
-                //NSLog("\tanimate path from positions \(drainStart) to \(puddleBottom).")
+            // animate path from previous puddle's end to current puddle's minPos,
+            // but only if the previous puddle doesn't share a bottom point (i.e. it is a different puddle)
+            if drainStart < puddleBottom &&
+                path[drainStart].z > path[puddleBottom].z {
+                NSLog("\tanimating path from position \(drainStart) to \(puddleBottom).")
                 let pathStep = Int(edgeSize)
                 var lastPos = drainStart
                 var pathPos = drainStart + pathStep
+                let pipeStartTime = currTime
+                var previousPipeEnd = path[lastPos]
                 while pathPos <= puddleBottom {
-                    let pipeStart = path[lastPos]
+                    let pipeStart = previousPipeEnd
                     let pipeEnd = path[pathPos]
                     if pipeEnd.z < pipeStart.z {
                         let pipeLength = vectorLength(vectorDiff(pipeEnd, pipeStart))
-                        NSLog("\tadding pipe from \(pipeStart) to \(pipeEnd) length \(pipeLength)")
+                        //NSLog("\tadding pipe from \(pipeStart) to \(pipeEnd) length \(pipeLength)")
                         // Note: use excessive length to log additional data about the situation
                         if pipeLength > Float(10*pathStep) {
+                            NSLog("\twhile adding pipe from \(pipeStart) to \(pipeEnd) length \(pipeLength)")
                             NSLog("\t\ta long pipe detected")
                             NSLog("\t\tpipe from position \(lastPos) to \(pathPos)")
                             NSLog("\t\talong path from positions \(drainStart) to \(puddleBottom).")
@@ -945,19 +969,23 @@ class GameViewTrigDrawer : GameViewDrawer {
                         appearNode.runAction(appearAction)
 
                         lastPos = pathPos
-                        currTime += 0.1 //Note: need to base this on fluid use rates
+                        
+                        // compute fluid use
+                        let fluidUsed = fireResult.fluidRemaining[drainStart] - fireResult.fluidRemaining[pathPos]
+                        currTime = pipeStartTime + Double(fluidUsed / fillRate)
                     }
                     
                     pathPos += pathStep
+                    previousPipeEnd = pipeEnd
                 }
             }
             
             // animate puddle rising
-            //NSLog("\tanimate puddle with area \(puddle.end - puddle.start) rising from \(puddle.minZ) to \(puddle.maxZ).")
+            let puddleVolume = fireResult.fluidRemaining[puddle.minPos] - fireResult.fluidRemaining[puddle.end]
+            //NSLog("\tanimating puddle with volume \(puddleVolume) rising from \(puddle.minZ) to \(puddle.maxZ).")
             // build quick lookup set
             // need to build dictionary for faster checking for inclusion in puddle
-            var puddleSet: [MapCoordinate:Float] = [:]
-            for i in puddleStart...puddleEnd {
+            for i in previousEnd...puddleEnd {
                 let point = path[i]
                 let coord = MapCoordinate(x: Int(point.x), y: Int(point.y))
                 puddleSet[coord] = point.z
@@ -989,6 +1017,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                                                   y: Int(y + CGFloat(ij[1])*edgeSize))
                         if let _ = puddleSet[coord] {
                             includeTrig = true
+                            break
                         }
                     }
                     
@@ -1021,25 +1050,71 @@ class GameViewTrigDrawer : GameViewDrawer {
             let puddleNode = SCNNode(geometry: geometry)
             puddleNode.isHidden = true
             
-            var minZ = puddle.minZ
-            if previousBottom > puddleBottom {
-                minZ = previousMax
+            // determine start elevation/position and fill time
+            //var origFillVolume = (fireResult.fluidRemaining[puddleBottom] - fireResult.fluidRemaining[puddleEnd])
+            var risePos = puddle.minPos
+            if let _ = bottomFilledTo[puddle.minPos] {
+                risePos = previousEnd
+                //origFillVolume = (fireResult.fluidRemaining[previousEnd] - fireResult.fluidRemaining[puddleEnd])
             }
+            bottomFilledTo[puddle.minPos] = puddle.maxZ
+            let minZ = path[risePos].z
+            
+            
+            // add a bunch of move(to:duration:) actions for non-linear rise
+            var previousRisePos = risePos
+            let minRise = max(fillRate / 60, 1)
             puddleNode.position = SCNVector3(0,minZ,0)
-            let fillTime = 1
-            let fillAction = SCNAction.sequence([.wait(duration: currTime),
-                                                 .unhide(),
-                                                 .move(to: SCNVector3(0,puddle.maxZ,0), duration: TimeInterval(fillTime))])
+            var fillActions: [SCNAction] = []
+            //fillActions.reserveCapacity(Int((puddle.maxZ - minZ) / minRise)+10)
+            fillActions.append(contentsOf: [.wait(duration: currTime),
+                                            .unhide()])
+            while risePos <= puddle.end {
+                if previousRisePos < risePos {
+                    let fillVolume = fireResult.fluidRemaining[previousRisePos] - fireResult.fluidRemaining[risePos]
+                    let fillTime = Double(fillVolume / fillRate)
+                    let nextZ = path[risePos].z
+                    fillActions.append(contentsOf: [.move(to: SCNVector3(0,nextZ,0), duration: TimeInterval(fillTime))])
+                    //NSLog("\tfill volume: \(fillVolume), fill time: \(fillTime)")
+                    currTime += fillTime
+                }
+                
+                previousRisePos = risePos
+                while fireResult.fluidRemaining[previousRisePos] - fireResult.fluidRemaining[risePos] < minRise {
+                    risePos += 1
+                    if risePos >= puddle.end {
+                        break
+                    }
+                }
+            }
+            if previousRisePos < risePos {
+                let fillVolume = fireResult.fluidRemaining[previousRisePos] - fireResult.fluidRemaining[risePos]
+                let fillTime = Double(fillVolume / fillRate)
+                fillActions.append(contentsOf: [.move(to: SCNVector3(0,puddle.maxZ,0), duration: TimeInterval(fillTime))])
+                //NSLog("\tfinal fill volume: \(fillVolume), fill time: \(fillTime)")
+                currTime += fillTime
+            }
+            //NSLog("\tfill volume: \(origFillVolume), fill time: \(fillTime)")
+            //NSLog("finished series of filling moves, \(fillActions.count) actions.")
+            
+            if i+1 < puddles.count {
+                let nextPuddle = puddles[i+1]
+                if puddle.minPos == nextPuddle.minPos {
+                    // next puddle will superseed this one, so hide it, and remove it
+                    let hideActions: [SCNAction] = [.hide(),
+                                                    .removeFromParentNode()]
+                    fillActions.append(contentsOf: hideActions)
+                }
+            }
+            let fillAction = SCNAction.sequence(fillActions)
             puddleNode.runAction(fillAction)
             fluidNode.addChildNode(puddleNode)
-            currTime += Double(fillTime)
+            
             
             // update per puddle info
             previousEnd = puddleEnd
-            previousMax = puddle.maxZ
-            previousBottom = puddleBottom
         }
-        NSLog("fluid filling finished at time \(currTime)")
+        NSLog("fluid filling finished at time \(currTime), \(currTime - time)s to drain volume of \(fireResult.fluidRemaining.first!)")
         
         return currTime
     }
