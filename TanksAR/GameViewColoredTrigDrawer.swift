@@ -11,7 +11,7 @@ import SceneKit
 
 class GameViewColoredTrigDrawer : GameViewTrigDrawer {
     
-    let colors = [UIColor.green, UIColor.brown]
+    let colors = [UIColor.green, UIColor.brown, UIColor.gray]
     
     override func updateBoard() {
         NSLog("\(#function) started")
