@@ -981,7 +981,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             }
             
             // animate puddle rising
-            let puddleVolume = fireResult.fluidRemaining[puddle.minPos] - fireResult.fluidRemaining[puddle.end]
+            //let puddleVolume = fireResult.fluidRemaining[puddle.minPos] - fireResult.fluidRemaining[puddle.end]
             //NSLog("\tanimating puddle with volume \(puddleVolume) rising from \(puddle.minZ) to \(puddle.maxZ).")
             // build quick lookup set
             // need to build dictionary for faster checking for inclusion in puddle
