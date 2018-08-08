@@ -962,7 +962,7 @@ class GameModel : Codable {
                 }
             }
         } else if style == .napalm || style == .mud {
-            let volume = pow(withRadius,2)
+            let volume = 4.0/3.0 * Double.pi * pow(Double(withRadius),3)
             let (path, remaining) = fluidFill(startX: at.x, startY: at.y, totalVolume: volume, andStyle: style)
             fluidPath = path
             fluidRemaining = remaining
