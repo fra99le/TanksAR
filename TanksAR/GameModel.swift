@@ -12,6 +12,22 @@ import Foundation
 import UIKit
 import SceneKit
 
+struct OrderedElevation : Comparable {
+    var elevation: Float
+    var order: Int
+    
+    static func < (lhs: OrderedElevation, rhs: OrderedElevation) -> Bool {
+        if lhs.elevation == rhs.elevation {
+            return lhs.order < rhs.order
+        }
+        return lhs.elevation < rhs.elevation
+    }
+    
+    static func == (lhs: OrderedElevation, rhs: OrderedElevation) -> Bool {
+        return lhs.elevation == rhs.elevation && lhs.order == rhs.order
+    }
+}
+
 struct MapCoordinate : Hashable {
     var x: Int
     var y: Int
@@ -962,7 +978,7 @@ class GameModel : Codable {
                                 fluidRemaining: fluidRemaining)
     }
     
-    func fluidFill(startX: Float, startY: Float, totalVolume: Float, andStyle: WeaponStyle = WeaponStyle.napalm) -> ([Vector3], [Float]) {
+    func fluidFill(startX: Float, startY: Float, totalVolume: Double, andStyle: WeaponStyle = WeaponStyle.napalm) -> ([Vector3], [Float]) {
         NSLog("\(#function) started with totalVolume: \(totalVolume)")
         
         // trace path of fluid (these get returned for animation purposes)
@@ -971,22 +987,23 @@ class GameModel : Codable {
         
         // track state needed
         var remainingVolume = totalVolume
-        var queue = PriorityQueue<Pair<Float, MapCoordinate>>()
-        var fringe: [MapCoordinate: Bool] = [:]
+        var queue = PriorityQueue<Pair<OrderedElevation, MapCoordinate>>()
+        var fringe = [Bool](repeatElement(false, count: board.boardSize * board.boardSize))
 
         // set start point
         let startCoord = MapCoordinate(x: Int(startX), y: Int(startY))
         let startElevation = getElevation(longitude: startCoord.x, latitude: startCoord.y)
-        queue.enqueue(Pair(key: startElevation, value: startCoord))
+        let initialKey = OrderedElevation(elevation: startElevation, order: 0)
+        queue.enqueue(Pair(key: initialKey, value: startCoord))
         
-        var currentArea: Float = 0
         var previousElevation = startElevation
         
         // need a priority queue of edge pixels ordered by height
-        while remainingVolume > 0 && queue.size > 0 {
+        var puddleStack = Stack<Pair<Int,Float>>()
+        while remainingVolume > 0 && queue.count > 0 {
             // get lowest pixel from queue
             guard let lowest = queue.dequeue() else { remainingVolume = 0; continue }
-            var lowestElevation = lowest.key
+            var lowestElevation = lowest.key.elevation
 
             // enqueue neighboring pixels
             for j in -1...1 {
@@ -1001,12 +1018,14 @@ class GameModel : Codable {
                           (x<board.boardSize) &&
                           (y<board.boardSize) else { continue }
                     
-                    let coordinate = MapCoordinate(x: x, y: y)
-                    let enqueuedAlready = fringe[coordinate] ?? false
+                    let fringeCoord = x + y * board.boardSize
+                    let enqueuedAlready = fringe[fringeCoord]
                     if !enqueuedAlready {
                         let elevation = getElevation(longitude: x, latitude: y)
-                        queue.enqueue(Pair(key: elevation, value: coordinate))
-                        fringe[coordinate] = true
+                        let key = OrderedElevation(elevation: elevation, order: lowest.key.order + 1)
+                        let coordinate = MapCoordinate(x: x, y: y)
+                        queue.enqueue(Pair(key: key, value: coordinate))
+                        fringe[fringeCoord] = true
                         //NSLog("\(#function): added \(coordinate.x),\(coordinate.y) to fringe with elevation \(elevation)")
                     }
                 }
@@ -1014,33 +1033,48 @@ class GameModel : Codable {
             
             // record newest low point
             fullPath.append(Vector3(Float(lowest.value.x), Float(lowest.value.y), lowestElevation))
-            remaining.append(remainingVolume)
+            remaining.append(Float(remainingVolume))
             
             if lowestElevation < previousElevation {
                 //NSLog("\(#function): moved down to \(lowest.key) at \(lowest.value.x),\(lowest.value.y)")
                 // if puddle set is non-empty, update surface accordingly
+                let volumeAdded = max(1, previousElevation - lowestElevation)
                 if andStyle == .mud {
                     // leave mud trail
-                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowestElevation + 1)
+                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowestElevation + volumeAdded)
                     setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 1) // dirt color
                 } else if andStyle == .napalm {
                     setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowestElevation - 1)
                     setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 2) // scorched color
                 }
-                remainingVolume -= 1
-                currentArea = 0
+                remainingVolume -= Double(volumeAdded)
+                
+                // push new elevation/position onto stack
+                puddleStack.push(Pair<Int,Float>(key: fullPath.count-1, value: lowestElevation))
             } else {
                 //NSLog("\(#function): filled up to \(lowest.key) at \(lowest.value.x),\(lowest.value.y)")
                 // new value is higher, so level is rising
                 // increase level to lowest edge pixel
                 // its neighbors were added to queue already
                 
+                // current area is all points between fullPath.last and nearest previous point with same elevation
+                var currentArea: Double = 0
+                while puddleStack.count > 0 && puddleStack.top!.value < lowestElevation {
+                    // pop off stack until the top is above current elevation
+                    _ = puddleStack.pop()
+                }
+                if puddleStack.count > 0 {
+                    currentArea = Double(fullPath.count - puddleStack.top!.key)
+                } else {
+                    currentArea = Double(fullPath.count)
+                }
+                
                 // compute volume used in level rise
-                let volumeAdded = currentArea * (lowestElevation - previousElevation)
+                let volumeAdded = currentArea * Double(lowestElevation - previousElevation)
                 if volumeAdded > remainingVolume {
                     // no enough liquid to reach next point
                     // adjust lowestElevation to the real final value
-                    lowestElevation = previousElevation + remainingVolume / currentArea
+                    lowestElevation = Float(Double(previousElevation) + remainingVolume / currentArea)
                     fullPath.removeLast()
                 }
                 
@@ -1055,9 +1089,10 @@ class GameModel : Codable {
 
             //NSLog("\(#function): remaining volume now \(remainingVolume), previousElevation: \(previousElevation)")
         }
-        if queue.size == 0 {
-            // entire queue exhausted, so entire board must be burrieds
-            previousElevation += remainingVolume / currentArea
+        if queue.count == 0 {
+            // entire queue exhausted, so entire board must be burried
+            previousElevation += Float(remainingVolume / Double(fullPath.count))
+            remainingVolume = 0
         }
         NSLog("\(#function): path length: \(fullPath.count)")
         

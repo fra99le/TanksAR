@@ -18,6 +18,7 @@
 		533032A320CF00990014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
 		533032A420CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
 		533032A520CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
+		533868592118E701002C61E1 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533868582118E701002C61E1 /* Stack.swift */; };
 		53522CA820DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
 		53522CA920DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
 		53522CAA20DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
@@ -73,6 +74,7 @@
 		531E9F0620F7169800BCF617 /* GameViewColoredTrigDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewColoredTrigDrawer.swift; sourceTree = "<group>"; };
 		531E9F0820F716B600BCF617 /* GameViewTexturedTrigDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewTexturedTrigDrawer.swift; sourceTree = "<group>"; };
 		533032A220CF00990014A16D /* WeaponsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponsViewController.swift; sourceTree = "<group>"; };
+		533868582118E701002C61E1 /* Stack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
 		53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewTrigDrawer.swift; sourceTree = "<group>"; };
 		53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewBlockDrawer.swift; sourceTree = "<group>"; };
 		53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewDrawer.swift; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 				53EEDB9D20C84A3E00B8B71D /* GameModel.swift */,
 				53DE0AA420FC80AB00F5077B /* TestGameModel.swift */,
 				535DDC9F210F96AB0036E197 /* PriorityQueue.swift */,
+				533868582118E701002C61E1 /* Stack.swift */,
 				5396120D20D0CAB7006D0E6C /* PlayerAI.swift */,
 				5318F3E520D38B4F00377161 /* NelderMead.swift */,
 				5314E47B20C8BFA00070481A /* ImageBuf.swift */,
@@ -343,6 +346,7 @@
 				53DE0AA7210306CB00F5077B /* HighScoreController.swift in Sources */,
 				53EEDB9A20C8420500B8B71D /* InstructionsViewController.swift in Sources */,
 				53EEDB6820C83C3E00B8B71D /* AppDelegate.swift in Sources */,
+				533868592118E701002C61E1 /* Stack.swift in Sources */,
 				53EEDB9E20C84A3E00B8B71D /* GameModel.swift in Sources */,
 				5318F3E620D38B4F00377161 /* NelderMead.swift in Sources */,
 				53522CB020DCC41B00DDB71B /* GameViewDrawer.swift in Sources */,

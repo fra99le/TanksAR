@@ -24,7 +24,7 @@ struct Pair<K: Comparable,V> : Comparable {
 struct PriorityQueue<T: Comparable> {
     var items: [T] = []
     
-    var size: Int {
+    var count: Int {
         return items.count
     }
     
