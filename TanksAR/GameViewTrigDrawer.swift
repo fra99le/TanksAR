@@ -864,7 +864,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         currentZ = path[0].z
         setupPuddleSurface()
         for i in 0..<puddles.count {
-            NSLog("animating puddle \(i+1) of \(puddles.count)")
+            //NSLog("animating puddle \(i+1) of \(puddles.count)")
             let puddle  = puddles[i]
 
             //animateDrainPath(for: puddle)
@@ -879,6 +879,7 @@ class GameViewTrigDrawer : GameViewDrawer {
     }
     
     func findPuddles(in path: [Vector3]) -> [PuddleInfo] {
+        NSLog("\(#function) starting")
         let minPuddleSize = Int(pow(edgeSize,2))
         //let minPuddleSize = -1
         //let minPuddleHeight: Float = 5
@@ -887,7 +888,10 @@ class GameViewTrigDrawer : GameViewDrawer {
         var previousElevation = path[0].z
         var wasFilling = false
         var puddles: [PuddleInfo] = []
-        
+        var puddleStack = Stack<Pair<Int,Float>>()
+        var minPosStack = Stack<Pair<Int,Float>>()
+
+        NSLog("looking for puddles, path length is \(path.count)")
         for i in 0..<path.count {
             let elevation = path[i].z
             
@@ -898,6 +902,15 @@ class GameViewTrigDrawer : GameViewDrawer {
             }
             
             if elevation < previousElevation {
+                
+                // push new elevation/position onto stack
+                if wasFilling {
+                    puddleStack.push(Pair<Int,Float>(key: i-1, value: previousElevation))
+                    minPosStack.push(Pair<Int,Float>(key: i-1, value: previousElevation))
+                }
+                puddleStack.push(Pair<Int,Float>(key: i, value: elevation))
+                minPosStack.push(Pair<Int,Float>(key: i, value: elevation))
+
                 // draining
                 if wasFilling {
                     wasFilling = false
@@ -906,26 +919,64 @@ class GameViewTrigDrawer : GameViewDrawer {
                     var puddleInfo = PuddleInfo(start: i, end: i-1, minPos: i,
                                                 removable: false, hideable: false)
                     
-                    // scan back to previous point with same elevation
-                    var searchStartPos = i - 1
-                    if let lastPuddle = puddles.last,
-                        previousElevation > path[lastPuddle.end].z {
-                        // expanding on puddle
-                        // jump to previous puddle's entry point
-                        searchStartPos = lastPuddle.start + 1
-                        puddleInfo.minPos = lastPuddle.minPos
-                    }
-                    var pos = searchStartPos - 1
-                    while pos >= 0 && path[pos].z <= previousElevation {
-                        //NSLog("searching for elevation \(previousElevation), path[\(pos)].z = \(path[pos].z)")
-                        if path[pos].z <  path[puddleInfo.minPos].z {
-                            puddleInfo.minPos = pos
+                    // new version, (fast, but broken)
+                    // get start and minPos of puddle
+                    //NSLog("starting stack search, puddleStack.top.value: \(puddleStack.top!.value),  previousElevation: \(previousElevation)")
+                    while puddleStack.count > 0 && puddleStack.top!.value <= previousElevation {
+                        //NSLog("looking for elevation \(elevation), at \(puddleStack.top!.value) (pos: \(puddleStack.top!.key)), bottom at \(minPosStack.top!.value) (pos: \(minPosStack.top!.key))")
+                        // pop off stack until the top is above current elevation
+                        _ = puddleStack.pop()
+                        let minPosPair = minPosStack.pop()
+                        if minPosStack.count > 0 && minPosPair!.value < minPosStack.top!.value {
+                            // replace top of stack with deeper minPos
+                            _ = minPosStack.pop()
+                            minPosStack.push(minPosPair!)
                         }
-                        
-                        pos -= 1
                     }
-                    puddleInfo.start = pos+1
+                    if puddleStack.count > 0 {
+                        //NSLog("found elevation \(elevation), at \(puddleStack.top!.value) (pos: \(puddleStack.top!.key)), bottom at \(minPosStack.top!.value) (pos: \(minPosStack.top!.key))")
+
+                        puddleInfo.start = puddleStack.top!.key + 1
+                        puddleInfo.minPos = minPosStack.top!.key
+                    } else {
+                        //NSLog("gave up looking for elevation \(elevation), puddleStack empty (\(puddleStack.count))")
+                        puddleInfo.start = 0
+                        puddleInfo.minPos = 0
+                        if let lastPuddle = puddles.last {
+                            // since stack is empty, were climbing out of the previous (first?) puddle
+                            puddleInfo.start = lastPuddle.start
+                            puddleInfo.minPos = lastPuddle.minPos
+                        }
+                    }
                     
+//                    // old version ('slow', but works better)
+//                    // scan back to previous point with same elevation
+//                    var searchStartPos = i - 1
+//                    if let lastPuddle = puddles.last,
+//                        previousElevation > path[lastPuddle.end].z {
+//                        // expanding on puddle
+//                        // jump to previous puddle's entry point
+//                        searchStartPos = lastPuddle.start + 1
+//                        puddleInfo.minPos = lastPuddle.minPos
+//                    }
+//                    var pos = searchStartPos - 1
+//                    while pos >= 0 && path[pos].z <= previousElevation {
+//                        //NSLog("searching for elevation \(previousElevation), path[\(pos)].z = \(path[pos].z)")
+//                        if path[pos].z <  path[puddleInfo.minPos].z {
+//                            puddleInfo.minPos = pos
+//                        }
+//
+//                        pos -= 1
+//                    }
+//                    puddleInfo.start = pos+1
+                    
+//                    if pos+1 != puddleStack.top!.key {
+//                        NSLog("puddleInfo.start = (pos+1: \(pos+1), puddleStack.top.key: \(puddleStack.top!.key)), elevations: (\(path[pos+1].z), \(path[puddleStack.top!.key].z)=\(puddleStack.top!.value))")
+//                    }
+//                    if minPosStack.count > 0 && puddleInfo.minPos != minPosStack.top!.key {
+//                        NSLog("puddleInfo.minPos = (minPos: \(puddleInfo.minPos), minPosStack.top!.key: \(minPosStack.top!.key)), elevations: (\(path[puddleInfo.minPos].z), \(path[minPosStack.top!.key].z)=\(minPosStack.top!.value))")
+//                    }
+
                     puddles.append(puddleInfo)
                 }
             } else {
@@ -986,6 +1037,8 @@ class GameViewTrigDrawer : GameViewDrawer {
         previousPuddleEnd = 0
         puddleSet = [Bool](repeating: false, count: gameModel.board.boardSize * gameModel.board.boardSize)
         
+        NSLog("\(#function) finished")
+
         return puddles
     }
     
@@ -1003,7 +1056,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         // but only if the previous puddle doesn't share a bottom point (i.e. it is a different puddle)
         if drainStart < puddleBottom &&
             path[drainStart].z > path[puddleBottom].z {
-            NSLog("\tanimating path from position \(drainStart) to \(puddleBottom).")
+            //NSLog("\tanimating path from position \(drainStart) to \(puddleBottom).")
             let pathStep = Int(edgeSize)
             var lastPos = drainStart
             var pathPos = drainStart + pathStep
@@ -1042,7 +1095,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                     // compute fluid use
                     let fluidUsed = remaining[drainStart] - remaining[pathPos]
                     let drainTime = min(0.5, Double(fluidUsed / drainRate))
-                    NSLog("\tdrained \(fluidUsed) in \(drainTime) seconds (pipe length: \(pipeLength)).")
+                    //NSLog("\tdrained \(fluidUsed) in \(drainTime) seconds (pipe length: \(pipeLength)).")
                     currTime = pipeStartTime + drainTime
                 }
                 
@@ -1180,7 +1233,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                 let fillTime = Double(fillVolume / fillRate)
                 let nextZ = path[risePos].z
                 fillActions.append(contentsOf: [.move(to: SCNVector3(0,nextZ,0), duration: TimeInterval(fillTime))])
-                NSLog("\tfill volume: \(fillVolume) rises from elevation \(currentZ) to \(nextZ), fill time: \(fillTime) (currTime: \(currTime))")
+                //NSLog("\tfill volume: \(fillVolume) rises from elevation \(currentZ) to \(nextZ), fill time: \(fillTime) (currTime: \(currTime))")
                 currTime += fillTime
             }
             currentZ = path[risePos].z
