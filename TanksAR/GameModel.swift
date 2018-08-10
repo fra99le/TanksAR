@@ -232,7 +232,7 @@ class GameModel : Codable {
         Weapon(name: "Dirty Bomb", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
                                      WeaponSize(name: "regular", size: 150, cost: 2000),
                                      WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .generative),
-        Weapon(name: "Liquid Dirt", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
+        Weapon(name: "Mud", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
                                             WeaponSize(name: "regular", size: 150, cost: 2000),
                                             WeaponSize(name: "heavy", size: 300, cost: 3000)], style: .mud),
         Weapon(name: "Napalm", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
@@ -1039,14 +1039,6 @@ class GameModel : Codable {
                 //NSLog("\(#function): moved down to \(lowest.key) at \(lowest.value.x),\(lowest.value.y)")
                 // if puddle set is non-empty, update surface accordingly
                 let volumeAdded = max(1, previousElevation - lowestElevation)
-                if andStyle == .mud {
-                    // leave mud trail
-                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowestElevation + volumeAdded)
-                    setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 1) // dirt color
-                } else if andStyle == .napalm {
-                    setElevation(longitude: lowest.value.x, latitude: lowest.value.y, to: lowestElevation - 1)
-                    setColorIndex(longitude: lowest.value.x, latitude: lowest.value.y, to: 2) // scorched color
-                }
                 remainingVolume -= Double(volumeAdded)
                 
                 // push new elevation/position onto stack
@@ -1102,12 +1094,14 @@ class GameModel : Codable {
             let pos = fullPath.count - i
             let currPos = fullPath[pos]
             maxLevel = max(maxLevel,currPos.z)
+            let currLevel = getElevation(longitude: Int(currPos.x), latitude: Int(currPos.y))
 
             if andStyle == .mud {
-                setElevation(longitude: Int(currPos.x), latitude: Int(currPos.y), to: maxLevel)
-                setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 1)
+                setElevation(longitude: Int(currPos.x), latitude: Int(currPos.y), to: max(currLevel+1,maxLevel))
+                setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 1) // mud/dirt color
             } else if andStyle == .napalm {
-                setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 2)
+                setElevation(longitude: Int(currPos.x), latitude: Int(currPos.y), to: currLevel-1)
+                setColorIndex(longitude: Int(currPos.x), latitude: Int(currPos.y), to: 2) // scorched color
             } else {
                 NSLog("\(#function): Unknown style encountered! \(andStyle)")
             }
@@ -1168,30 +1162,29 @@ class GameModel : Codable {
 
     func damageCheckForFluid(at: Vector3, fromWeapon: Weapon, with path: [Vector3]) {
         NSLog("\(#function) started")
+        let fluidBaseDamage: Float = 50
 
-        // build map (dictionary) from path
-        var puddleSet: [MapCoordinate:Float] = [:]
-        for point in path {
-            let coord = MapCoordinate(x: Int(point.x), y: Int(point.y))
-            puddleSet[coord] = point.z
-        }
-
+        // check each player to see if they take damage
         var totalKills = 0
         for i in 0..<board.players.count {
-            let tank = board.players[i].tank
-            let tankPos = tank.position
-            
-            let tankCoord = MapCoordinate(x: Int(tankPos.x), y: Int(tankPos.y))
-            if let _ = puddleSet[tankCoord] {
-                NSLog("\t\tPlayer \(board.currentPlayer) hit player \(i)")
-
-                let damage = board.players[i].hitPoints
-                NSLog("\t\tdamage: \(damage)")
-
-                board.players[i].hitPoints = 0
-                applyKill(board.currentPlayer, killed: i, did: damage)
-                totalKills += 1
+            var totalDamage: Float = 0
+            for point in path {
+                let tank = board.players[i].tank
+                
+                let dist = distance(from: tank.position, to: point)
+                if dist < tankSize && board.players[i].hitPoints > 0 {
+                    let damage = min(fluidBaseDamage / pow(max(1,dist),2.0), board.players[i].hitPoints)
+                    totalDamage += damage
+                    
+                    board.players[i].hitPoints -= damage
+                    if board.players[i].hitPoints == 0 {
+                        NSLog("\t\tPlayer \(board.currentPlayer) killed player \(i)")
+                        applyKill(board.currentPlayer, killed: i, did: damage)
+                        totalKills += 1
+                    }
+                }
             }
+            NSLog("\tplayer \(i) took \(totalDamage) points of damage.")
         }
         board.players[board.currentPlayer].stats.maxKillsPerShot = max(totalKills, board.players[board.currentPlayer].stats.maxKillsPerShot)
 
