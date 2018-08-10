@@ -12,6 +12,8 @@ import Foundation
 import UIKit
 import SceneKit
 
+// Note: when fluid weapons are fired by buried tanks, they jump to the surface, this seems wrong.
+
 struct OrderedElevation : Comparable {
     var elevation: Float
     var order: Int
