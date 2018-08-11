@@ -15,7 +15,10 @@ class GameViewBlockDrawer : GameViewDrawer {
     var boardBlocks: [[SCNNode]] = []
     var boardSurfaces: [[SCNNode]] = []
     var dropBlocks: [SCNNode] = []
-
+    var fluidNode: SCNNode = SCNNode()
+    let drainRate: Float = 500
+    var fillRate: Float = 1000
+    
     override func addBoard() {
         NSLog("\(#function) started")
         
@@ -109,6 +112,7 @@ class GameViewBlockDrawer : GameViewDrawer {
         for block in dropBlocks {
             block.removeFromParentNode()
         }
+        fluidNode.removeFromParentNode()
         //NSLog("\(#function) finished")
     }
 
@@ -234,11 +238,136 @@ class GameViewBlockDrawer : GameViewDrawer {
         return currTime
     }
     
+    var previousPuddleEnd: Int = 0
+    var previousPipeEnd: Int = 0
+    var currentZ: Float = 0
+    var puddleSet: [Bool] = []
+    var bottomFilledTo: [Int:Float] = [:]
+
     func animateFluidFill(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval) -> CFTimeInterval {
         var currTime = time
         
         let path = fireResult.fluidPath
+        let remaining = fireResult.fluidRemaining
+        let puddles = findPuddles(in: path)
+        let drainEdgeSize = edgeSize / 5
+        var drainStart = 0
         
+        // initialize variables for tracking animation
+        previousPipeEnd = 0
+        previousPuddleEnd = 0
+        puddleSet = [Bool](repeating: false, count: gameModel.board.boardSize * gameModel.board.boardSize)
+        
+        // set color of fluid
+        var color = UIColor.green
+        if fireResult.weaponStyle == .mud {
+            color = UIColor.brown
+        } else if fireResult.weaponStyle == .napalm {
+            color = UIColor.red
+        }
+        
+        fluidNode.removeFromParentNode()
+        fluidNode = SCNNode()
+        for puddle in puddles {
+            // animate drain paths
+            var prevDrainX = 0
+            var prevDrainY = 0
+            var blockDrainStart = 0
+            var blockDrainEnd = 0
+            if drainStart < puddle.minPos {
+                for i in drainStart...puddle.minPos {
+                    let point = path[i]
+                    
+                    let drainBlockX = Int(CGFloat(Int(CGFloat(point.x) / drainEdgeSize)) * drainEdgeSize + drainEdgeSize/2)
+                    let drainBlockY = Int(CGFloat(Int(CGFloat(point.y) / drainEdgeSize)) * drainEdgeSize + drainEdgeSize/2)
+                    
+                    let blockX = Int(CGFloat(Int(CGFloat(point.x) / edgeSize)) * edgeSize + edgeSize/2)
+                    let blockY = Int(CGFloat(Int(CGFloat(point.y) / edgeSize)) * edgeSize + edgeSize/2)
+                    let blockElevation = gameModel.getElevation(fromMap: fireResult.old, longitude: Int(blockX), latitude: Int(blockY))
+                    
+                    if drainBlockX != prevDrainX || drainBlockY != prevDrainY {
+                        blockDrainStart = blockDrainEnd
+                        blockDrainEnd = i
+                        
+                        // add a block for the drain path
+                        let drainBlock = SCNNode(geometry: SCNBox(width: drainEdgeSize, height: 1, length: drainEdgeSize, chamferRadius: 0))
+                        drainBlock.position = fromModelSpace(Vector3(Float(drainBlockX), Float(drainBlockY), blockElevation+0.5))
+                        drainBlock.isHidden = true
+                        drainBlock.geometry?.firstMaterial?.diffuse.contents = color
+                        fluidNode.addChildNode(drainBlock)
+                        
+                        // animate appearance of block
+                        let appear = SCNAction.sequence([.wait(duration: currTime),
+                                                         .unhide()])
+                        drainBlock.runAction(appear)
+                        
+                        // update currTime
+                        let drainVolume = remaining[blockDrainEnd] - remaining[blockDrainStart]
+                        if drainVolume > 0 {
+                            let drainTime = Double(drainVolume / drainRate)
+                            currTime += drainTime
+                        }
+                    }
+                    
+                    prevDrainX = drainBlockX
+                    prevDrainY = drainBlockY
+                }
+                currentZ = path[puddle.minPos].z
+            }
+            
+            // animate puddle fills
+            fillRate = 1000.0
+            let maxFillTime: CFTimeInterval = 20.0
+            fillRate = max(fillRate, remaining[0] / Float(maxFillTime))
+
+            for i in previousPuddleEnd...puddle.end {
+                let point = path[i]
+                let coord = Int(point.y) * gameModel.board.boardSize + Int(point.x)
+                puddleSet[coord] = true
+            }
+
+            let fillVolume = remaining[puddle.minPos] - remaining[puddle.end]
+            let fillTime = Double(fillVolume / fillRate)
+            let startElevation = max(currentZ, path[puddle.minPos].z)
+            let finalElevation = path[puddle.end].z
+            let fillHeight = Double(finalElevation - startElevation)
+
+            for i in 0..<numPerSide {
+                for j in 0..<numPerSide {
+                    // determine location of segment
+                    let xPos = CGFloat(i)*edgeSize + edgeSize/2
+                    let zPos = CGFloat(j)*edgeSize + edgeSize/2
+                    let elevation = gameModel.getElevation(fromMap: fireResult.old, longitude: Int(xPos), latitude: Int(zPos))
+                    
+                    let coord = Int(zPos) * gameModel.board.boardSize + Int(xPos)
+                    if puddleSet[coord] && finalElevation >= elevation {
+                        // create short block that will be animated to be taller
+                        let fillBlockGeometry = SCNBox(width: edgeSize, height: 0, length: edgeSize, chamferRadius: 0)
+                        let fillBlock = SCNNode(geometry: fillBlockGeometry)
+                        fillBlock.position = fromModelSpace(Vector3(xPos,zPos,CGFloat(elevation)))
+                        fillBlockGeometry.height = 0
+                        fillBlockGeometry.firstMaterial?.diffuse.contents = color
+                        
+                        let fillAction = SCNAction.sequence([.wait(duration: currTime),
+                                                             .customAction(duration: fillTime, action: {node, elapsedTime in
+                                                                let progress = Double(elapsedTime) / fillTime
+                                                                let geometry = node.geometry as! SCNBox
+                                                                node.position.y = Float(Double(startElevation) + progress * (fillHeight / 2))
+                                                                geometry.height = CGFloat(progress * fillHeight)
+                                                             })])
+                        fillBlock.runAction(fillAction)
+                        fluidNode.addChildNode(fillBlock)
+                    }
+                }
+            }
+            currentZ = finalElevation
+            currTime += fillTime
+            
+            drainStart = puddle.end
+            previousPuddleEnd = puddle.end
+        }
+        board.addChildNode(fluidNode)
+        NSLog("finished fluid fill at time \(currTime)")
         
         return currTime
     }
