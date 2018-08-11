@@ -810,13 +810,6 @@ class GameViewTrigDrawer : GameViewDrawer {
         return currTime
     }
     
-    struct PuddleInfo {
-        var start: Int = -1
-        var end: Int = -1
-        var minPos: Int = -1
-        var removable = false
-        var hideable = false
-    }
     var previousPuddleEnd: Int = 0
     var previousPipeEnd: Int = 0
     var currentZ: Float = 0
@@ -846,6 +839,11 @@ class GameViewTrigDrawer : GameViewDrawer {
         let path = fireResult.fluidPath
         let puddles = findPuddles(in: path)
 
+        // initialize variables for tracking animation
+        previousPipeEnd = 0
+        previousPuddleEnd = 0
+        puddleSet = [Bool](repeating: false, count: gameModel.board.boardSize * gameModel.board.boardSize)
+        
         // animate drain paths and puddles filling
         var color: UIColor!
         if fireResult.weaponStyle == .mud {
@@ -877,170 +875,6 @@ class GameViewTrigDrawer : GameViewDrawer {
         NSLog("fluid filling finished at time \(currTime), \(currTime - time)s to drain volume of \(fireResult.fluidRemaining.first!)")
         
         return currTime
-    }
-    
-    func findPuddles(in path: [Vector3]) -> [PuddleInfo] {
-        NSLog("\(#function) starting")
-        let minPuddleSize = Int(pow(edgeSize,2))
-        //let minPuddleSize = -1
-        //let minPuddleHeight: Float = 5
-        let minPuddleHeight: Float = -1
-
-        var previousElevation = path[0].z
-        var wasFilling = false
-        var puddles: [PuddleInfo] = []
-        var puddleStack = Stack<Pair<Int,Float>>()
-        var minPosStack = Stack<Pair<Int,Float>>()
-
-        NSLog("looking for puddles, path length is \(path.count)")
-        for i in 0..<path.count {
-            let elevation = path[i].z
-            
-            if elevation == previousElevation {
-                // skip large flat regions when animating drain paths
-                // if they're important puddle filling animation will cover them
-                continue
-            }
-            
-            if elevation < previousElevation {
-                
-                // push new elevation/position onto stack
-                if wasFilling {
-                    puddleStack.push(Pair<Int,Float>(key: i-1, value: previousElevation))
-                    minPosStack.push(Pair<Int,Float>(key: i-1, value: previousElevation))
-                }
-                puddleStack.push(Pair<Int,Float>(key: i, value: elevation))
-                minPosStack.push(Pair<Int,Float>(key: i, value: elevation))
-
-                // draining
-                if wasFilling {
-                    wasFilling = false
-                    
-                    // create new puddle
-                    var puddleInfo = PuddleInfo(start: i, end: i-1, minPos: i,
-                                                removable: false, hideable: false)
-                    
-                    // new version, (fast, but broken)
-                    // get start and minPos of puddle
-                    //NSLog("starting stack search, puddleStack.top.value: \(puddleStack.top!.value),  previousElevation: \(previousElevation)")
-                    while puddleStack.count > 0 && puddleStack.top!.value <= previousElevation {
-                        //NSLog("looking for elevation \(elevation), at \(puddleStack.top!.value) (pos: \(puddleStack.top!.key)), bottom at \(minPosStack.top!.value) (pos: \(minPosStack.top!.key))")
-                        // pop off stack until the top is above current elevation
-                        _ = puddleStack.pop()
-                        let minPosPair = minPosStack.pop()
-                        if minPosStack.count > 0 && minPosPair!.value < minPosStack.top!.value {
-                            // replace top of stack with deeper minPos
-                            _ = minPosStack.pop()
-                            minPosStack.push(minPosPair!)
-                        }
-                    }
-                    if puddleStack.count > 0 {
-                        //NSLog("found elevation \(elevation), at \(puddleStack.top!.value) (pos: \(puddleStack.top!.key)), bottom at \(minPosStack.top!.value) (pos: \(minPosStack.top!.key))")
-
-                        puddleInfo.start = puddleStack.top!.key + 1
-                        puddleInfo.minPos = minPosStack.top!.key
-                    } else {
-                        //NSLog("gave up looking for elevation \(elevation), puddleStack empty (\(puddleStack.count))")
-                        puddleInfo.start = 0
-                        puddleInfo.minPos = 0
-                        if let lastPuddle = puddles.last {
-                            // since stack is empty, were climbing out of the previous (first?) puddle
-                            puddleInfo.start = lastPuddle.start
-                            puddleInfo.minPos = lastPuddle.minPos
-                        }
-                    }
-                    
-//                    // old version ('slow', but works better)
-//                    // scan back to previous point with same elevation
-//                    var searchStartPos = i - 1
-//                    if let lastPuddle = puddles.last,
-//                        previousElevation > path[lastPuddle.end].z {
-//                        // expanding on puddle
-//                        // jump to previous puddle's entry point
-//                        searchStartPos = lastPuddle.start + 1
-//                        puddleInfo.minPos = lastPuddle.minPos
-//                    }
-//                    var pos = searchStartPos - 1
-//                    while pos >= 0 && path[pos].z <= previousElevation {
-//                        //NSLog("searching for elevation \(previousElevation), path[\(pos)].z = \(path[pos].z)")
-//                        if path[pos].z <  path[puddleInfo.minPos].z {
-//                            puddleInfo.minPos = pos
-//                        }
-//
-//                        pos -= 1
-//                    }
-//                    puddleInfo.start = pos+1
-                    
-//                    if pos+1 != puddleStack.top!.key {
-//                        NSLog("puddleInfo.start = (pos+1: \(pos+1), puddleStack.top.key: \(puddleStack.top!.key)), elevations: (\(path[pos+1].z), \(path[puddleStack.top!.key].z)=\(puddleStack.top!.value))")
-//                    }
-//                    if minPosStack.count > 0 && puddleInfo.minPos != minPosStack.top!.key {
-//                        NSLog("puddleInfo.minPos = (minPos: \(puddleInfo.minPos), minPosStack.top!.key: \(minPosStack.top!.key)), elevations: (\(path[puddleInfo.minPos].z), \(path[minPosStack.top!.key].z)=\(minPosStack.top!.value))")
-//                    }
-
-                    puddles.append(puddleInfo)
-                }
-            } else {
-                // filling
-                wasFilling = true
-            }
-            
-            previousElevation = elevation
-        }
-        NSLog("\(#function): \(puddles.count) puddle sets")
-        
-        // filter puddles so "strictly" overlapping puddles are eliminated
-        NSLog("starting to filter \(puddles.count) puddles")
-        // remove all tiny puddles
-        var i = 0
-        while i < puddles.count
-            && puddles.count > 1 {
-                //find super small puddles
-                let puddle = puddles[i]
-                let puddleSize = puddle.end - puddle.start
-                let puddleHeight = path[puddle.end].z - path[puddle.minPos].z
-                if  puddleSize <  minPuddleSize
-                    || puddleHeight < minPuddleHeight {
-                    puddles.remove(at: i)
-                    continue
-                }
-                i += 1
-        }
-        NSLog("\(puddles.count) puddles remaining after small puddle filtering")
-
-        for i in 0..<(puddles.count-1) {
-            let puddle = puddles[i]
-            let puddleBottom = puddle.minPos
-            
-            let nextPuddle = puddles[i+1]
-            let nextPuddleBottom = nextPuddle.minPos
-            
-            // whenever puddle_{i+1} is has the same buttom, mark puddle_i for removal
-            // if size increase is big enough, puddle_{i+1) will have a different bottom
-            if puddleBottom == nextPuddleBottom {
-                puddles[i].removable = true
-            }
-        }
-
-        // remove tagged puddles
-        i = 0
-        while i < puddles.count {
-            if puddles[i].removable {
-                puddles.remove(at: i)
-                continue
-            }
-            i += 1
-        }
-        NSLog("\(puddles.count) puddles remaining after filtering")
-        
-        // initialize variables for tracking animation
-        previousPipeEnd = 0
-        previousPuddleEnd = 0
-        puddleSet = [Bool](repeating: false, count: gameModel.board.boardSize * gameModel.board.boardSize)
-        
-        NSLog("\(#function) finished")
-
-        return puddles
     }
     
     func animateDrainPath(for puddle: PuddleInfo, from result: FireResult, using color: UIColor, at time: CFTimeInterval) -> CFTimeInterval {
