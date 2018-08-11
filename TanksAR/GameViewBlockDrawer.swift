@@ -16,8 +16,8 @@ class GameViewBlockDrawer : GameViewDrawer {
     var boardSurfaces: [[SCNNode]] = []
     var dropBlocks: [SCNNode] = []
     var fluidNode: SCNNode = SCNNode()
-    let drainRate: Float = 500
-    var fillRate: Float = 1000
+    let drainRate: Float = 5000
+    var fillRate: Float = 5000
     
     override func addBoard() {
         NSLog("\(#function) started")
@@ -316,7 +316,7 @@ class GameViewBlockDrawer : GameViewDrawer {
             }
             
             // animate puddle fills
-            fillRate = 1000.0
+            fillRate = 5000.0
             let maxFillTime: CFTimeInterval = 20.0
             fillRate = max(fillRate, remaining[0] / Float(maxFillTime))
 
