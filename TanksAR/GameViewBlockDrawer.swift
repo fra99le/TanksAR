@@ -13,6 +13,7 @@ import ARKit
 class GameViewBlockDrawer : GameViewDrawer {
 
     var boardBlocks: [[SCNNode]] = []
+    var boardSurfaces: [[SCNNode]] = []
     var dropBlocks: [SCNNode] = []
 
     override func addBoard() {
@@ -22,13 +23,21 @@ class GameViewBlockDrawer : GameViewDrawer {
         
         // keep references to each block
         boardBlocks = Array(repeating: Array(repeating: SCNNode(), count: numPerSide), count: numPerSide)
-        
+        boardSurfaces = Array(repeating: Array(repeating: SCNNode(), count: numPerSide), count: numPerSide)
+
         for i in 0..<numPerSide {
             for j in 0..<numPerSide {
                 // create block
-                let blockNode = SCNNode(geometry: SCNBox(width: edgeSize * 1.001, height: 1, length: edgeSize * 1.001, chamferRadius: 0))
+                let blockGeometry = SCNBox(width: edgeSize, height: 1, length: edgeSize, chamferRadius: 0)
+                let blockNode = SCNNode(geometry: blockGeometry)
                 boardBlocks[i][j] = blockNode
                 blockNode.position.y = -1 // make sure update will happen initially
+                
+                // add surface plane to block
+                let surfaceGeometry = SCNBox(width: edgeSize, height: 1, length: edgeSize, chamferRadius: 0)
+                let blockSurface = SCNNode(geometry: surfaceGeometry)
+                boardSurfaces[i][j] = blockSurface
+                blockNode.addChildNode(blockSurface)
                 
                 // add to board
                 board.addChildNode(boardBlocks[i][j])
@@ -48,6 +57,7 @@ class GameViewBlockDrawer : GameViewDrawer {
             }
         }
         boardBlocks = []
+        boardSurfaces = []
         board.removeFromParentNode()
         NSLog("\(#function) finished")
     }
@@ -70,23 +80,28 @@ class GameViewBlockDrawer : GameViewDrawer {
                 
                 // update cube
                 let blockNode = boardBlocks[i][j]
+                let blockSurface = boardSurfaces[i][j]
                 blockNode.isHidden = false
                 blockNode.opacity = 1.0
                 
-                if blockNode.position.y != Float(yPos) {
-                    //NSLog("block at \(i),\(j) is \(blockNode)")
-                    blockNode.position = SCNVector3(xPos-CGFloat(gameModel.board.boardSize/2),
-                                                    yPos,
-                                                    zPos-CGFloat(gameModel.board.boardSize/2))
-                    if let geometry = blockNode.geometry as? SCNBox {
-                        geometry.width = edgeSize
-                        geometry.height = ySize
-                        geometry.length = edgeSize
-                    }
+                //NSLog("block at \(i),\(j) is \(blockNode)")
+                blockNode.position = SCNVector3(xPos-CGFloat(gameModel.board.boardSize/2),
+                                                yPos-0.5,
+                                                zPos-CGFloat(gameModel.board.boardSize/2))
+                if let geometry = blockNode.geometry as? SCNBox {
+                    geometry.width = edgeSize
+                    geometry.height = ySize-1
+                    geometry.length = edgeSize
                 }
+                blockSurface.position.y = Float(yPos) + 0.5
                 
                 // update color
-                blockNode.geometry?.firstMaterial?.diffuse.contents = UIColor.green
+                let color = gameModel.getColor(longitude: Int(xPos), latitude: Int(zPos))
+                blockNode.geometry?.firstMaterial?.diffuse.contents = UIColor.brown
+//                if i != 0 && j != 0 && i < numPerSide-1 && j < numPerSide-1 {
+//                    blockNode.geometry?.firstMaterial?.diffuse.contents = color
+//                }
+                blockSurface.geometry?.firstMaterial?.diffuse.contents = color
             }
         }
         
@@ -108,6 +123,25 @@ class GameViewBlockDrawer : GameViewDrawer {
             currTime = animateExplosion(fireResult: fireResult, at: currTime)
         }
 
+        if fireResult.weaponStyle == .explosive || fireResult.weaponStyle == .generative {
+            currTime = animateDropSurface(fireResult: fireResult, from: from, at: currTime)
+        } else if fireResult.weaponStyle == .napalm || fireResult.weaponStyle == .mud {
+            currTime = animateFluidFill(fireResult: fireResult, from: from, at: currTime)
+        }
+        
+        // deal with round transitions
+        currTime = animateRoundResult(fireResult: fireResult, at: currTime)
+        
+        // wait for animations to end
+        let delay = SCNAction.sequence([.wait(duration: currTime)])
+        board.runAction(delay, completionHandler: { DispatchQueue.main.async { from.finishTurn() } })
+        
+        NSLog("\(#function) finished")
+    }
+
+    func animateDropSurface(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval) -> CFTimeInterval {
+        var currTime = time
+
         // animate board update
         var dropNeeded = false
         for block in dropBlocks {
@@ -120,7 +154,9 @@ class GameViewBlockDrawer : GameViewDrawer {
         for j in 0..<numPerSide {
             for i in 0..<numPerSide {
                 let boardBlock = boardBlocks[i][j]
+                let boardSurface = boardSurfaces[i][j]
                 let blockGeometry = boardBlock.geometry as! SCNBox
+                let surfaceGeometry = boardSurface.geometry as! SCNBox
                 let modelPos = toModelSpace(boardBlock.position)
                 
                 // get elevations for block
@@ -139,14 +175,22 @@ class GameViewBlockDrawer : GameViewDrawer {
                     //NSLog("(\(i),\(j)) will drop, top: \(top), middle: \(middle), bottom: \(bottom)")
                     // need to create and animate a drop block
                     let dropBlock = SCNNode(geometry: SCNBox(width: blockGeometry.width,
-                                                             height: CGFloat(top-middle),
+                                                             height: CGFloat(top-middle) - 1 ,
                                                              length: blockGeometry.length, chamferRadius: 0))
                     dropBlock.position = boardBlock.position
-                    dropBlock.position.y = (top+middle)/2
+                    dropBlock.position.y = (top+middle)/2 - 0.5
                     dropBlock.geometry?.firstMaterial = blockGeometry.firstMaterial
                     dropBlock.isHidden = true
                     board.addChildNode(dropBlock)
                     dropBlocks.append(dropBlock)
+                    
+                    let dropBlockSurface = SCNNode(geometry: SCNBox(width: blockGeometry.width,
+                                                                    height: 1,
+                                                                    length: blockGeometry.length,
+                                                                    chamferRadius: 0))
+                    dropBlockSurface.position.y = (top-middle)/2 + 0.5
+                    dropBlockSurface.geometry?.firstMaterial = surfaceGeometry.firstMaterial
+                    dropBlock.addChildNode(dropBlockSurface)
                     
                     var finalPosition = dropBlock.position
                     finalPosition.y = bottom + (top-middle)/2
@@ -187,14 +231,16 @@ class GameViewBlockDrawer : GameViewDrawer {
         }
         NSLog("board settled at time \(currTime).")
         
-        // deal with round transitions
-        currTime = animateRoundResult(fireResult: fireResult, at: currTime)
-        
-        // wait for animations to end
-        let delay = SCNAction.sequence([.wait(duration: currTime)])
-        board.runAction(delay, completionHandler: { DispatchQueue.main.async { from.finishTurn() } })
-        
-        NSLog("\(#function) finished")
+        return currTime
     }
-
+    
+    func animateFluidFill(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval) -> CFTimeInterval {
+        var currTime = time
+        
+        let path = fireResult.fluidPath
+        
+        
+        return currTime
+    }
+    
 }

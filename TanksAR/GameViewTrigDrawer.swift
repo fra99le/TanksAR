@@ -222,7 +222,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         let edgeSource = SCNGeometrySource(vertices: edgeVerts)
         let edgeGeometry = SCNGeometry(sources: [edgeSource], elements: [edgeElements])
         
-        edgeGeometry.firstMaterial?.diffuse.contents = UIColor.green
+        edgeGeometry.firstMaterial?.diffuse.contents = UIColor.brown
 
         return edgeGeometry
     }
@@ -863,6 +863,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         board.addChildNode(fluidNode)
         currentZ = path[0].z
         setupPuddleSurface()
+        
         for i in 0..<puddles.count {
             //NSLog("animating puddle \(i+1) of \(puddles.count)")
             let puddle  = puddles[i]
