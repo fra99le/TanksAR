@@ -324,9 +324,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         
         // wait for animations to end
         let delay = SCNAction.sequence([.wait(duration: currTime)])
-        board.runAction(delay,
-                        completionHandler: { DispatchQueue.main.async { from.finishTurn() } })
-        
+        board.runAction(delay, completionHandler: { DispatchQueue.main.async { from.finishTurn() } })
         
         NSLog("\(#function) finished")
     }

@@ -505,7 +505,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         // set size, orientation, and color of board base
         let geometry = SCNPlane(width: CGFloat(gameModel.board.boardSize),
                                 height: CGFloat(gameModel.board.boardSize))
-        geometry.firstMaterial?.diffuse.contents = UIColor.green
+        geometry.firstMaterial?.diffuse.contents = UIColor.brown
 
         let boardBaseNode = SCNNode()
         boardBaseNode.geometry = geometry
