@@ -166,7 +166,6 @@
                                                 <state key="normal" title="Play Game"/>
                                                 <connections>
                                                     <action selector="playGameTapped:" destination="cEh-LH-kqS" eventType="touchUpInside" id="25i-Rr-1qV"/>
-                                                    <segue destination="BV1-FR-VrT" kind="show" identifier="startGame" id="niD-Ws-avX"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -212,6 +211,7 @@
                         <outlet property="resumeGameButton" destination="5BT-Al-IS8" id="tGd-qo-kq0"/>
                         <outlet property="roundsNumLabel" destination="F7a-j8-P41" id="42j-ws-23e"/>
                         <outlet property="roundsStepper" destination="DJg-nu-2tW" id="WCm-mi-KbS"/>
+                        <segue destination="BV1-FR-VrT" kind="show" identifier="startGame" id="qDK-X6-VW4"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MeU-Gx-nzX" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1163,6 +1163,6 @@ If no surfaces can be found, double tap to place board in the air.</string>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="L4u-yX-l7V"/>
+        <segue reference="qDK-X6-VW4"/>
     </inferredMetricsTieBreakers>
 </document>

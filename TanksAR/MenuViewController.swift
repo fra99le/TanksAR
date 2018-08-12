@@ -150,7 +150,24 @@ class MenuViewController: UIViewController {
     }
     
     @IBAction func playGameTapped(_ sender: UIButton) {
-        
+        // check for in-progress game
+        // present an alert if one is found
+        if let model = gameState?.model,
+            model.gameStarted {
+            let alert = UIAlertController(title: "New Game?", message: "A game is currently in progress, and will be lost if you start a new game.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: "Default inaction"), style: .default, handler: { _ in
+                NSLog("New game canceled.")
+                self.updateUI()
+                return
+            }))
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Start New Game", comment: "Default action"), style: .default, handler: { _ in
+                NSLog("Starting new game!")
+                self.performSegue(withIdentifier: "startGame", sender: nil)
+            }))
+            self.present(alert, animated: true, completion: nil)
+        } else {
+            performSegue(withIdentifier: "startGame", sender: nil)
+        }
     }
 
     @IBAction func modeTapped(_ sender: UIButton) {
