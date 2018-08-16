@@ -711,7 +711,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         // don't mess with exit button here!
         fireButton.isHidden = true
         fireButton.isEnabled = false
-        if humanLeft == 0 {
+        if humanLeft == 0 && gameModel.gameStarted {
             skipButton.isEnabled = true
             skipButton.isHidden = false
         }
