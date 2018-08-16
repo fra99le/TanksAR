@@ -28,10 +28,9 @@ class GameViewColoredTrigDrawer : GameViewTrigDrawer {
         board.addChildNode(edgeNode)
         
         // remove any temporary animation objects
-        for dropSurface in dropSurfaces {
-            dropSurface.isHidden = true
-            dropSurface.removeFromParentNode()
-        }
+        droppingNode.isHidden = true
+        droppingNode.removeFromParentNode()
+        droppingNode = SCNNode()
         if let morpher = surface.morpher {
             morpher.targets = [surface.geometry!]
         }

@@ -54,9 +54,9 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         sun.runAction(riseAndSet)
     }
     
-    override func surfaceNode(forSurface: ImageBuf, useNormals: Bool = false, withColors: ImageBuf?, colors: [Any] = [UIColor.green]) -> SCNNode {
+    override func surfaceNode(forSurface: ImageBuf, useNormals: Bool = false, withColors: ImageBuf?, colors: [Any] = [UIColor.green], isBottom: Bool = false) -> SCNNode {
         let colorImage = gameModel.colorMap(forMap: withColors!)
-        let node = super.surfaceNode(forSurface: forSurface, useNormals: true, withColors: withColors, colors: [colorImage])
+        let node = super.surfaceNode(forSurface: forSurface, useNormals: true, withColors: withColors, colors: [colorImage], isBottom: isBottom)
         
         // computing the normal map is very very slow, it's also not right
         //let normalMap = gameModel.normalMap(forMap: forSurface)
@@ -93,10 +93,9 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         board.addChildNode(edgeNode)
         
         // remove any temporary animation objects
-        for dropSurface in dropSurfaces {
-            dropSurface.isHidden = true
-            dropSurface.removeFromParentNode()
-        }
+        droppingNode.isHidden = true
+        droppingNode.removeFromParentNode()
+        droppingNode = SCNNode()
         if let morpher = surface.morpher {
             morpher.targets = [surface.geometry!]
         }
@@ -127,7 +126,7 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
     }
     
     override func animateResult(fireResult: FireResult, from: GameViewController) {
-        super.animateResult(fireResult: fireResult, from: from, useNormals: true, colors: [gameModel.colorMap(forMap: fireResult.topColor)])
+        super.animateResult(fireResult: fireResult, from: from, useNormals: true, colors: [gameModel.colorMap(forMap: fireResult.detonationResult[0].topColor)])
     }
     
 }

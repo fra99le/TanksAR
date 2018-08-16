@@ -181,29 +181,24 @@ struct DetonationResult {
     var bottomColor: ImageBuf
     var fluidPath: [Vector3]
     var fluidRemaining: [Float]
+    var timeIndex: Int
 }
 
 struct FireResult {
     var playerID: Int = 0
     
     var timeStep: Float = 1
-    var trajectory: [Vector3] = []
+    var trajectories: [[Vector3]] = []
     var explosionRadius: Float = 100
     var weaponStyle: WeaponStyle
+    var detonationResult: [DetonationResult]
     
     // data needed to animate board
     var old: ImageBuf
-    var top: ImageBuf
-    var middle: ImageBuf
-    var bottom: ImageBuf
     var final: ImageBuf
-    var fluidPath: [Vector3]
-    var fluidRemaining: [Float]
 
-    // data needed color updates properly
+    // data needed for color updates
     var oldColor: ImageBuf
-    var topColor: ImageBuf
-    var bottomColor: ImageBuf
     var finalColor: ImageBuf
     
     var newRound: Bool
@@ -227,7 +222,7 @@ class GameModel : Codable {
     let computerCost = 2000
     
     var weaponsList = [
-        Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 35, cost: 10)], style: .explosive),
+        Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 35, cost: 100)], style: .explosive),
         Weapon(name: "Nuke", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
                                      WeaponSize(name: "regular", size: 150, cost: 2000),
                                      WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .explosive),
@@ -240,7 +235,14 @@ class GameModel : Codable {
         Weapon(name: "Napalm", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
                                             WeaponSize(name: "regular", size: 150, cost: 2000),
                                             WeaponSize(name: "heavy", size: 300, cost: 3000)], style: .napalm),
-        // still need MIRVs
+        Weapon(name: "MIRV", sizes: [WeaponSize(name: "linear", size: 5, cost: 500),
+                                     WeaponSize(name: "linear", size: 6, cost: 500),
+                                       WeaponSize(name: "cross", size: 9, cost: 900),
+                                       WeaponSize(name: "ring", size: 13, cost: 1200),
+                                       WeaponSize(name: "crosshairs", size: 17, cost: 1700),
+                                       WeaponSize(name: "wheel", size: 21, cost: 2100),
+                                       WeaponSize(name: "grid", size: 25, cost: 2500)], style: .mirv),
+
         ]
     
     func generateBoard() {
@@ -683,7 +685,7 @@ class GameModel : Codable {
         // charge points
         let player = board.players[board.currentPlayer]
         let weapon = weaponsList[player.weaponID]
-        let weaponSize = weapon.sizes[player.weaponSizeID].size
+        var weaponSize = weapon.sizes[player.weaponSizeID].size
         let weaponCost = weapon.sizes[player.weaponSizeID].cost +
                                     ((player.useTargetingComputer || player.usedComputer) ? computerCost : 0)
         if weaponCost >= player.credit {
@@ -696,14 +698,28 @@ class GameModel : Codable {
         board.players[board.currentPlayer].useTargetingComputer = false
         
         NSLog("firing \(weapon.name) with size \(weaponSize) and style \(weapon.style).")
-        let trajectory = computeTrajectory(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity, withTimeStep: timeStep)
+        var trajectories: [[Vector3]] = []
+        if weapon.style == .mirv {
+            trajectories = computeMirvTrajectories(muzzlePosition: muzzlePosition,
+                                                 muzzleVelocity: muzzleVelocity,
+                                                 withTimeStep: timeStep,
+                                                 pattern: Int(weaponSize))
+            weaponSize = weaponsList[0].sizes[0].size // MIRVs are each standard explosives
+        } else {
+            trajectories = [computeTrajectory(muzzlePosition: muzzlePosition,
+                                           muzzleVelocity: muzzleVelocity,
+                                           withTimeStep: timeStep)]
+        }
 
-        // deal with impact
-        let impactPosition = trajectory.last!
-        let blastRadius = weaponSize
-        
-        board.players[board.currentPlayer].prevTrajectory = trajectory
-        
+        // previous trajectory should be the primary projectile
+        board.players[board.currentPlayer].prevTrajectory = trajectories.first!
+
+        // sort trajectories by length for easier animation
+        let sortedTrajectories = trajectories.sorted(by: {lhs, rhs in
+            return lhs.count < rhs.count
+        })
+        trajectories = sortedTrajectories
+
         // update stats
         board.players[board.currentPlayer].stats.shotsFired += 1
         board.players[board.currentPlayer].stats.pointsSpent += Int64(weaponCost)
@@ -712,12 +728,25 @@ class GameModel : Codable {
         let sizeID = board.players[board.currentPlayer].weaponSizeID
         let old = ImageBuf(board.surface)
         let oldColor = ImageBuf(board.colors)
-        let detinationResult = applyExplosion(at: impactPosition, withRadius: weaponSize, andStyle: weapon.style)
-        if weapon.style == .explosive {
-            damageCheckForExplosion(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
-        } else if weapon.style == .napalm {
-            damageCheckForFluid(at: impactPosition, fromWeapon: weapon, with: detinationResult.fluidPath)
+
+        // deal with impact(s)
+        let blastRadius = weaponSize
+        var detonationResults: [DetonationResult] = []
+        for trajectory in trajectories {
+            let detonationResult = applyExplosion(for: trajectory, withRadius: blastRadius, andStyle: weapon.style)
+            detonationResults.append(detonationResult)
+
+            let impactPosition = trajectory.last!
+            if weapon.style == .explosive {
+                damageCheckForExplosion(at: impactPosition, fromWeapon: weapon, withSize: sizeID)
+            } else if weapon.style == .mirv {
+                damageCheckForExplosion(at: impactPosition, fromWeapon: weaponsList[0], withSize: 0)
+            } else if weapon.style == .napalm {
+                damageCheckForFluid(at: impactPosition, fromWeapon: weapon, with: detonationResult.fluidPath)
+            }
         }
+        
+        // record final state of the board
         let final = ImageBuf(board.surface)
         let finalColor = ImageBuf(board.colors)
         
@@ -739,19 +768,13 @@ class GameModel : Codable {
         
         let result: FireResult = FireResult(playerID: board.currentPlayer,
                                             timeStep: timeStep,
-                                            trajectory: trajectory,
+                                            trajectories: trajectories,
                                             explosionRadius: blastRadius,
                                             weaponStyle: weapon.style,
+                                            detonationResult: detonationResults,
                                             old: old,
-                                            top: detinationResult.topBuf,
-                                            middle: detinationResult.middleBuf,
-                                            bottom: detinationResult.bottomBuf,
                                             final: final,
-                                            fluidPath: detinationResult.fluidPath,
-                                            fluidRemaining: detinationResult.fluidRemaining,
                                             oldColor: oldColor,
-                                            topColor: detinationResult.topColor,
-                                            bottomColor: detinationResult.bottomColor,
                                             finalColor: finalColor,
                                             newRound: roundEnded,
                                             roundWinner: roundWinner,
@@ -769,6 +792,87 @@ class GameModel : Codable {
         NSLog("\(#function) finished")
 
         return result
+    }
+    
+    func computeMirvTrajectories(muzzlePosition: Vector3, muzzleVelocity: Vector3, withTimeStep: Float, pattern: Int, ignoreTanks: Bool = false) -> [[Vector3]] {
+        
+        var ret: [[Vector3]] = []
+        
+        // compute main trajectory
+        let primary = computeTrajectory(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity, withTimeStep: withTimeStep)
+        ret.append(primary)
+        
+        // find apex
+        var apexPos = 0
+        var prevZ: Float = -1
+        for i in 0..<primary.count {
+            if primary[i].z < prevZ {
+                apexPos = i-1
+                break
+            }
+            prevZ = primary[i].z
+        }
+        let apexPosition = primary[apexPos]
+        let apexVelocity = vectorScale(vectorDiff(primary[apexPos+1], primary[apexPos]), by: 1/withTimeStep)
+        
+        // create 'array' of patterns
+        // [0,0] is implicitly in each one as 'primary'
+        // [1,0] is in the direction of apexVelocity
+        let patterns: [Int: [[Float]]] = [5: [[-2,0], [-1,0], [1,0], [2,0]],
+                        6: [[0,-2], [0,-1], [0,1], [0,2]],
+                        9: [[-2,0], [-1,0], [1,0], [2,0], [0,-2], [0,-1], [0,1], [0,2]],
+                        13: [[2,0], [1.847,0.765], [1.414,1.414], [0.765,1.847],
+                             [0,2], [-0.765,1.847], [-1.414,1.414], [-1.847,0.765],
+                             [-2,0], [-1.847,-0.765],[-1.414,-1.414],[-0.765,-1.847],
+                             [0,-2], [0.765,-1.847], [1.414,-1.414], [1.847,-0.765]],
+                        17: [[2,0], [1.847,0.765], [1.414,1.414], [0.765,1.847],
+                             [0,2], [-0.765,1.847], [-1.414,1.414], [-1.847,0.765],
+                             [-2,0], [-1.847,-0.765],[-1.414,-1.414],[-0.765,-1.847],
+                             [0,-2], [0.765,-1.847], [1.414,-1.414], [1.847,-0.765],
+                             [-1,0], [1,0], [0,-1], [0,1]],
+                        21: [[2,0], [1.847,0.765], [1.414,1.414], [0.765,1.847],
+                             [0,2], [-0.765,1.847], [-1.414,1.414], [-1.847,0.765],
+                             [-2,0], [-1.847,-0.765],[-1.414,-1.414],[-0.765,-1.847],
+                             [0,-2], [0.765,-1.847], [1.414,-1.414], [1.847,-0.765],
+                             [0.7071,0.7071], [-0.7071,0.7071], [-0.7071,-0.7071], [0.7071,-0.7071],
+                             [-1,0], [1,0], [0,-1], [0,1]],
+                        25: [[-2,-2], [-1,-2], [0,-2], [1,-2], [2,-2],
+                             [-2,-1], [-1,-1], [0,-1], [1,-1], [2,-1],
+                             [-2,0], [-1,0], /*[0,0],*/ [1,0], [2,0],
+                             [-2,1], [-1,1], [0,1], [1,1], [2,1],
+                             [-2,2], [-1,2], [0,2], [1,2], [2,2],]
+                        ]
+        
+        guard let patternOffsets = patterns[pattern] else { return ret }
+        
+        // determine rotation needed
+        let angle = atan2(apexVelocity.y,apexVelocity.x)
+        
+        // compute additional trajectories
+        // be sure to align pattern with apexVelocity's x,y vector
+        for offset in patternOffsets {
+            // rotate offsets to match apexVelocity
+            let rotatedOffset = [offset[0] * cos(angle) - offset[1] * sin(angle),
+                                 offset[0] * sin(angle) + offset[1] * cos(angle)]
+            
+            // adjust velocity
+            let scaleFactor: Float = 10
+            let orientedOffset = Vector3(scaleFactor*rotatedOffset[0],scaleFactor*rotatedOffset[1],0)
+            let adjustedVelocity = vectorAdd(apexVelocity, orientedOffset)
+            let secondary = computeTrajectory(muzzlePosition: apexPosition, muzzleVelocity: adjustedVelocity, withTimeStep: withTimeStep)
+            var fullSecondary = Array(primary.prefix(apexPos-1))
+            fullSecondary.append(contentsOf: secondary)
+            
+//            // for debugging purposes
+//            let prevLength = ret.last!.count
+//            while fullSecondary.count < prevLength + 60 {
+//                fullSecondary.append(fullSecondary.last!)
+//            }
+            
+            ret.append(fullSecondary)
+        }
+        
+        return ret
     }
     
     func computeTrajectory(muzzlePosition: Vector3, muzzleVelocity: Vector3, withTimeStep: Float, ignoreTanks: Bool = false) -> [Vector3] {
@@ -861,8 +965,10 @@ class GameModel : Codable {
         return trajectory
     }
     
-    func applyExplosion(at: Vector3, withRadius: Float, andStyle: WeaponStyle = .explosive) -> DetonationResult {
-        NSLog("\(#function) started")
+    func applyExplosion(for trajectory: [Vector3], withRadius: Float, andStyle: WeaponStyle = .explosive) -> DetonationResult {
+        //NSLog("\(#function) started (radius: \(withRadius), style:\(andStyle), trajectory length: \(trajectory.count))")
+        let impactPosition = trajectory.last!
+        let at = impactPosition
         let topBuf = ImageBuf()
         let middleBuf = ImageBuf()
         let bottomBuf = ImageBuf()
@@ -871,7 +977,7 @@ class GameModel : Codable {
         var fluidPath: [Vector3] = []
         var fluidRemaining: [Float] = []
         
-        NSLog("starting image buffer copies")
+        //NSLog("starting image buffer copies")
         topBuf.copy(board.surface)
         middleBuf.copy(board.surface)
         bottomBuf.copy(board.surface)
@@ -879,11 +985,11 @@ class GameModel : Codable {
         topColor.copy(board.colors)
         bottomColor.copy(board.colors)
 
-        NSLog("\(#function) starting explosion computation at \(at) with radius \(withRadius) and style \(andStyle).")
+        //NSLog("\(#function) starting explosion computation at \(at) with radius \(withRadius) and style \(andStyle).")
         let style = andStyle
         
         // update things in the radius of the explosion
-        if style == .explosive || style == .generative {
+        if style == .explosive || style == .generative || style == .mirv {
             for j in Int(at.y-withRadius)...Int(at.y+withRadius) {
                 for i in Int(at.x-withRadius)...Int(at.x+withRadius) {
                     let xDiff = at.x - Float(i)
@@ -902,7 +1008,7 @@ class GameModel : Codable {
                     let expTop = at.z + vertSize
                     let expBottom = at.z - vertSize
                     
-                    if style == .explosive  {
+                    if style == .explosive || style == .mirv {
                         let top = currElevation
                         let middle = expTop
                         let bottom = min(currElevation, expBottom)
@@ -910,6 +1016,7 @@ class GameModel : Codable {
                         setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
                         setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
                         setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
+                        //NSLog("\(#function): \(i),\(j): set bottom to \(bottom)")
                         
                         // update elevation map
                         let newElevation = min(currElevation, bottom + max(0,top-middle))
@@ -972,12 +1079,13 @@ class GameModel : Codable {
             NSLog("\(#function) doesn't handle \(andStyle) style.")
         }
         
-        NSLog("\(#function) finished")
+        //NSLog("\(#function) finished")
 
         return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
                                 topColor: topColor, bottomColor: bottomColor,
                                 fluidPath: fluidPath,
-                                fluidRemaining: fluidRemaining)
+                                fluidRemaining: fluidRemaining,
+                                timeIndex: trajectory.count)
     }
     
     func fluidFill(startX: Float, startY: Float, totalVolume: Double, andStyle: WeaponStyle = WeaponStyle.napalm) -> ([Vector3], [Float]) {

@@ -22,6 +22,8 @@ struct PixelData {
 class ImageBuf : Codable {
     var width: Int = 0
     var height: Int = 0
+    var xOffset: Int = 0
+    var yOffset: Int = 0
     var pixels: [CGFloat] = []
     var pngBuffer: Data?
     var noiseLevel: Float = 10
@@ -46,6 +48,15 @@ class ImageBuf : Codable {
         guard x < width && x >= 0 else { return 0 }
 
         return pixels[offset]
+    }
+    
+    func setOffset(x: Int, y: Int) {
+        xOffset = x
+        yOffset = y
+    }
+
+    func getOffset() -> (x: Int, y: Int) {
+        return (xOffset, yOffset)
     }
     
     func setPixel(x: Int, y: Int, value: Double) {

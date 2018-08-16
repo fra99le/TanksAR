@@ -14,8 +14,6 @@ class GameViewBlockDrawer : GameViewDrawer {
 
     var boardBlocks: [[SCNNode]] = []
     var boardSurfaces: [[SCNNode]] = []
-    var dropBlocks: [SCNNode] = []
-    var fluidNode: SCNNode = SCNNode()
     let drainRate: Float = 5000
     var fillRate: Float = 5000
     
@@ -109,28 +107,44 @@ class GameViewBlockDrawer : GameViewDrawer {
         }
         
         // remove any dropBlocks that may still be around
-        for block in dropBlocks {
-            block.removeFromParentNode()
-        }
+        droppingNode.removeFromParentNode()
+        droppingNode = SCNNode()
         fluidNode.removeFromParentNode()
+        fluidNode = SCNNode()
         //NSLog("\(#function) finished")
     }
 
     override func animateResult(fireResult: FireResult, from: GameViewController) {
+     
         NSLog("\(#function) started")
-        
-        // time for use in animations
-        var currTime: CFTimeInterval = 0
-        
-        currTime = animateShell(fireResult: fireResult, at: currTime)
-        if fireResult.weaponStyle == .explosive || fireResult.weaponStyle == .generative {
-            currTime = animateExplosion(fireResult: fireResult, at: currTime)
-        }
+        let startTime: CFTimeInterval = 0
+        var currTime = startTime
+        let timeStep = CFTimeInterval(fireResult.timeStep / Float(timeScaling))
 
-        if fireResult.weaponStyle == .explosive || fireResult.weaponStyle == .generative {
-            currTime = animateDropSurface(fireResult: fireResult, from: from, at: currTime)
-        } else if fireResult.weaponStyle == .napalm || fireResult.weaponStyle == .mud {
-            currTime = animateFluidFill(fireResult: fireResult, from: from, at: currTime)
+        // prepare for explosion(s)
+        explosionsNode.removeFromParentNode()
+        explosionsNode = SCNNode()
+        board.addChildNode(explosionsNode)
+        
+        // prepare for dropping bits
+        droppingNode.removeFromParentNode()
+        droppingNode = SCNNode()
+        board.addChildNode(droppingNode)
+        
+        // animate shells' trajectories
+        let (firstImpact, _) = animateShells(fireResult: fireResult, at: currTime)
+        currTime = firstImpact
+        
+        let weaponStyle = fireResult.weaponStyle
+        for index in 0..<fireResult.detonationResult.count {
+            let hitTime = timeStep * Double(fireResult.trajectories[index].count)
+            
+            if weaponStyle == .explosive || weaponStyle == .generative || weaponStyle == .mirv {
+                let localTime = animateExplosion(fireResult: fireResult, at: hitTime, index: index)
+                currTime = max(currTime, animateDropSurface(fireResult: fireResult, from: from, at: localTime, index: index))
+            } else if fireResult.weaponStyle == .napalm || fireResult.weaponStyle == .mud {
+                currTime = max(currTime, animateFluidFill(fireResult: fireResult, from: from, at: hitTime, index: index))
+            }
         }
         
         // deal with round transitions
@@ -143,14 +157,12 @@ class GameViewBlockDrawer : GameViewDrawer {
         NSLog("\(#function) finished")
     }
 
-    func animateDropSurface(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval) -> CFTimeInterval {
+    func animateDropSurface(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval, index: Int = 0) -> CFTimeInterval {
         var currTime = time
 
         // animate board update
         var dropNeeded = false
-        for block in dropBlocks {
-            block.removeFromParentNode()
-        }
+        
         // stages:
         //  1. dropBlocks created, boardBlocks set to bottom height (immediate)
         //  2. dropBlocks drop over fixed interval
@@ -166,11 +178,11 @@ class GameViewBlockDrawer : GameViewDrawer {
                 // get elevations for block
                 let current = gameModel.getElevation(fromMap: fireResult.old,
                                                      longitude: Int(modelPos.x), latitude: Int(modelPos.y))
-                let top = gameModel.getElevation(fromMap: fireResult.top,
+                let top = gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
                                                  longitude: Int(modelPos.x), latitude: Int(modelPos.y))
-                let middle = gameModel.getElevation(fromMap: fireResult.middle,
+                let middle = gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
                                                     longitude: Int(modelPos.x), latitude: Int(modelPos.y))
-                let bottom = gameModel.getElevation(fromMap: fireResult.bottom,
+                let bottom = gameModel.getElevation(fromMap: fireResult.detonationResult[index].bottomBuf,
                                                     longitude: Int(modelPos.x), latitude: Int(modelPos.y))
                 
                 // check to see if drop block is needed
@@ -185,8 +197,7 @@ class GameViewBlockDrawer : GameViewDrawer {
                     dropBlock.position.y = (top+middle)/2 - 0.5
                     dropBlock.geometry?.firstMaterial = blockGeometry.firstMaterial
                     dropBlock.isHidden = true
-                    board.addChildNode(dropBlock)
-                    dropBlocks.append(dropBlock)
+                    droppingNode.addChildNode(dropBlock)
                     
                     let dropBlockSurface = SCNNode(geometry: SCNBox(width: blockGeometry.width,
                                                                     height: 1,
@@ -216,8 +227,7 @@ class GameViewBlockDrawer : GameViewDrawer {
                     shortBlock.position.y = bottom / 2
                     shortBlock.isHidden = true
                     shortBlock.geometry?.firstMaterial = blockGeometry.firstMaterial
-                    dropBlocks.append(shortBlock)
-                    board.addChildNode(shortBlock)
+                    droppingNode.addChildNode(shortBlock)
                     
                     let shortenAction = SCNAction.sequence([.wait(duration: currTime),
                                                             .unhide()])
@@ -244,11 +254,11 @@ class GameViewBlockDrawer : GameViewDrawer {
     var puddleSet: [Bool] = []
     var bottomFilledTo: [Int:Float] = [:]
 
-    func animateFluidFill(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval) -> CFTimeInterval {
+    func animateFluidFill(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval, index: Int = 0) -> CFTimeInterval {
         var currTime = time
         
-        let path = fireResult.fluidPath
-        let remaining = fireResult.fluidRemaining
+        let path = fireResult.detonationResult[index].fluidPath
+        let remaining = fireResult.detonationResult[index].fluidRemaining
         let puddles = findPuddles(in: path)
         let drainEdgeSize = edgeSize / 5
         var drainStart = 0

@@ -29,9 +29,12 @@ class GameViewDrawer {
     var tankNodes: [SCNNode] = []
     var tankScale: Float = 10
     var numPerSide: Int = 0
-    var shellNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
-    var explosionNode: SCNNode? = nil // may need to be an array if simultaneous turns are allowed
+    var shellsNode =  SCNNode()
+    var explosionsNode = SCNNode()
+    var droppingNode = SCNNode()
+    var fluidNode: SCNNode = SCNNode()
     var timeScaling: Double = 3
+    //var timeScaling: Double = 0.5 // for debugging purposes
     let explosionTime: Double = 0.5
     let explosionReceedTime: Double = 0.25
     let dropTime: Double = 1.5
@@ -58,39 +61,76 @@ class GameViewDrawer {
         sceneView.autoenablesDefaultLighting = true
     }
     
-    func animateShell(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {
+    func animateShells(fireResult: FireResult, at: CFTimeInterval) -> (CFTimeInterval, CFTimeInterval) {
         var currTime = at
-        
+        let timeStep = CFTimeInterval(fireResult.timeStep / Float(timeScaling))
+
         // create shell object
-        if let oldShell = shellNode {
-            oldShell.removeFromParentNode()
+        shellsNode.removeFromParentNode()
+        shellsNode = SCNNode()
+        board.addChildNode(shellsNode)
+        
+        // get split time
+        var splitIndex = 0
+        if fireResult.trajectories.count > 1 {
+            var i = 0
+            while fireResult.trajectories[0][i].x == fireResult.trajectories[1][i].x &&
+                fireResult.trajectories[0][i].y == fireResult.trajectories[1][i].y {
+                    i += 1
+            }
+            splitIndex = i
         }
-        shellNode = SCNNode(geometry: SCNSphere(radius: 5))
-        if let shell = shellNode,
-            let firstPosition = fireResult.trajectory.first {
+        let splitTime = timeStep * CFTimeInterval(splitIndex)
+        
+        var shortestTraj = fireResult.trajectories.first!.count
+        var longestTraj = fireResult.trajectories.last!.count
+        for i in 0..<fireResult.trajectories.count {
+            let trajectory = fireResult.trajectories[i]
+            let shell = SCNNode(geometry: SCNSphere(radius: 5))
+            
+            shortestTraj = min(shortestTraj,trajectory.count)
+            longestTraj = max(longestTraj,trajectory.count)
+
+            guard let firstPosition = trajectory.first else { continue }
+            
             shell.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
             // convert back to view coordinates
             shell.position = fromModelSpace(firstPosition)
             shell.isHidden = true
-            board.addChildNode(shellNode!)
+            shellsNode.addChildNode(shell)
+            
+            var appearTime: CFTimeInterval!
+            var startPos: Int!
+            if i == 0 {
+                appearTime = 0
+                startPos = 0
+            } else {
+                appearTime = splitTime
+                startPos = splitIndex
+            }
             
             // make shell appear
-            var shellActions: [SCNAction] = [.unhide()]
+            var shellActions: [SCNAction] = [.wait(duration: appearTime),
+                                             .unhide()]
             
             // make shell move
-            let timeStep = CFTimeInterval(fireResult.timeStep / Float(timeScaling))
-            for currPosition in fireResult.trajectory {
+            for j in startPos..<trajectory.count {
+                let currPosition = trajectory[j]
                 // convert currPostion to AR space
                 let arPosition = fromModelSpace(currPosition)
                 shellActions.append(contentsOf: [.move(to: arPosition, duration: timeStep)])
             }
-            currTime = timeStep * CFTimeInterval(fireResult.trajectory.count)
+            currTime = at + timeStep * CFTimeInterval(trajectory.count)
             shellActions.append(contentsOf: [.hide()])
             let shellAnimation = SCNAction.sequence(shellActions)
-            shellNode?.runAction(shellAnimation)
+            shell.runAction(shellAnimation)
+        
+            NSLog("shell landed at time \(currTime).")
         }
-        NSLog("shell landed at time \(currTime).")
-        return currTime
+
+        let firstImpact = at + Double(shortestTraj) * timeStep
+        let lastImpact = at + Double(longestTraj) * timeStep
+        return (firstImpact, lastImpact)
     }
     
     func addTrajectory(trajectory: [Vector3], toNode: SCNNode, color: UIColor) {
@@ -146,43 +186,39 @@ class GameViewDrawer {
         toNode.addChildNode(gimble)
     }
     
-    func animateExplosion(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {
+    func animateExplosion(fireResult: FireResult, at: CFTimeInterval, index: Int = 0) -> CFTimeInterval {
         var currTime = at
 
-        // animate explosion
-        if let oldExplosion = explosionNode {
-            oldExplosion.removeFromParentNode()
-        }
-        explosionNode = SCNNode(geometry: SCNSphere(radius: 1))
-        if let explosion = explosionNode,
-            let lastPosition = fireResult.trajectory.last {
-            explosion.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
-            // convert back to view coordinates
-            explosion.position = fromModelSpace(lastPosition)
-            explosion.isHidden = true
-            explosionNode?.castsShadow = false
-            board.addChildNode(explosion)
-            
-            let explosionActions = SCNAction.sequence([.wait(duration: currTime),
-                                                       .unhide(),
-                                                       .scale(to: CGFloat(fireResult.explosionRadius), duration: explosionTime),
-                                                       .scale(to: 0, duration: explosionReceedTime),
-                                                       .hide()])
-            explosionNode?.runAction(explosionActions)
+        guard let lastPosition = fireResult.trajectories[index].last else { return currTime }
 
-            // check for tanks that need to be hidden
-            for i in 0..<gameModel.board.players.count {
-                let player = gameModel.board.players[i]
-                if player.hitPoints <= 0 {
-                    let tankNode = tankNodes[i]
-                    let hideAction = SCNAction.sequence([.wait(duration: currTime+explosionTime),
-                                                         .hide()])
-                    tankNode.runAction(hideAction)
-                }
-            }
-        }
+        let explosion = SCNNode(geometry: SCNSphere(radius: 1))        
+        explosion.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
+        // convert back to view coordinates
+        explosion.position = fromModelSpace(lastPosition)
+        explosion.isHidden = true
+        explosion.castsShadow = false
+        explosionsNode.addChildNode(explosion)
+        
+        let explosionActions = SCNAction.sequence([.wait(duration: currTime),
+                                                   .unhide(),
+                                                   .scale(to: CGFloat(fireResult.explosionRadius), duration: explosionTime),
+                                                   .scale(to: 0, duration: explosionReceedTime),
+                                                   .hide()])
+        explosion.runAction(explosionActions)
+        
+//        // check for tanks that need to be hidden
+//        for i in 0..<gameModel.board.players.count {
+//            let player = gameModel.board.players[i]
+//            if player.hitPoints <= 0 {
+//                let tankNode = tankNodes[i]
+//                let hideAction = SCNAction.sequence([.wait(duration: currTime+explosionTime),
+//                                                     .hide()])
+//                tankNode.runAction(hideAction)
+//            }
+//        }
+        
         currTime += explosionTime
-        NSLog("explosion reached maximum radius at time \(currTime) and ended at \(currTime+1).")
+        NSLog("\(index): explosion at \(lastPosition) reached maximum radius at time \(currTime) and ended at \(currTime+explosionReceedTime).")
         
         return currTime
     }

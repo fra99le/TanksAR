@@ -626,7 +626,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         // record result for AIs
         let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
         if let ai = gameModel.board.players[fireResult.playerID].ai,
-            let impact = fireResult.trajectory.last {
+            let impact = gameModel.board.players[fireResult.playerID].prevTrajectory.last {
             // player is an AI
             _ = ai.recordResult(gameModel: gameModel, azimuth: tank.azimuth, altitude: tank.altitude, velocity: tank.velocity,
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
