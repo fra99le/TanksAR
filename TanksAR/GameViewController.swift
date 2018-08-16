@@ -977,7 +977,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         let (muzzlePosition, muzzleVelocity) = muzzleParameters()
         let playerTraj = gameModel.computeTrajectory(muzzlePosition: muzzlePosition,
                                                      muzzleVelocity: muzzleVelocity,
-                                                     withTimeStep: 1/3.0)
+                                                     withTimeStep: 1/6.0)
         boardDrawer.addTrajectory(trajectory: playerTraj, toNode: currTraj, color: UIColor.lightGray)
         board.addChildNode(currTraj)
     }

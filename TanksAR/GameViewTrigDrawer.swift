@@ -58,9 +58,21 @@ class GameViewTrigDrawer : GameViewDrawer {
                 let n = gameModel.getNormal(fromMap: forSurface, longitude: Int(x), latitude: Int(y))
                 
                 let modelCoordinates = Vector3(x,y,z)
-                let viewCoordinates = fromModelSpace(modelCoordinates)
+                var viewCoordinates = fromModelSpace(modelCoordinates)
                 //NSLog("\(i),\(j) -> model coordinates \(modelCoordinates) -> view coordinates \(viewCoordinates)")
                 
+                if isBottom {
+                    // Note: need a test to see if the point in question changes!
+                    // should depress bottom slightly so crater caps don't interfere with it
+                    var slightOffset = Vector3()
+                    if useNormals {
+                        let offset = vectorNormalize(n)
+                        slightOffset = vectorScale(offset, by: -0.1)
+                    }
+                    let vertex = vectorAdd(modelCoordinates, slightOffset)
+                    viewCoordinates = fromModelSpace(vertex)
+                }
+
                 vertices.append(viewCoordinates)
                 texCoords.append(toMapSpace(x: x, y: y))
                 normals.append(fromModelScale(n))
