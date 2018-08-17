@@ -347,6 +347,7 @@ class GameViewTrigDrawer : GameViewDrawer {
 
         let weaponStyle = fireResult.weaponStyle
         for index in 0..<fireResult.detonationResult.count {
+            NSLog("projectile \(index): started")
             let hitTime = timeStep * Double(fireResult.trajectories[index].count)
             
             // board surface animation
@@ -425,16 +426,16 @@ class GameViewTrigDrawer : GameViewDrawer {
                     
                     if bottom < current {
                         vertexChanges[j][i] = true
-                        NSLog("\(i),\(j): bottom: \(bottom), current: \(current)")
+                        //NSLog("\(i),\(j): bottom: \(bottom), current: \(current)")
                         numChanged += 1
-                    } else {
+                    } else if useNormals {
                         let bottomNormal = gameModel.getNormal(fromMap: combinedBottom, longitude: Int(x), latitude: Int(y))
                         let currentNormal = gameModel.getNormal(fromMap: detination.bottomBuf, longitude: Int(x), latitude: Int(y))
                         if bottomNormal.x != currentNormal.x ||
                             bottomNormal.y != currentNormal.y ||
                             bottomNormal.z != currentNormal.z {
                             vertexChanges[j][i] = true
-                            NSLog("\(i),\(j): bottomNormal: \(bottomNormal), currentNormal: \(currentNormal), diff: \(vectorDiff(bottomNormal, currentNormal))")
+                            //NSLog("\(i),\(j): bottomNormal: \(bottomNormal), currentNormal: \(currentNormal), diff: \(vectorDiff(bottomNormal, currentNormal))")
                             numChanged += 1
                         }
                     }
@@ -546,7 +547,26 @@ class GameViewTrigDrawer : GameViewDrawer {
         return (combinedBottom, combinedBottomColor)
     }
     
+    struct VertexValues {
+        var current: CGFloat = 0.0
+        var top: CGFloat = 0.0
+        var middle: CGFloat = 0.0
+        var bottom: CGFloat = 0.0
+        var new: CGFloat = 0.0
+        
+        var isDropping = false
+        var isUnchanged = false
+        var isDisplaced = false
+
+        var oldNorm = Vector3()
+        var topNorm = Vector3()
+        var middleNorm = Vector3()
+        var bottomNorm = Vector3()
+        var finalNorm = Vector3()
+    }
+    
     func animateDropSurface(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval, index: Int = 0) -> CFTimeInterval {
+        NSLog("\(#function): started")
         var currTime = time
         
         // for debugging purposes only!
@@ -556,7 +576,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         //                         [2,1,0],
         //                         [2,0,1],
         //                         [1,2,0],
-        //                         [0,2,1], // broken (has false, false, false)
+        //                         [0,2,1],
         //                         [1,0,2],
         //                         [0,1,2],
         //                         [1,1,1]]
@@ -564,6 +584,74 @@ class GameViewTrigDrawer : GameViewDrawer {
         //        NSLog("ROUND \(gameModel.board.currentRound): \(showOnly)")
         
 
+        // record all relevant data at each vertex position, to prevent repeated accessed to getElevation and getNormal
+        NSLog("\(#function): starting to fill vertexInfo")
+        var vertexInfo: [[VertexValues]] = [[VertexValues]](repeating: [], count: numPerSide+1)
+        for i in 0...numPerSide {
+            vertexInfo[i] = [VertexValues](repeating: VertexValues(), count: numPerSide+1)
+            for j in 0...numPerSide {
+                let x = CGFloat(i)*edgeSize
+                let y = CGFloat(j)*edgeSize
+                
+                let current = CGFloat(gameModel.getElevation(fromMap: fireResult.old, longitude: Int(x), latitude: Int(y)))
+                let top = CGFloat(gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
+                                                                      longitude: Int(x), latitude: Int(y)))
+                let middle = CGFloat(gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
+                                                                         longitude: Int(x), latitude: Int(y)))
+                let bottom = CGFloat(gameModel.getElevation(fromMap: fireResult.detonationResult[index].bottomBuf,
+                                                                         longitude: Int(x), latitude: Int(y)))
+                let new = CGFloat(gameModel.getElevation(fromMap: fireResult.final,
+                                                                      longitude: Int(x), latitude: Int(y)))
+
+                let isDropping = top >= middle && middle > bottom
+                let isUnchanged = new == current
+                let isDisplaced = !isDropping && !isUnchanged
+                
+                vertexInfo[i][j].current = current
+                vertexInfo[i][j].top = top
+                vertexInfo[i][j].middle = middle
+                vertexInfo[i][j].bottom = bottom
+                vertexInfo[i][j].new = new
+                
+                vertexInfo[i][j].isDropping = isDropping
+                vertexInfo[i][j].isUnchanged = isUnchanged
+                vertexInfo[i][j].isDisplaced = isDisplaced
+                
+                // exactly one must be true
+                assert( (isDropping  && !isUnchanged && !isDisplaced)
+                    || (!isDropping && isUnchanged && !isDisplaced)
+                    || (!isDropping && !isUnchanged && isDisplaced) )
+
+                if useNormals {
+                    // needed for: all
+                    vertexInfo[i][j].topNorm = gameModel.getNormal(fromMap: fireResult.detonationResult[index].topBuf,
+                                                                   longitude: Int(x), latitude: Int(y))
+                    vertexInfo[i][j].finalNorm = gameModel.getNormal(fromMap: fireResult.final,
+                                                                     longitude: Int(x), latitude: Int(y))
+                    
+                    
+                    if isUnchanged {
+                        // needed for: unchanged
+                        vertexInfo[i][j].oldNorm = gameModel.getNormal(fromMap: fireResult.old,
+                                                                     longitude: Int(x), latitude: Int(y))
+                    }
+                    
+                    if isDropping {
+                        // needed for: dropping
+                        vertexInfo[i][j].middleNorm = gameModel.getNormal(fromMap: fireResult.detonationResult[index].middleBuf,
+                                                                      longitude: Int(x), latitude: Int(y))
+                    }
+                    
+                    if isDisplaced || isDropping {
+                        // needed for: displaced, dropping
+                        vertexInfo[i][j].bottomNorm = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
+                                                                   longitude: Int(x), latitude: Int(y))
+                    }
+                }
+            }
+        }
+        NSLog("\(#function): finished filling vertexInfo")
+        
         // draw dropping surfaces
         var dropVertices0: [SCNVector3] = []
         var dropVertices1: [SCNVector3] = []
@@ -572,65 +660,59 @@ class GameViewTrigDrawer : GameViewDrawer {
         var dropTexCoords: [CGPoint] = []
         var dropIndices: [[CInt]] = [[CInt]](repeating: [], count: colors.count)
         var dropNeeded = false
-        for i in 0...numPerSide {
-            for j in 0...numPerSide {
+        // Note: restricting this to just the regions that changes will greatly improve performance, mostly by decreasing the number of normal found.
+        // Note: additionally make arrays that can cache elevation and normal data at each vertex point
+        
+        var currentArr: [CGFloat] = [0,0,0,0]
+        var topArr: [CGFloat] = [0,0,0,0]
+        var middleArr: [CGFloat] = [0,0,0,0]
+        var bottomArr: [CGFloat] = [0,0,0,0]
+        var newArr: [CGFloat] = [0,0,0,0]
+        var dropArr: [Bool] = [false,false,false,false]
+        var displaceArr: [Bool] = [false,false,false,false]
+        var unchangedArr: [Bool] = [false,false,false,false]
+        var normalChanged: [Bool] = [false,false,false,false]
+
+        for i in 0..<numPerSide {
+            for j in 0..<numPerSide {
                 
                 // get elevation for all four vertices (i.e. both triangles)
                 let xArr = [CGFloat(i)*edgeSize, CGFloat(i)*edgeSize, CGFloat(i+1)*edgeSize, CGFloat(i+1)*edgeSize]
                 let yArr = [CGFloat(j)*edgeSize, CGFloat(j+1)*edgeSize, CGFloat(j+1)*edgeSize, CGFloat(j)*edgeSize]
-                var currentArr: [CGFloat] = []
-                var topArr: [CGFloat] = []
-                var middleArr: [CGFloat] = []
-                var bottomArr: [CGFloat] = []
-                var newArr: [CGFloat] = []
-                var dropArr: [Bool] = []
-                var displaceArr: [Bool] = []
-                var unchangedArr: [Bool] = []
-                var normalChanged: [Bool] = []
+                let iArr = [i, i, i+1, i+1]
+                let jArr = [j, j+1, j+1, j]
                 for k in 0...3 {
-                    let x = xArr[k]
-                    let y = yArr[k]
-                    
+                    let iIdx = iArr[k]
+                    let jIdx = jArr[k]
+
                     // get elevations for each vertex
-                    let current = gameModel.getElevation(fromMap: fireResult.old, longitude: Int(x), latitude: Int(y))
-                    let top = gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
-                                                     longitude: Int(x), latitude: Int(y))
-                    let middle = gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
-                                                        longitude: Int(x), latitude: Int(y))
-                    let bottom = gameModel.getElevation(fromMap: fireResult.detonationResult[index].bottomBuf,
-                                                        longitude: Int(x), latitude: Int(y))
-                    let new = gameModel.getElevation(fromMap: fireResult.final,
-                                                     longitude: Int(x), latitude: Int(y))
+                    let current = vertexInfo[iIdx][jIdx].current
+                    let top = vertexInfo[iIdx][jIdx].top
+                    let middle = vertexInfo[iIdx][jIdx].middle
+                    let bottom = vertexInfo[iIdx][jIdx].bottom
+                    let new = vertexInfo[iIdx][jIdx].new
+
                     // NSLog("\(#function) i,j: \(i),\(j), k: \(k), current: \(current), top: \(top), middle: \(middle), bottom: \(bottom)")
                     
                     if useNormals {
                         // check normals before and after for each vertex
-                        let preNorm = gameModel.getNormal(fromMap: fireResult.detonationResult[index].topBuf,
-                                                          longitude: Int(x), latitude: Int(y))
-                        let postNorm = gameModel.getNormal(fromMap: fireResult.final,
-                                                           longitude: Int(x), latitude: Int(y))
-                        normalChanged.append(preNorm.x != postNorm.x || preNorm.y != postNorm.y || preNorm.z != postNorm.z)
+                        let preNorm = vertexInfo[iIdx][jIdx].topNorm
+                        let postNorm = vertexInfo[iIdx][jIdx].finalNorm
+                        normalChanged[k] = (preNorm.x != postNorm.x || preNorm.y != postNorm.y || preNorm.z != postNorm.z)
                     }
                    
                     // record elevations for each point
-                    currentArr.append(CGFloat(current))
-                    topArr.append(CGFloat(top))
-                    middleArr.append(CGFloat(middle))
-                    bottomArr.append(CGFloat(bottom))
-                    newArr.append(CGFloat(new))
+                    currentArr[k] = CGFloat(current)
+                    topArr[k] = CGFloat(top)
+                    middleArr[k] = CGFloat(middle)
+                    bottomArr[k] = CGFloat(bottom)
+                    newArr[k] = CGFloat(new)
                     
                     // record booleans for different animation conditions
-                    let isDropping = top >= middle && middle > bottom
-                    let isUnchanged = new == current
-                    let isDisplaced = !isDropping && !isUnchanged
-                    dropArr.append(isDropping)
-                    unchangedArr.append(isUnchanged)
-                    displaceArr.append(isDisplaced)
+                    dropArr[k] = vertexInfo[iIdx][jIdx].isDropping
+                    unchangedArr[k] = vertexInfo[iIdx][jIdx].isUnchanged
+                    displaceArr[k] = vertexInfo[iIdx][jIdx].isDisplaced
                     
-                    // exactly one must be true
-                    assert( (isDropping  && !isUnchanged && !isDisplaced)
-                            || (!isDropping && isUnchanged && !isDisplaced)
-                            || (!isDropping && !isUnchanged && isDisplaced) )
                 }
                 
                 // deal with both sub-triangles
@@ -657,18 +739,18 @@ class GameViewTrigDrawer : GameViewDrawer {
                         }
                     }
                     
+                    let numDropping = dropIdxs.count
+                    let numDisplaced = displaceIdxs.count
+                    let numUnchanged = unchangedIdxs.count
+                    let numNormChanged = normChangeIdxs.count
+                    assert (numDropping+numDisplaced+numUnchanged == 3)
+        
                     // determine color index
                     let colorX = Int((xArr[p[0]] + xArr[p[1]] + xArr[p[2]]) / 3)
                     let colorY = Int((yArr[p[0]] + yArr[p[1]] + yArr[p[2]]) / 3)
                     let colorIndex = gameModel.getColorIndex(forMap: fireResult.detonationResult[index].topColor,
                                                              longitude: colorX,
                                                              latitude: colorY) % colors.count
-                    
-                    let numDropping = dropIdxs.count
-                    let numDisplaced = displaceIdxs.count
-                    let numUnchanged = unchangedIdxs.count
-                    let numNormChanged = normChangeIdxs.count
-                    assert (numDropping+numDisplaced+numUnchanged == 3)
                     
                     // enumeration of possible triangles:
                     // (d=drops, i=displaced, u=unchanged)
@@ -726,7 +808,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                         // 2,0,1
                         
                         // if the unchanged point is above the explosion,
-                        // then it is save to attach the dropping points to it.
+                        // then it is safe to attach the dropping points to it.
                         // if the unchanged point is below the dropping one,
                         // it is probably disconnected.
                         
@@ -735,32 +817,44 @@ class GameViewTrigDrawer : GameViewDrawer {
                         // initial position
                         let x1_0 = xArr[dropIdxs[0]]
                         let y1_0 = yArr[dropIdxs[0]]
-                        let z1_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
-                                                          longitude: Int(x1_0), latitude: Int(y1_0))
-                        let v1_0 = Vector3(x1_0, y1_0, CGFloat(z1_0))
+                        let i1_0 = iArr[dropIdxs[0]]
+                        let j1_0 = jArr[dropIdxs[0]]
+//                        let z1_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
+//                                                          longitude: Int(x1_0), latitude: Int(y1_0))
+                        let z1_0 = vertexInfo[i1_0][j1_0].top
+                        let v1_0 = Vector3(x1_0, y1_0, z1_0)
                         
                         let x2_0 = xArr[dropIdxs[0]]
                         let y2_0 = yArr[dropIdxs[0]]
-                        let z2_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
-                                                          longitude: Int(x2_0), latitude: Int(y2_0))
-                        let v2_0 = Vector3(x2_0, y2_0, CGFloat(z2_0))
+                        let i2_0 = iArr[dropIdxs[0]]
+                        let j2_0 = jArr[dropIdxs[0]]
+//                        let z2_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
+//                                                          longitude: Int(x2_0), latitude: Int(y2_0))
+                        let z2_0 = vertexInfo[i2_0][j2_0].middle
+                        let v2_0 = Vector3(x2_0, y2_0, z2_0)
                         
                         let x3_0 = xArr[dropIdxs[1]]
                         let y3_0 = yArr[dropIdxs[1]]
-                        let z3_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
-                                                          longitude: Int(x3_0), latitude: Int(y3_0))
-                        let v3_0 = Vector3(x3_0, y3_0, CGFloat(z3_0))
+                        let i3_0 = iArr[dropIdxs[1]]
+                        let j3_0 = jArr[dropIdxs[1]]
+//                        let z3_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
+//                                                          longitude: Int(x3_0), latitude: Int(y3_0))
+                        let z3_0 = vertexInfo[i3_0][j3_0].top
+                        let v3_0 = Vector3(x3_0, y3_0, z3_0)
                         
                         let x4_0 = xArr[dropIdxs[1]]
                         let y4_0 = yArr[dropIdxs[1]]
-                        let z4_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
-                                                          longitude: Int(x4_0), latitude: Int(y4_0))
-                        let v4_0 = Vector3(x4_0, y4_0, CGFloat(z4_0))
+                        let i4_0 = iArr[dropIdxs[1]]
+                        let j4_0 = jArr[dropIdxs[1]]
+//                        let z4_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
+//                                                          longitude: Int(x4_0), latitude: Int(y4_0))
+                        let z4_0 = vertexInfo[i4_0][j4_0].middle
+                        let v4_0 = Vector3(x4_0, y4_0, z4_0)
                         
                         let x5_0 = (x2_0 + x4_0) / 2
                         let y5_0 = (y2_0 + y4_0) / 2
                         let z5_0 = (z2_0 + z4_0) / 2
-                        let v5_0 = Vector3(x5_0, y5_0, CGFloat(z5_0))
+                        let v5_0 = Vector3(x5_0, y5_0, z5_0)
                         
                         let normal0_0 = Vector3(xArr[unchangedIdxs[0]]-x5_0,
                                                 yArr[unchangedIdxs[0]]-y5_0,
@@ -769,35 +863,53 @@ class GameViewTrigDrawer : GameViewDrawer {
                         // final position
                         let x1_1 = xArr[dropIdxs[0]]
                         let y1_1 = yArr[dropIdxs[0]]
-                        let z1_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x1_1), latitude: Int(y1_1))
+                        let i1_1 = iArr[dropIdxs[0]]
+                        let j1_1 = jArr[dropIdxs[0]]
+                        //let z1_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x1_1), latitude: Int(y1_1))
+                        let z1_1 = vertexInfo[i1_1][j1_1].new
                         let v1_1 = Vector3(x1_1, y1_1, CGFloat(z1_1))
                         
                         let x2_1 = xArr[dropIdxs[0]]
                         let y2_1 = yArr[dropIdxs[0]]
-                        let z2_1 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].bottomBuf,
-                                                          longitude: Int(x2_1), latitude: Int(y2_1))
+                        let i2_1 = iArr[dropIdxs[0]]
+                        let j2_1 = jArr[dropIdxs[0]]
+                        //let z2_1 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].bottomBuf,
+                        //                                  longitude: Int(x2_1), latitude: Int(y2_1))
+                        let z2_1 = vertexInfo[i2_1][j2_1].bottom
                         let v2_1 = Vector3(x2_1, y2_1, CGFloat(z2_1))
                         
                         let x3_1 = xArr[dropIdxs[1]]
                         let y3_1 = yArr[dropIdxs[1]]
-                        let z3_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x3_1), latitude: Int(y3_1))
+                        let i3_1 = iArr[dropIdxs[1]]
+                        let j3_1 = jArr[dropIdxs[1]]
+                        //let z3_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x3_1), latitude: Int(y3_1))
+                        let z3_1 = vertexInfo[i3_1][j3_1].new
                         let v3_1 = Vector3(x3_1, y3_1, CGFloat(z3_1))
                         
                         let x4_1 = xArr[dropIdxs[1]]
                         let y4_1 = yArr[dropIdxs[1]]
-                        let z4_1 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].bottomBuf,
-                                                          longitude: Int(x4_1), latitude: Int(y4_1))
+                        let i4_1 = iArr[dropIdxs[1]]
+                        let j4_1 = jArr[dropIdxs[1]]
+                        //let z4_1 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].bottomBuf,
+                        //                                  longitude: Int(x4_1), latitude: Int(y4_1))
+                        let z4_1 = vertexInfo[i4_1][j4_1].bottom
                         let v4_1 = Vector3(x4_1, y4_1, CGFloat(z4_1))
                         
                         let x5_1 = xArr[unchangedIdxs[0]]
                         let y5_1 = yArr[unchangedIdxs[0]]
-                        let z5_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x5_1), latitude: Int(y5_1))
+                        let i5_1 = iArr[unchangedIdxs[0]]
+                        let j5_1 = jArr[unchangedIdxs[0]]
+                        //let z5_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x5_1), latitude: Int(y5_1))
+                        let z5_1 = vertexInfo[i5_1][j5_1].new
                         let v5_1 = Vector3(x5_1, y5_1, CGFloat(z5_1))
                         
-                        let normal0_1 = gameModel.getNormal(longitude: Int(x1_1), latitude: Int(y1_1))
-                        let normal1_1 = gameModel.getNormal(longitude: Int(x3_1), latitude: Int(y3_1))
-                        let normal2_1 = gameModel.getNormal(longitude: Int(x5_1), latitude: Int(y5_1))
-                        
+//                        let normal0_1 = gameModel.getNormal(longitude: Int(x1_1), latitude: Int(y1_1))
+//                        let normal1_1 = gameModel.getNormal(longitude: Int(x3_1), latitude: Int(y3_1))
+//                        let normal2_1 = gameModel.getNormal(longitude: Int(x5_1), latitude: Int(y5_1))
+                        let normal0_1 = vertexInfo[i1_1][j1_1].finalNorm
+                        let normal1_1 = vertexInfo[i3_1][j3_1].finalNorm
+                        let normal2_1 = vertexInfo[i5_1][j5_1].finalNorm
+
                         // add vertices
                         let baseIdx = dropVertices0.count
                         dropVertices0.append(fromModelSpace(v1_0))
@@ -876,25 +988,33 @@ class GameViewTrigDrawer : GameViewDrawer {
                         if dropArr[k] {
                             z0 = topArr[k]
                             z1 = bottomArr[k] + (topArr[k] - middleArr[k])
-                            norm0 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].topBuf,
-                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm0 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].topBuf,
+//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm0 = vertexInfo[iArr[k]][jArr[k]].topNorm
+                            norm1 = vertexInfo[iArr[k]][jArr[k]].finalNorm
                         } else if displaceArr[k] {
                             z0 = bottomArr[k]
                             z1 = bottomArr[k]
-                            var norm0surf = fireResult.detonationResult[index].bottomBuf
+                            //var norm0surf = fireResult.detonationResult[index].bottomBuf
                             if topArr[k] == bottomArr[k] {
                                 // if displacement was upwards (i.e. .generative),
                                 // norm0 should be from .top.
-                                norm0surf = fireResult.detonationResult[index].topBuf
+                                //norm0surf = fireResult.detonationResult[index].topBuf
+                                norm0 = vertexInfo[iArr[k]][jArr[k]].topNorm
+                            } else  {
+                                norm0 = vertexInfo[iArr[k]][jArr[k]].bottomNorm
                             }
-                            norm0 = gameModel.getNormal(fromMap: norm0surf, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            //norm0 = gameModel.getNormal(fromMap: norm0surf, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            //norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm1 = vertexInfo[iArr[k]][jArr[k]].finalNorm
                         } else if unchangedArr[k] {
                             z0 = currentArr[k]
                             z1 = newArr[k]
-                            norm0 = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm0 = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm0 = vertexInfo[iArr[k]][jArr[k]].oldNorm
+                            norm1 = vertexInfo[iArr[k]][jArr[k]].finalNorm
                         } else {
                             NSLog("This is bad (line \(#line)), i,j=\(i),\(j); k=\(k), \(dropArr[k]), \(displaceArr[k]), \(unchangedArr[k])")
                             NSLog("\(currentArr[k]) -> \(topArr[k]) > \(middleArr[k]) > \(bottomArr[k]) -> \(newArr[k])")
@@ -931,23 +1051,29 @@ class GameViewTrigDrawer : GameViewDrawer {
                         if dropArr[k] {
                             z0 = middleArr[k]
                             z1 = bottomArr[k]
-                            norm0 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].middleBuf,
-                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
-                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm0 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].middleBuf,
+//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm1 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
+//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm0 = vertexInfo[iArr[k]][jArr[k]].middleNorm
+                            norm1 = vertexInfo[iArr[k]][jArr[k]].bottomNorm
                         } else if displaceArr[k] {
                             z0 = bottomArr[k]
                             z1 = bottomArr[k]
                             
-                            norm0 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
-                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
-                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm0 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
+//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm1 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
+//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm0 = vertexInfo[iArr[k]][jArr[k]].bottomNorm
+                            norm1 = vertexInfo[iArr[k]][jArr[k]].bottomNorm
                         } else if unchangedArr[k] {
                             z0 = currentArr[k]
                             z1 = newArr[k]
-                            norm0 = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm0 = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+//                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
+                            norm0 = vertexInfo[iArr[k]][jArr[k]].oldNorm
+                            norm1 = vertexInfo[iArr[k]][jArr[k]].finalNorm
                         } else {
                             NSLog("This is bad (line \(#line)), i,j=\(i),\(j); k=\(k), \(dropArr[k]), \(displaceArr[k]), \(unchangedArr[k])")
                             NSLog("\(currentArr[k]) -> \(topArr[k]) > \(middleArr[k]) > \(bottomArr[k]) -> \(newArr[k])")
@@ -1032,6 +1158,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             //currTime += dropTime
         }
         
+        NSLog("\(#function): finished")
         return currTime
     }
     
