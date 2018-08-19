@@ -251,7 +251,9 @@ class TestGameModel : GameModel {
         
         return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
                                 topColor: topColor, bottomColor: bottomColor,
-                                fluidPath: [], fluidRemaining: [], timeIndex: trajectory.count)
+                                fluidPath: [], fluidRemaining: [], timeIndex: trajectory.count,
+                                minX: 0, maxX: topBuf.width-1,
+                                minY: 0, maxY: topBuf.height-1)
     }
     
 }

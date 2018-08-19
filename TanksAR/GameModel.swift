@@ -182,6 +182,12 @@ struct DetonationResult {
     var fluidPath: [Vector3]
     var fluidRemaining: [Float]
     var timeIndex: Int
+    
+    // coordinates of detonation
+    var minX: Int
+    var maxX: Int
+    var minY: Int
+    var maxY: Int
 }
 
 struct FireResult {
@@ -966,7 +972,7 @@ class GameModel : Codable {
     }
     
     func applyExplosion(for trajectory: [Vector3], withRadius: Float, andStyle: WeaponStyle = .explosive) -> DetonationResult {
-        //NSLog("\(#function) started (radius: \(withRadius), style:\(andStyle), trajectory length: \(trajectory.count))")
+        NSLog("\(#function) started (radius: \(withRadius), style:\(andStyle), trajectory length: \(trajectory.count))")
         let impactPosition = trajectory.last!
         let at = impactPosition
         let topBuf = ImageBuf()
@@ -976,22 +982,35 @@ class GameModel : Codable {
         let bottomColor = ImageBuf()
         var fluidPath: [Vector3] = []
         var fluidRemaining: [Float] = []
+        var minX: Int = 0
+        var maxX: Int = 1
+        var minY: Int = 0
+        var maxY: Int = 1
         
-        //NSLog("starting image buffer copies")
-        topBuf.copy(board.surface)
-        middleBuf.copy(board.surface)
-        bottomBuf.copy(board.surface)
-
-        topColor.copy(board.colors)
-        bottomColor.copy(board.colors)
-
         //NSLog("\(#function) starting explosion computation at \(at) with radius \(withRadius) and style \(andStyle).")
         let style = andStyle
         
+        minX = max(0, min(board.surface.width, Int(at.x - withRadius)))
+        maxX = max(0, min(board.surface.width, Int(at.x + withRadius)))
+        minY = max(0, min(board.surface.height, Int(at.y - withRadius)))
+        maxY = max(0, min(board.surface.height, Int(at.y + withRadius)))
+
+        NSLog("\(#function): starting image buffer copies")
+        topBuf.crop(board.surface, minX: minX, maxX: maxX, minY: minY, maxY: maxY)
+        middleBuf.copy(topBuf)
+        bottomBuf.copy(topBuf)
+        
+        topColor.crop(board.colors, minX: minX, maxX: maxX, minY: minY, maxY: maxY)
+        bottomColor.copy(topColor)
+        NSLog("\(#function): finished image buffer copies")
+
         // update things in the radius of the explosion
         if style == .explosive || style == .generative || style == .mirv {
-            for j in Int(at.y-withRadius)...Int(at.y+withRadius) {
-                for i in Int(at.x-withRadius)...Int(at.x+withRadius) {
+            
+            NSLog("appling to range (\(minX),\(minY)) to (\(maxX),\(maxY)), \(maxX-minX+1)x\(maxY-minY+1).")
+            
+            for j in minY...maxY {
+                for i in minX...maxX {
                     let xDiff = at.x - Float(i)
                     let yDiff = at.y - Float(j)
                     
@@ -1079,13 +1098,44 @@ class GameModel : Codable {
             NSLog("\(#function) doesn't handle \(andStyle) style.")
         }
         
-        //NSLog("\(#function) finished")
+        NSLog("\(#function) finished")
 
         return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
                                 topColor: topColor, bottomColor: bottomColor,
                                 fluidPath: fluidPath,
                                 fluidRemaining: fluidRemaining,
-                                timeIndex: trajectory.count)
+                                timeIndex: trajectory.count,
+                                minX: minX, maxX: maxX,
+                                minY: minY, maxY: maxY)
+    }
+    
+    func unpackDetonation(_ detonation: DetonationResult, from: FireResult) -> DetonationResult {
+        // copy/update full map images to use
+        let fireResult = from
+        let topBuf = ImageBuf(fireResult.old)
+        let middleBuf = ImageBuf(fireResult.old)
+        let bottomBuf = ImageBuf(fireResult.old)
+        let topColor = ImageBuf(fireResult.oldColor)
+        let bottomColor = ImageBuf(fireResult.oldColor)
+        let timeIndex = detonation.timeIndex
+        
+        // coordinates of detonation
+        let minX = detonation.minX
+        let maxX = detonation.maxX
+        let minY = detonation.minY
+        let maxY = detonation.maxY
+        
+        // update full sized images with bits that changed
+        topBuf.paste(detonation.topBuf)
+        middleBuf.paste(detonation.middleBuf)
+        bottomBuf.paste(detonation.bottomBuf)
+        topColor.paste(detonation.topColor)
+        bottomColor.paste(detonation.bottomColor)
+        
+        return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
+                                topColor: topColor, bottomColor: bottomColor,
+                                fluidPath: [], fluidRemaining: [], timeIndex: timeIndex,
+                                minX: minX, maxX: maxX, minY: minY, maxY: maxY)
     }
     
     func fluidFill(startX: Float, startY: Float, totalVolume: Double, andStyle: WeaponStyle = WeaponStyle.napalm) -> ([Vector3], [Float]) {

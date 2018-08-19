@@ -39,13 +39,17 @@ class ImageBuf : Codable {
     func setSize(width: Int, height: Int) {
         self.width = width
         self.height = height
+        xOffset = 0
+        yOffset = 0
         pixels = [CGFloat](repeating: CGFloat(0), count: width*height)
     }
     
     func getPixel(x: Int, y: Int) -> CGFloat {
-        let offset = x + y*width
+        let offsetX = x-xOffset
+        let offsetY = y-yOffset
+        let offset = offsetX + offsetY*width
         guard offset >= 0 && offset < pixels.count else { return 0 }
-        guard x < width && x >= 0 else { return 0 }
+        guard offsetX < width && offsetX >= 0 else { return 0 }
 
         return pixels[offset]
     }
@@ -64,9 +68,11 @@ class ImageBuf : Codable {
     }
  
     func setPixel(x: Int, y: Int, value: CGFloat) {
-        let offset = x + y*width
+        let offsetX = x-xOffset
+        let offsetY = y-yOffset
+        let offset = offsetX + offsetY*width
         guard offset >= 0 && offset < pixels.count else { return }
-        guard x < width && x >= 0 else { return }
+        guard offsetX < width && offsetX >= 0 else { return }
 
         pixels[offset] = value
     }
@@ -75,6 +81,30 @@ class ImageBuf : Codable {
         width = source.width
         height = source.height
         pixels = source.pixels
+        xOffset = source.xOffset
+        yOffset = source.yOffset
+    }
+    
+    func crop(_ source: ImageBuf, minX: Int, maxX: Int, minY: Int, maxY: Int) {
+        
+        setSize(width: maxX-minX+1, height: maxY-minY+1)
+        setOffset(x: minX, y: minY)
+        
+        for j in minY...maxY {
+            for i in minX...maxX {
+                let value = source.getPixel(x: i, y: j)
+                setPixel(x: i, y: j, value: value)
+            }
+        }
+    }
+    
+    func paste(_ source: ImageBuf) {
+        for j in source.yOffset..<source.yOffset+source.height {
+            for i in source.xOffset..<source.xOffset+source.width {
+                let value = source.getPixel(x: i, y: j)
+                setPixel(x: i, y: j, value: value)
+            }
+        }
     }
     
     func smooth() {
