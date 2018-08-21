@@ -90,6 +90,7 @@ class NelderMead : Codable {
         let ordered = simplex.sorted(by: {lhs, rhs in // areInIncreasingOrder
             return lhs.value < rhs.value
         })
+        assert(ordered.first!.value <= ordered.last!.value)
         //NSLog("simplex: \(simplex)")
         //NSLog("ordered: \(ordered)")
 
