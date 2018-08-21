@@ -64,6 +64,7 @@ class GameViewDrawer {
     func animateShells(fireResult: FireResult, at: CFTimeInterval) -> (CFTimeInterval, CFTimeInterval) {
         var currTime = at
         let timeStep = CFTimeInterval(fireResult.timeStep / Float(timeScaling))
+        //NSLog("\(#function) started")
 
         // create shell object
         shellsNode.removeFromParentNode()
@@ -125,11 +126,13 @@ class GameViewDrawer {
             let shellAnimation = SCNAction.sequence(shellActions)
             shell.runAction(shellAnimation)
         
-            NSLog("shell landed at time \(currTime).")
+            NSLog("shell \(i) landed at time \(currTime).")
         }
 
         let firstImpact = at + Double(shortestTraj) * timeStep
         let lastImpact = at + Double(longestTraj) * timeStep
+        
+        //NSLog("\(#function) finished")
         return (firstImpact, lastImpact)
     }
     

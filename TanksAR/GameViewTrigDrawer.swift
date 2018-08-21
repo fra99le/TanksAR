@@ -285,7 +285,7 @@ class GameViewTrigDrawer : GameViewDrawer {
     
     func animateResult(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green]) {
 
-        NSLog("\(#function) started")
+        NSLog("\(#function) started (useNormals: \(useNormals))")
         let startTime: CFTimeInterval = 0
         var currTime = startTime
         let timeStep = CFTimeInterval(fireResult.timeStep / Float(timeScaling))
@@ -384,8 +384,8 @@ class GameViewTrigDrawer : GameViewDrawer {
             return lhs.timeIndex < rhs.timeIndex
         })
         
-//        // combine bottoms and create caps
-        NSLog("\(#function): combining detonations into single combinedBottom map")
+        // combine bottoms and create caps
+        //NSLog("\(#function): combining detonations into single combinedBottom map")
         var minI: Int = numPerSide
         var maxI: Int = 0
         var minJ: Int = numPerSide
@@ -397,10 +397,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             let detonation = sortedDetonations[i]
             combinedBottom.paste(detonation.bottomBuf)
             combinedBottomColor.paste(detonation.bottomColor)
-            
-            // record bottom including previous impacts
-            sortedDetonations[i].bottomBuf.copy(combinedBottom)
-            sortedDetonations[i].bottomColor.copy(combinedBottomColor)
+            //NSLog("\tadded \(detonation.bottomBuf.width)x\(detonation.bottomBuf.height) update to combinedBottom")
             
             // update extents
             minI = min(minI, max(0, min(numPerSide, Int(CGFloat(detonation.minX) / edgeSize) - margin)))
@@ -409,36 +406,66 @@ class GameViewTrigDrawer : GameViewDrawer {
             maxJ = max(maxJ, max(0, min(numPerSide, Int(CGFloat(detonation.maxY) / edgeSize) + margin)))
         }
         let sideSize = maxJ - minJ
-        NSLog("\(#function): combined detonations into single bottom")
-//        let lastDetonation = gameModel.unpackDetonation(sortedDetonations.last!, from: fireResult)
-//        let combinedBottom = lastDetonation.bottomBuf
-//        let combinedBottomColor = lastDetonation.bottomColor
+        //NSLog("\(#function): combined detonations into single bottom")
 
-        for k in 0..<sortedDetonations.count {
+        if fireResult.detonationResult.count <= 1 {
+            NSLog("\(#function): No need for crater caps for only one impact.")
+            return (combinedBottom, combinedBottomColor)
+        }
+        
+        var oldNorms = [[Vector3]](repeating: [], count: maxI-minI+2)
+        var comboNorms = [[Vector3?]](repeating: [], count: maxI-minI+2)
+        var currentNorms = [[Vector3?]](repeating: [], count: maxI-minI+2)
+        for i in minI...maxI+1 {
+            oldNorms[i-minI] = [Vector3](repeating: Vector3(), count: maxJ-minJ+2)
+            comboNorms[i-minI] = [Vector3?](repeating: nil, count: maxJ-minJ+2)
+            currentNorms[i-minI] = [Vector3?](repeating: nil, count: maxJ-minJ+2)
+            for j in minJ...maxJ+1 {
+                let x = CGFloat(i)*edgeSize
+                let y = CGFloat(j)*edgeSize
+                oldNorms[i-minI][j-minJ] = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(x), latitude: Int(y))
+            }
+        }
+        
+        let currentBottom = ImageBuf(fireResult.old)
+        for k in 0..<sortedDetonations.count-1 {
             //NSLog("\t\(#function): handling detonation \(k), timeIndex: \(sortedDetonations[k].timeIndex) -> \(Double(sortedDetonations[k].timeIndex) * timeStep)")
             
-            // get full sized map images for detonation
-            let detonation = gameModel.unpackDetonation(sortedDetonations[k], from: fireResult)
-
+            // update full sized map image for detonations
+            currentBottom.paste(sortedDetonations[k].bottomBuf)
+            
             // check which vertices need to be included this round
-            var vertexChanges = [[Bool]](repeating: [], count: numPerSide+1)
+            var vertexChanges = [[Bool]](repeating: [], count: numPerSide+2)
             var numChanged = 0
             for j in minJ...maxJ+1 {
-                vertexChanges[j] = [Bool](repeating:false, count: numPerSide+1)
+                vertexChanges[j] = [Bool](repeating:false, count: numPerSide+2)
                 for i in minI...maxI+1 {
                     let x = CGFloat(i)*edgeSize
                     let y = CGFloat(j)*edgeSize
 
                     let bottom = gameModel.getElevation(fromMap: combinedBottom, longitude: Int(x), latitude: Int(y))
-                    let current = gameModel.getElevation(fromMap: detonation.bottomBuf, longitude: Int(x), latitude: Int(y))
+                    let current = gameModel.getElevation(fromMap: currentBottom, longitude: Int(x), latitude: Int(y))
                     
                     if bottom < current {
                         vertexChanges[j][i] = true
                         //NSLog("\(i),\(j): bottom: \(bottom), current: \(current)")
                         numChanged += 1
                     } else if useNormals {
-                        let bottomNormal = gameModel.getNormal(fromMap: combinedBottom, longitude: Int(x), latitude: Int(y))
-                        let currentNormal = gameModel.getNormal(fromMap: detonation.bottomBuf, longitude: Int(x), latitude: Int(y))
+                        let detonation = sortedDetonations[k]
+                        let withinCurrent = i >= detonation.minX &&
+                                            i <= detonation.maxX &&
+                                            j >= detonation.minY &&
+                                            j <= detonation.maxY
+                        
+                        if withinCurrent || comboNorms[i-minI][j-minJ] == nil {
+                            comboNorms[i-minI][j-minJ] = gameModel.getNormal(fromMap: combinedBottom, longitude: Int(x), latitude: Int(y))
+                        }
+                        if withinCurrent || currentNorms[i-minI][j-minJ] == nil {
+                            currentNorms[i-minI][j-minJ] = gameModel.getNormal(fromMap: currentBottom, longitude: Int(x), latitude: Int(y))
+                        }
+                        
+                        let bottomNormal = comboNorms[i-minI][j-minJ]!
+                        let currentNormal = currentNorms[i-minI][j-minJ]!
                         if bottomNormal.x != currentNormal.x ||
                             bottomNormal.y != currentNormal.y ||
                             bottomNormal.z != currentNormal.z {
@@ -463,7 +490,8 @@ class GameViewTrigDrawer : GameViewDrawer {
                     let y = CGFloat(j)*edgeSize
                     let z = CGFloat(gameModel.getElevation(fromMap: fireResult.old, longitude: Int(x), latitude: Int(y)))
                     if useNormals {
-                        let n = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(x), latitude: Int(y))
+                        //let n = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(x), latitude: Int(y))
+                        let n = oldNorms[i-minI][j-minJ]
                         capNormals.append(fromModelScale(n))
                     }
                     
@@ -483,7 +511,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let cy = Int(CGFloat(j) * edgeSize + 2.0/3.0 * edgeSize)
                         
                         var colorIndex = 0
-                        colorIndex = gameModel.getColorIndex(forMap: detonation.bottomColor, longitude: cx, latitude: cy) % capIndices.count
+                        colorIndex = gameModel.getColorIndex(forMap: fireResult.oldColor, longitude: cx, latitude: cy) % capIndices.count
                         
                         capIndices[colorIndex].append(pos)
                         capIndices[colorIndex].append(pos+1)
@@ -545,7 +573,7 @@ class GameViewTrigDrawer : GameViewDrawer {
                                                      .hide(),
                                                      .removeFromParentNode()]
                 appearActions.append(contentsOf: disappearActions)
-                //NSLog("\t\t\tand disappears at time \(disappearTime)")
+                //NSLog("\t\t\tand disappears at time \(disappearTime), after delay of \(disappearTime-appearTime).")
 
             }
             capSurfaceNode.isHidden = true
@@ -581,25 +609,26 @@ class GameViewTrigDrawer : GameViewDrawer {
     }
     
     func animateDropSurface(fireResult: FireResult, from: GameViewController, useNormals: Bool = false, colors: [Any] = [UIColor.green], at time: CFTimeInterval, index: Int = 0) -> CFTimeInterval {
-        NSLog("\(#function): started")
+        NSLog("\(#function): started (useNormals: \(useNormals))")
         var currTime = time
         
-        // for debugging purposes only!
-        //        let dropCases = [[3,0,0],
-        //                         [0,3,0], // weird
-        //                         [0,0,3],
-        //                         [2,1,0],
-        //                         [2,0,1],
-        //                         [1,2,0],
-        //                         [0,2,1],
-        //                         [1,0,2],
-        //                         [0,1,2],
-        //                         [1,1,1]]
-        //        var showOnly = dropCases[gameModel.board.currentRound-1]
-        //        NSLog("ROUND \(gameModel.board.currentRound): \(showOnly)")
+//        // for debugging purposes only!
+//        let dropCases = [[3,0,0],
+//                         [0,3,0], // weird
+//                         [0,0,3],
+//                         [2,1,0],
+//                         [2,0,1],
+//                         [1,2,0],
+//                         [0,2,1],
+//                         [1,0,2],
+//                         [0,1,2],
+//                         [1,1,1]]
+//        var showOnly = dropCases[gameModel.board.currentRound-1]
+//        NSLog("ROUND \(gameModel.board.currentRound): \(showOnly)")
 
         // get full sized map images for detonation
-        let detonation = gameModel.unpackDetonation(fireResult.detonationResult[index], from: fireResult)
+        //let detonation = gameModel.unpackDetonation(fireResult.detonationResult[index], from: fireResult)
+        let detonation = fireResult.detonationResult[index]
         
         // determine start/end points
         let minI = max(0, min(numPerSide, Int(CGFloat(detonation.minX) / edgeSize) - 1))
@@ -695,6 +724,7 @@ class GameViewTrigDrawer : GameViewDrawer {
         var unchangedArr: [Bool] = [false,false,false,false]
         var normalChanged: [Bool] = [false,false,false,false]
 
+        //NSLog("\(#function): starting vertex buffer filling")
         for i in minI..<maxI {
             for j in minJ..<maxJ {
                 
@@ -788,14 +818,14 @@ class GameViewTrigDrawer : GameViewDrawer {
                     // 8: 0,1,2    newBottomSurface
                     // 9: 1,1,1    one of each
                     
-                    // for debugging
-//                    showOnly = dropCases[2]
+//                    // for debugging
+//                    showOnly = dropCases[1]
 //                    //NSLog("MANUALLY SET: \(showOnly)")
 //                    if !(numDropping==showOnly[0] && numDisplaced==showOnly[1] && numUnchanged==showOnly[2]) {
 //                        //NSLog("SKIPPING \(numDropping),\(numDisplaced),\(numUnchanged)")
 //                        continue
 //                    }
-                    //NSLog("GOT HERE!!!! \(numDropping),\(numDisplaced),\(numUnchanged)")
+//                    //NSLog("GOT HERE!!!! \(numDropping),\(numDisplaced),\(numUnchanged)")
 
                     // NOTE: Should try recording a distribution here, so make sure all cases are covered by TestGameModel
 
@@ -1113,9 +1143,11 @@ class GameViewTrigDrawer : GameViewDrawer {
                 }
             }
         }
+        //NSLog("\(#function): finished vertex buffer filling")
 
         // setup dropping surface
         if dropNeeded {
+            //NSLog("\(#function): starting geometry creation")
             // create geometry for surface
             let dropSource0 = SCNGeometrySource(vertices: dropVertices0)
             let dropSource1 = SCNGeometrySource(vertices: dropVertices1)
@@ -1173,8 +1205,9 @@ class GameViewTrigDrawer : GameViewDrawer {
                 let collapse = SCNAction.sequence(collapseActions)
                 dropSurface.runAction(collapse)
             }
+            //NSLog("\(#function): finished geometry creation")
         }
-        //NSLog("drop/bottom surface appear at time \(currTime)")
+        NSLog("drop/bottom surface appear at time \(currTime)")
         if dropNeeded {
             currTime += dropTime
             //currTime += dropTime
@@ -1228,7 +1261,7 @@ class GameViewTrigDrawer : GameViewDrawer {
             color = UIColor.black
         }
         
-        // for debugging purposes
+//        // for debugging purposes
 //        color = UIColor.magenta
 
         fluidNode = SCNNode()

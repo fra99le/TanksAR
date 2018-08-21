@@ -20,10 +20,19 @@ struct PixelData {
 }
 
 class ImageBuf : Codable {
+    // dimensions of full (uncropped image)
     var width: Int = 0
     var height: Int = 0
-    var xOffset: Int = 0
-    var yOffset: Int = 0
+    
+    // portions contained in this image
+    var minX: Int = 0
+    var minY: Int = 0
+    var maxX: Int = 0
+    var maxY: Int = 0
+    var isCropped: Bool {
+        return minX>0 || minY>0 || maxX<width-1 || maxY<height-1
+    }
+    
     var pixels: [CGFloat] = []
     var pngBuffer: Data?
     var noiseLevel: Float = 10
@@ -39,28 +48,34 @@ class ImageBuf : Codable {
     func setSize(width: Int, height: Int) {
         self.width = width
         self.height = height
-        xOffset = 0
-        yOffset = 0
+        
+        minX = 0
+        minY = 0
+        maxX = width - 1
+        maxY = height - 1
+        
         pixels = [CGFloat](repeating: CGFloat(0), count: width*height)
     }
     
-    func getPixel(x: Int, y: Int) -> CGFloat {
-        let offsetX = x-xOffset
-        let offsetY = y-yOffset
-        let offset = offsetX + offsetY*width
-        guard offset >= 0 && offset < pixels.count else { return 0 }
-        guard offsetX < width && offsetX >= 0 else { return 0 }
+    func getPixelOffset(_ x: Int, _ y: Int) -> Int? {
+        guard x >= minX else { return nil }
+        guard y >= minY else { return nil }
+        guard x <= maxX else { return nil }
+        guard y <= maxY else { return nil }
+
+        let offsetX = x-minX
+        let offsetY = y-minY
+        let offsetWidth = maxX-minX+1
+        
+        let offset = offsetY*offsetWidth + offsetX
+        return offset
+    }
+
+    func getPixel(x: Int, y: Int) -> CGFloat? {
+        guard let offset = getPixelOffset(x,y) else { return nil }
+        guard offset >= 0 && offset < pixels.count else { return nil }
 
         return pixels[offset]
-    }
-    
-    func setOffset(x: Int, y: Int) {
-        xOffset = x
-        yOffset = y
-    }
-
-    func getOffset() -> (x: Int, y: Int) {
-        return (xOffset, yOffset)
     }
     
     func setPixel(x: Int, y: Int, value: Double) {
@@ -68,11 +83,8 @@ class ImageBuf : Codable {
     }
  
     func setPixel(x: Int, y: Int, value: CGFloat) {
-        let offsetX = x-xOffset
-        let offsetY = y-yOffset
-        let offset = offsetX + offsetY*width
+        guard let offset = getPixelOffset(x,y) else { return }
         guard offset >= 0 && offset < pixels.count else { return }
-        guard offsetX < width && offsetX >= 0 else { return }
 
         pixels[offset] = value
     }
@@ -80,29 +92,99 @@ class ImageBuf : Codable {
     func copy(_ source: ImageBuf) {
         width = source.width
         height = source.height
+
+        minX = source.minX
+        minY = source.minY
+        maxX = source.maxX
+        maxY = source.maxY
+
         pixels = source.pixels
-        xOffset = source.xOffset
-        yOffset = source.yOffset
+    }
+    
+    func differsFrom(_ other: ImageBuf) -> Bool {
+        guard other.width == width else {
+            NSLog("\(#function): widths differ. (\(width)!=\(other.width))")
+            return true
+        }
+        guard other.height == height else {
+            NSLog("\(#function): heights differ. (\(height)!=\(other.height))")
+            return true
+        }
+        
+        for j in 0..<height {
+            for i in 0..<width {
+                let pixel1 = getPixel(x: i, y: j)
+                let pixel2 = other.getPixel(x: i, y: j)
+                
+                if pixel1 != pixel2 {
+                    NSLog("\(#function): pixel (\(i),\(j)) differs. (\(pixel1!)!=\(pixel2!))")
+                    return true
+                }
+            }
+        }
+        
+        return false
     }
     
     func crop(_ source: ImageBuf, minX: Int, maxX: Int, minY: Int, maxY: Int) {
+        //NSLog("\(#function): cropping region \(minX),\(minY) to \(maxX),\(maxY) from \(source.width)x\(source.height) image")
+        self.width = source.width
+        self.height = source.height
         
-        setSize(width: maxX-minX+1, height: maxY-minY+1)
-        setOffset(x: minX, y: minY)
+        self.minX = minX
+        self.minY = minY
+        self.maxX = maxX
+        self.maxY = maxY
+        
+        pixels = [CGFloat](repeating: CGFloat(0), count: (maxX-minX+1)*(maxY-minY+1))
         
         for j in minY...maxY {
             for i in minX...maxX {
-                let value = source.getPixel(x: i, y: j)
-                setPixel(x: i, y: j, value: value)
+                if let value = source.getPixel(x: i, y: j) {
+                    //NSLog("\t\(i),\(j): has value \(value)")
+                    setPixel(x: i, y: j, value: value)
+                }
             }
         }
+        
+//        // for debugging purposes
+//        let dupe = ImageBuf(source)
+//        dupe.paste(self)
+//        if dupe.differsFrom(source) {
+//            NSLog("\(#function): pasting back to source image failed!")
+//        }
     }
     
+//    func paste(_ source: ImageBuf) {
+//        NSLog("Pasting \(source.width),\(source.height) image with offset of \(source.xOffset),\(source.yOffset) into \(width)x\(height) image.")
+//        for j in 0..<source.height {
+//            let srcRowStart = j*source.width
+//            let dstRowStart = (j+source.yOffset)*width + source.xOffset
+//            for i in 0..<source.width {
+//
+//                let srcOffset = i + srcRowStart
+//                guard srcOffset >= 0 else { continue }
+//                guard srcOffset < source.pixels.count else { continue }
+//
+//                guard i+source.xOffset >= 0 else { continue }
+//                guard i+source.xOffset < width else { continue }
+//                let dstOffset = i + dstRowStart
+//                guard dstOffset >= 0 else { continue }
+//                guard dstOffset < pixels.count else { continue }
+//
+//                pixels[dstOffset] = source.pixels[srcOffset]
+//            }
+//        }
+//    }
+
     func paste(_ source: ImageBuf) {
-        for j in source.yOffset..<source.yOffset+source.height {
-            for i in source.xOffset..<source.xOffset+source.width {
-                let value = source.getPixel(x: i, y: j)
-                setPixel(x: i, y: j, value: value)
+        //NSLog("\(#function): pasting region \(source.minX),\(source.minY) to \(source.maxX),\(source.maxY) into \(width)x\(height) image")
+        for j in source.minY...source.maxY {
+            for i in source.minX...source.maxX {
+                if let value = source.getPixel(x: i, y: j) {
+                    //NSLog("\t\(i),\(j): has value \(value)")
+                    setPixel(x: i, y: j, value: value)
+                }
             }
         }
     }
@@ -246,7 +328,7 @@ class ImageBuf : Codable {
             pattern = [[0, -1], [-1, 0], [0, 1], [1,0]]
         }
         // check for already computed values
-        let curr = getPixel(x: x, y: y)
+        guard let curr = getPixel(x: x, y: y) else { return }
         if curr != 0 {
             return
         }
@@ -260,7 +342,7 @@ class ImageBuf : Codable {
             guard ny >= 0 else { continue }
             guard ny < height else { continue }
             
-            let value = getPixel(x: nx, y: ny)
+            let value = getPixel(x: nx, y: ny)!
             //values.append(Float(r))
             sum += value
             count += 1
@@ -346,21 +428,49 @@ class ImageBuf : Codable {
         
         // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
         var pixelArray = [PixelData](repeating: PixelData(a: 255, r:0, g: 0, b: 0), count: width*height)
+
         //UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 1);
         
-        //NSLog("\(#function): Converting \(width)x\(height) image to a UIImage using CGDataProvider.")
         //NSLog("copying data into pixelArray")
-        for i in 0 ..< pixels.count {
-            //let (r, g, b) = valueToRGB(value: CGFloat(pixels[i]))
-            let value = Int32(pixels[i] * 1_000_000)
-            let b = UInt8((value / 65536) % 256)
-            let g = UInt8((value / 256) % 256)
-            let r = UInt8(value % 256)
-            
-            pixelArray[i].r = r
-            pixelArray[i].g = g
-            pixelArray[i].b = b
-            pixelArray[i].a = 255
+        if minX == 0 && minY == 0 && maxX == width-1 && maxY == height-1 {
+            //NSLog("\(#function): Converting \(width)x\(height) image, without offsets, to a UIImage using CGDataProvider.")
+            for i in 0 ..< pixels.count {
+                //let (r, g, b) = valueToRGB(value: CGFloat(pixels[i]))
+                let value = Int32(pixels[i] * 1_000_000)
+                let b = UInt8((value / 65536) % 256)
+                let g = UInt8((value / 256) % 256)
+                let r = UInt8(value % 256)
+                
+                pixelArray[i].r = r
+                pixelArray[i].g = g
+                pixelArray[i].b = b
+                pixelArray[i].a = 255
+            }
+        } else  {
+            //NSLog("\(#function): Converting \(width)x\(height) image, with subimage from \(minX),\(minY) to \(maxX),\(maxY), to a UIImage using CGDataProvider.")
+            for j in 0..<height {
+                for i in 0..<width {
+                    
+                    let pixelIndex = i + width * j
+
+                    if let pixelValue = getPixel(x: i, y: j) {
+                        let value = Int32(pixelValue * 1_000_000)
+                        let b = UInt8((value / 65536) % 256)
+                        let g = UInt8((value / 256) % 256)
+                        let r = UInt8(value % 256)
+                        
+                        pixelArray[pixelIndex].r = r
+                        pixelArray[pixelIndex].g = g
+                        pixelArray[pixelIndex].b = b
+                        pixelArray[pixelIndex].a = 255
+                    } else  {
+                        pixelArray[pixelIndex].r = 0
+                        pixelArray[pixelIndex].g = 0
+                        pixelArray[pixelIndex].b = 0
+                        pixelArray[pixelIndex].a = 0
+                    }
+                }
+            }
         }
         //NSLog("finished copying data to pixelArray")
         
@@ -432,4 +542,5 @@ class ImageBuf : Codable {
         
         pngBuffer = nil
     }
+    
 }

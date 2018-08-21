@@ -80,7 +80,7 @@ class TestGameModel : GameModel {
         let oldColor = ImageBuf()
         old.copy(board.surface)
         oldColor.copy(board.colors)
-        let detinationResults = [applyExplosion(for: trajectory, withRadius: weaponSize, andStyle: weapon.style)]
+        let detonationResults = [applyExplosion(for: trajectory, withRadius: weaponSize, andStyle: weapon.style)]
         let final = ImageBuf(board.surface)
         let finalColor = ImageBuf(board.colors)
         
@@ -110,7 +110,7 @@ class TestGameModel : GameModel {
                                             trajectories: [trajectory],
                                             explosionRadius: blastRadius,
                                             weaponStyle: weapon.style,
-                                            detonationResult: detinationResults,
+                                            detonationResult: detonationResults,
                                             old: old,
                                             final: final,
                                             oldColor: oldColor,

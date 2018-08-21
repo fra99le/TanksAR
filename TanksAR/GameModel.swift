@@ -361,35 +361,30 @@ class GameModel : Codable {
             [1,1],
             [0,1],
             [-1,1],
-            [-1,0]
+            [-1,0],
+            [-1,-1]
         ]
         var sumVect = Vector3()
         var count = 0
         let centerElevation = getElevation(fromMap: fromMap, longitude: longitude, latitude: latitude)
+        var prevVect: Vector3? = nil
         for i in 0..<offsets.count {
-            let x1 = longitude + sampleDist * offsets[i][0]
-            let y1 = latitude + sampleDist * offsets[i][1]
-            let nextI = (i + 1) % offsets.count
-            let x2 = longitude + sampleDist * offsets[nextI][0]
-            let y2 = latitude + sampleDist * offsets[nextI][1]
+            let x = longitude + sampleDist * offsets[i][0]
+            let y = latitude + sampleDist * offsets[i][1]
 
-            guard x1 >= 0 else { continue }
-            guard y1 >= 0 else { continue }
-            guard x1 < fromMap.width else { continue }
-            guard y1 < fromMap.height else { continue }
-            guard x2 >= 0 else { continue }
-            guard y2 >= 0 else { continue }
-            guard x2 < fromMap.width else { continue }
-            guard y2 < fromMap.height else { continue }
+            guard x >= 0 else { continue }
+            guard y >= 0 else { continue }
+            guard x < fromMap.width else { continue }
+            guard y < fromMap.height else { continue }
 
-            let otherElevation1 = getElevation(fromMap: fromMap, longitude: x1, latitude: y1)
-            let otherElevation2 = getElevation(fromMap: fromMap, longitude: x2, latitude: y2)
+            let edgeElevation = getElevation(fromMap: fromMap, longitude: x, latitude: y)
+            let vect = Vector3(Float(x-longitude), Float(y-latitude), edgeElevation-centerElevation)
 
-            let v1 = Vector3(Float(x1-longitude), Float(y1-latitude), otherElevation1-centerElevation)
-            let v2 = Vector3(Float(x2-longitude), Float(y2-latitude), otherElevation2-centerElevation)
-
-            sumVect = vectorAdd(sumVect, vectorCross(v1, v2))
-            count += 1
+            if let oldVect = prevVect {
+                sumVect = vectorAdd(sumVect, vectorNormalize(vectorCross(oldVect, vect)))
+                count += 1
+            }
+            prevVect = vect
         }
         
         let normal = vectorNormalize(vectorScale(sumVect, by: 1.0/Float(count)))
@@ -401,12 +396,7 @@ class GameModel : Codable {
     }
 
     func getElevation(fromMap: ImageBuf, longitude: Int, latitude: Int) -> Float {
-        guard longitude >= 0 else { return -1 }
-        guard longitude < fromMap.width else { return -1 }
-        guard latitude >= 0 else { return -1 }
-        guard latitude < fromMap.height else { return -1 }
-
-        let pixel = fromMap.getPixel(x: longitude, y: latitude)
+        guard let pixel = fromMap.getPixel(x: longitude, y: latitude) else { return 0 }
         let elevation = Float(pixel*255)
         //let elevation = Float(10*( (longitude+latitude)%2 ) + 50)
         
@@ -419,11 +409,6 @@ class GameModel : Codable {
     }
     
     func setElevation(forMap: ImageBuf, longitude: Int, latitude: Int, to: Float) {
-        guard longitude >= 0 else { return }
-        guard longitude < forMap.width else { return }
-        guard latitude >= 0 else { return }
-        guard latitude < forMap.height else { return }
-        
         let newElevation = max(0,to / 255) / elevationScale
         
         forMap.setPixel(x: longitude, y: latitude, value: CGFloat(newElevation))
@@ -435,12 +420,7 @@ class GameModel : Codable {
     }
     
     func getColorIndex(forMap: ImageBuf, longitude: Int, latitude: Int) -> Int {
-        guard longitude >= 0 else { return -1 }
-        guard longitude < forMap.width else { return -1 }
-        guard latitude >= 0 else { return -1 }
-        guard latitude < forMap.height else { return -1 }
-        
-        let pixel = forMap.getPixel(x: longitude, y: latitude)
+        guard let pixel = forMap.getPixel(x: longitude, y: latitude) else { return 0 }
 
         return Int(pixel)
     }
@@ -462,11 +442,6 @@ class GameModel : Codable {
     }
     
     func setColorIndex(forMap: ImageBuf, longitude: Int, latitude: Int, to: Int) {
-        guard longitude >= 0 else { return }
-        guard longitude < forMap.width else { return }
-        guard latitude >= 0 else { return }
-        guard latitude < forMap.height else { return }
-        
         forMap.setPixel(x: longitude, y: latitude, value: CGFloat(to))
     }
 
@@ -507,11 +482,25 @@ class GameModel : Codable {
         // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
         var pixelArray = [PixelData](repeating: PixelData(a: 255, r:0, g: 0, b: 0), count: forMap.width*forMap.height)
         
-        //NSLog("\(#function): Converting \(width)x\(height) image to a UIImage using CGDataProvider.")
+        //NSLog("\(#function): Converting \(forMap.width)x\(forMap.height) image to a UIImage using CGDataProvider.")
         //NSLog("copying data into pixelArray")
-        for i in 0 ..< forMap.pixels.count {
-            let colorIdx = Int(forMap.pixels[i])
-            pixelArray[i] = pixelColors[colorIdx % pixelColors.count]
+        if  !forMap.isCropped {
+            //NSLog("\tnon-cropped version")
+            for i in 0 ..< forMap.pixels.count {
+                let colorIdx = Int(forMap.pixels[i])
+                pixelArray[i] = pixelColors[colorIdx % pixelColors.count]
+            }
+        } else {
+            //NSLog("\tcropped version")
+            for j in 0 ..< forMap.height {
+                for i in 0 ..< forMap.width {
+                    let pixelIndex = i + j*forMap.width
+                    if let pixelValue = forMap.getPixel(x: i, y: j) {
+                        let colorIdx = Int(pixelValue)
+                        pixelArray[pixelIndex] = pixelColors[colorIdx % pixelColors.count]
+                    }
+                }
+            }
         }
         //NSLog("finished copying data to pixelArray")
         
@@ -986,33 +975,37 @@ class GameModel : Codable {
         var maxX: Int = 1
         var minY: Int = 0
         var maxY: Int = 1
+        let margin: Float = 11 // one more than standard getNormal distance to account for round-off error
         
         //NSLog("\(#function) starting explosion computation at \(at) with radius \(withRadius) and style \(andStyle).")
         let style = andStyle
         
-        minX = max(0, min(board.surface.width, Int(at.x - withRadius)))
-        maxX = max(0, min(board.surface.width, Int(at.x + withRadius)))
-        minY = max(0, min(board.surface.height, Int(at.y - withRadius)))
-        maxY = max(0, min(board.surface.height, Int(at.y + withRadius)))
+        minX = max(0, min(board.surface.width, Int(at.x - withRadius - margin)))
+        maxX = max(0, min(board.surface.width, Int(at.x + withRadius + margin)))
+        minY = max(0, min(board.surface.height, Int(at.y - withRadius - margin)))
+        maxY = max(0, min(board.surface.height, Int(at.y + withRadius + margin)))
 
-        NSLog("\(#function): starting image buffer copies")
+        //NSLog("\(#function): starting image buffer copies")
         topBuf.crop(board.surface, minX: minX, maxX: maxX, minY: minY, maxY: maxY)
+//        topBuf.copy(board.surface)  // for debugging purposes
         middleBuf.copy(topBuf)
         bottomBuf.copy(topBuf)
         
         topColor.crop(board.colors, minX: minX, maxX: maxX, minY: minY, maxY: maxY)
+//        topColor.copy(board.colors)  // for debugging purposes
         bottomColor.copy(topColor)
-        NSLog("\(#function): finished image buffer copies")
+        //NSLog("\(#function): finished image buffer copies")
 
-        // update things in the radius of the explosion
+        // update things within the radius of the explosion
         if style == .explosive || style == .generative || style == .mirv {
             
-            NSLog("appling to range (\(minX),\(minY)) to (\(maxX),\(maxY)), \(maxX-minX+1)x\(maxY-minY+1).")
+            //NSLog("appling to range (\(minX),\(minY)) to (\(maxX),\(maxY)), \(maxX-minX+1)x\(maxY-minY+1).")
             
             for j in minY...maxY {
+                let yDiff = at.y - Float(j)
+
                 for i in minX...maxX {
                     let xDiff = at.x - Float(i)
-                    let yDiff = at.y - Float(j)
                     
                     let horizDist = sqrt(xDiff*xDiff + yDiff*yDiff)
                     guard withRadius >= horizDist else { continue }
@@ -1066,7 +1059,7 @@ class GameModel : Codable {
                             newElevation = currElevation // new chunk below old surface
                         } else {
                             newElevation = currElevation * 1.1
-                            //NSLog("Unconsidered case, this is wierd! top: \(top), middle: \(middle), bottom: \(bottom), curr: \(currElevation)")
+                            NSLog("Unconsidered case, this is wierd! top: \(top), middle: \(middle), bottom: \(bottom), curr: \(currElevation)")
                         }
                         //                    if( newElevation != currElevation) {
                         //                        NSLog("generative level change: \(currElevation) -> \(newElevation) at \(i),\(j)")
@@ -1131,6 +1124,13 @@ class GameModel : Codable {
         bottomBuf.paste(detonation.bottomBuf)
         topColor.paste(detonation.topColor)
         bottomColor.paste(detonation.bottomColor)
+
+//        // for debugging purposes
+//        topBuf = ImageBuf(detonation.topBuf)
+//        middleBuf = ImageBuf(detonation.middleBuf)
+//        bottomBuf = ImageBuf(detonation.bottomBuf)
+//        topColor = ImageBuf(detonation.topColor)
+//        bottomColor = ImageBuf(detonation.bottomColor)
         
         return DetonationResult(topBuf: topBuf, middleBuf: middleBuf, bottomBuf: bottomBuf,
                                 topColor: topColor, bottomColor: bottomColor,
@@ -1299,9 +1299,10 @@ class GameModel : Codable {
             }
             
             let dist = distance(from: tankPos, to: at)
-            NSLog("\t tank \(i) dist = \(dist)")
+            //NSLog("\t tank \(i) dist = \(dist)")
             let weaponSize = fromWeapon.sizes[withSize].size
             if dist < (weaponSize + tankSize) && board.players[i].hitPoints > 0 {
+                NSLog("\t tank \(i) dist = \(dist) < (weaponSize + tankSize) = \(weaponSize + tankSize)")
                 NSLog("\t\tPlayer \(board.currentPlayer) hit player \(i)")
                 let effectiveDist = min(1,dist-tankSize)
                 NSLog("\t\teffectiveDist: \(effectiveDist)")

@@ -58,10 +58,6 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         let colorImage = gameModel.colorMap(forMap: withColors!)
         let node = super.surfaceNode(forSurface: forSurface, useNormals: true, withColors: withColors, colors: [colorImage], isBottom: isBottom)
         
-        // computing the normal map is very very slow, it's also not right
-        //let normalMap = gameModel.normalMap(forMap: forSurface)
-        //node.geometry.firstMaterial?.normal.contents = normalMap
-
         return node
     }
     
@@ -103,7 +99,7 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         newBottomSurface.removeFromParentNode()
         fluidNode.removeFromParentNode()
         
-        // make tanks look 'metalic'
+        // make tanks look 'metallic'
         //This code breaks the highligting of the active player
 //        for tank in tankNodes {
 //            let diffuse = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
@@ -126,7 +122,13 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
     }
     
     override func animateResult(fireResult: FireResult, from: GameViewController) {
-        super.animateResult(fireResult: fireResult, from: from, useNormals: true, colors: [gameModel.colorMap(forMap: fireResult.detonationResult[0].topColor)])
+        let topColorIndexes = ImageBuf(fireResult.oldColor)
+        if fireResult.detonationResult.count > 0 {
+            topColorIndexes.paste(fireResult.detonationResult[0].topColor)
+        }
+        //NSLog("\(#function): using \(topColorIndexes.width)x\(topColorIndexes.height) image for topColor in animateResult.")
+        let topColorMap = gameModel.colorMap(forMap: topColorIndexes)
+        super.animateResult(fireResult: fireResult, from: from, useNormals: true, colors: [topColorMap])
     }
     
 }
