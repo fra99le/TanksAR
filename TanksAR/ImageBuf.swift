@@ -36,7 +36,6 @@ class ImageBuf : Codable {
     var pixels: [CGFloat] = []
     var pngBuffer: Data?
     var noiseLevel: Float = 10
-    //let noiseLevel: Float = 0
     
     init() {
     }
@@ -155,28 +154,6 @@ class ImageBuf : Codable {
 //        }
     }
     
-//    func paste(_ source: ImageBuf) {
-//        NSLog("Pasting \(source.width),\(source.height) image with offset of \(source.xOffset),\(source.yOffset) into \(width)x\(height) image.")
-//        for j in 0..<source.height {
-//            let srcRowStart = j*source.width
-//            let dstRowStart = (j+source.yOffset)*width + source.xOffset
-//            for i in 0..<source.width {
-//
-//                let srcOffset = i + srcRowStart
-//                guard srcOffset >= 0 else { continue }
-//                guard srcOffset < source.pixels.count else { continue }
-//
-//                guard i+source.xOffset >= 0 else { continue }
-//                guard i+source.xOffset < width else { continue }
-//                let dstOffset = i + dstRowStart
-//                guard dstOffset >= 0 else { continue }
-//                guard dstOffset < pixels.count else { continue }
-//
-//                pixels[dstOffset] = source.pixels[srcOffset]
-//            }
-//        }
-//    }
-
     func paste(_ source: ImageBuf) {
         //NSLog("\(#function): pasting region \(source.minX),\(source.minY) to \(source.maxX),\(source.maxY) into \(width)x\(height) image")
         for j in source.minY...source.maxY {
@@ -210,6 +187,8 @@ class ImageBuf : Codable {
         var values: [Float] = []
         var minValue = 2*noiseLevel
         var maxValue = -2*noiseLevel
+
+        // randomly assign corners
         for _ in 0..<5 {
             let value = Float(drand48() * Double(noiseLevel) - Double(0.5 * noiseLevel))
             minValue = min(minValue,value)
@@ -222,20 +201,14 @@ class ImageBuf : Codable {
             let newValue = (values[i] - minValue) * (andMaximum - withMinimum) / (maxValue - minValue) + withMinimum
             values[i] = newValue
         }
-        //values = [withMinimum, andMaximum/2, andMaximum/2, andMaximum, andMaximum]
-        //values = [andMaximum, andMaximum, andMaximum, andMaximum, andMaximum]
         NSLog("first five values: \(values) for range (\(withMinimum),\(andMaximum))")
         
-        // randomly assign corners
         setPixel(x: 0, y: 0, value: CGFloat(values[0]))
         setPixel(x: 0, y: height-1, value: CGFloat(values[1]))
         setPixel(x: width-1, y: 0, value: CGFloat(values[2]))
         setPixel(x: width-1, y: height-1, value: CGFloat(values[3]))
         setPixel(x: width/2, y: height/2, value: CGFloat(values[4]))
 
-        // make recursive call
-        //doDiamondSquare(left: 0, right: width-1, top: 0, bottom: height-1)
-        
         // iterative version
         var size = width-1
         while size > 1 {
@@ -273,31 +246,6 @@ class ImageBuf : Codable {
         NSLog("\(#function) finished")
 
     }
-    
-//    // This is broken!!!
-//    func doDiamondSquare(left: Int, right: Int, top: Int, bottom: Int) {
-//        if (right-1) <= left || (bottom-1) <= top { return }
-//
-//        // compute center location
-//        let centerX = (left + right) / 2
-//        let centerY = (top + bottom) / 2
-//        let size = centerX - left
-//
-//        // compute center (diamond step)
-//        diamondStep(x: centerX, y: centerY, size: size)
-//
-//        // compute edge centers (square step)
-//        squareStep(x: centerX, y: top, size: size) // top
-//        squareStep(x: left, y: centerY, size: size) // left
-//        squareStep(x: centerX, y: bottom, size: size) // bottom
-//        squareStep(x: right, y: centerY, size: size) // right
-//
-//        // perform recursions
-//        doDiamondSquare(left: left, right: centerX, top: top, bottom: centerY) // upper left
-//        doDiamondSquare(left: centerX, right: right, top: top, bottom: centerY) // upper left
-//        doDiamondSquare(left: left, right: centerX, top: centerY, bottom: bottom) // lower left
-//        doDiamondSquare(left: centerX, right: right, top: centerY, bottom: bottom) // lower right
-//    }
     
     func median(of: [Float]) -> Float {
         let sorted = of.sorted()
@@ -396,7 +344,6 @@ class ImageBuf : Codable {
                 
                 let normalized = (r-minValue) / (maxValue-minValue)
                 let nv = ( normalized * (max-min) ) + min
-                //let nv = ( CGFloat(andMaximum - withMinimum) / CGFloat(maxValue-minValue) ) * CGFloat(r-minValue) + CGFloat(withMinimum)
                 pixels[i] = CGFloat(Int(nv*1_000_000+0.5)) / 1_000_000.0
             }
         }
@@ -429,8 +376,6 @@ class ImageBuf : Codable {
         // see: http://blog.human-friendly.com/drawing-images-from-pixel-data-in-swift
         var pixelArray = [PixelData](repeating: PixelData(a: 255, r:0, g: 0, b: 0), count: width*height)
 
-        //UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, 1);
-        
         //NSLog("copying data into pixelArray")
         if minX == 0 && minY == 0 && maxX == width-1 && maxY == height-1 {
             //NSLog("\(#function): Converting \(width)x\(height) image, without offsets, to a UIImage using CGDataProvider.")

@@ -10,7 +10,7 @@ import Foundation
 
 typealias NMVector = [Float]
 
-// Note: the correctness of this has never been tested.
+// Note: the correctness of this has never been properly tested.
 
 func nmVectorAdd(_ a: NMVector, _ b: NMVector) -> NMVector {
     guard a.count == b.count else { return a }

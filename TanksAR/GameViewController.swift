@@ -12,6 +12,7 @@ import ARKit
 
 // Note: board placement doesn't seem to work when resuming if the app didn't fully quit
 // Note: player changes strangely on a new round in unlimited round mode
+// Note: see: https://developer.apple.com/documentation/arkit/creating_a_multiuser_ar_experience
 
 struct UserConfig {
     var scaleFactor: Float
@@ -123,11 +124,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         // see: https://blog.markdaws.net/arkit-by-example-part-4-realism-lighting-pbr-b9a0bedb013e
         configuration.isLightEstimationEnabled = true
         
-        // cause board placement to occur when view reappears
-        // this causes problems with the weapons view
-        //unplaceBoard()
-        //updateUI()
-    
         if let saveStateController = saveStateController as? MenuViewController {
             NSLog("Writing to saveStateController in GameViewController")
             saveStateController.gameState = GameState(model: gameModel, config: gameConfig)
@@ -154,7 +150,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         updateUI()
 
         placeBoardGesture.require(toFail: backupPlaceBoardGesture)
-        //screenDraggingGesture.require(toFail: rotateGesture)
         
         // Run the view's session
         sceneView.session.run(configuration)
@@ -162,9 +157,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-
-        // cause board placement to occur when view reappears
-        //unplaceBoard()
 
         // Pause the view's session
         sceneView.session.pause()
@@ -188,17 +180,17 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
-        
+        NSLog("\(#function): \(error.localizedDescription)")
     }
     
     func sessionWasInterrupted(_ session: ARSession) {
         // Inform the user that the session has been interrupted, for example, by presenting an overlay
-        
+        NSLog("\(#function): \(session)")
     }
     
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
-        
+        NSLog("\(#function): \(session)")
     }
 
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {

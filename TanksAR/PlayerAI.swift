@@ -171,7 +171,6 @@ class PlayerAI : Codable {
             let velocity = Vector3(xVel, yVel, zVel)
             let muzzleVelocity = velocity
 
-            // Note: This position is very wrong, and could be leading to incorrect solutions.
             let tankHeight: Float = 14.52 // 0.625+0.827 = 1.452 * tankScale
             let barrelLength: Float = 20
             var muzzlePosition = tank.position
@@ -215,10 +214,5 @@ class PlayerAI : Codable {
 
         return dist
     }
-    
-//    func playerIsMe(player: Player) -> Bool {
-//        guard let ai = player.ai else { return false }
-//        return ai == self
-//    }
     
 }

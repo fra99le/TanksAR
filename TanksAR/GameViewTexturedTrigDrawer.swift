@@ -43,13 +43,9 @@ class GameViewTexturedTrigDrawer : GameViewTrigDrawer {
         sunLight.orthographicScale = 4000
         sunLight.automaticallyAdjustsShadowProjection = true
         sun.light = sunLight
-        // sun.eulerAngles.x = -Float.pi
-        //sun.eulerAngles.x = -Float.pi * (3.0/8.0) + 0.001
-        // sun.eulerAngles.y = Float.pi
         ecliptic.addChildNode(sun)
         
         // animate direction of the sun
-        //let riseAndSet = SCNAction.repeatForever(.rotateBy(x: 0, y: CGFloat(2 * Float.pi), z: 0, duration: 10))
         let riseAndSet = SCNAction.repeatForever(.rotateBy(x: CGFloat(-Float.pi / 4), y: CGFloat(Float.pi / 4), z: 0, duration: 300))
         sun.runAction(riseAndSet)
     }

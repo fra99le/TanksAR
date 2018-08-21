@@ -712,7 +712,6 @@ class GameViewTrigDrawer : GameViewDrawer {
         var dropTexCoords: [CGPoint] = []
         var dropIndices: [[CInt]] = [[CInt]](repeating: [], count: colors.count)
         var dropNeeded = false
-        // Note: restricting this to just the regions that changes will greatly improve performance, mostly by decreasing the number of normal found.
         
         var currentArr: [CGFloat] = [0,0,0,0]
         var topArr: [CGFloat] = [0,0,0,0]
@@ -871,8 +870,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let y1_0 = yArr[dropIdxs[0]]
                         let i1_0 = iArr[dropIdxs[0]]
                         let j1_0 = jArr[dropIdxs[0]]
-//                        let z1_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
-//                                                          longitude: Int(x1_0), latitude: Int(y1_0))
                         let z1_0 = vertexInfo[i1_0][j1_0].top
                         let v1_0 = Vector3(x1_0, y1_0, z1_0)
                         
@@ -880,8 +877,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let y2_0 = yArr[dropIdxs[0]]
                         let i2_0 = iArr[dropIdxs[0]]
                         let j2_0 = jArr[dropIdxs[0]]
-//                        let z2_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
-//                                                          longitude: Int(x2_0), latitude: Int(y2_0))
                         let z2_0 = vertexInfo[i2_0][j2_0].middle
                         let v2_0 = Vector3(x2_0, y2_0, z2_0)
                         
@@ -889,8 +884,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let y3_0 = yArr[dropIdxs[1]]
                         let i3_0 = iArr[dropIdxs[1]]
                         let j3_0 = jArr[dropIdxs[1]]
-//                        let z3_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
-//                                                          longitude: Int(x3_0), latitude: Int(y3_0))
                         let z3_0 = vertexInfo[i3_0][j3_0].top
                         let v3_0 = Vector3(x3_0, y3_0, z3_0)
                         
@@ -898,8 +891,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let y4_0 = yArr[dropIdxs[1]]
                         let i4_0 = iArr[dropIdxs[1]]
                         let j4_0 = jArr[dropIdxs[1]]
-//                        let z4_0 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
-//                                                          longitude: Int(x4_0), latitude: Int(y4_0))
                         let z4_0 = vertexInfo[i4_0][j4_0].middle
                         let v4_0 = Vector3(x4_0, y4_0, z4_0)
                         
@@ -917,7 +908,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let y1_1 = yArr[dropIdxs[0]]
                         let i1_1 = iArr[dropIdxs[0]]
                         let j1_1 = jArr[dropIdxs[0]]
-                        //let z1_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x1_1), latitude: Int(y1_1))
                         let z1_1 = vertexInfo[i1_1][j1_1].new
                         let v1_1 = Vector3(x1_1, y1_1, CGFloat(z1_1))
                         
@@ -925,8 +915,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let y2_1 = yArr[dropIdxs[0]]
                         let i2_1 = iArr[dropIdxs[0]]
                         let j2_1 = jArr[dropIdxs[0]]
-                        //let z2_1 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].bottomBuf,
-                        //                                  longitude: Int(x2_1), latitude: Int(y2_1))
                         let z2_1 = vertexInfo[i2_1][j2_1].bottom
                         let v2_1 = Vector3(x2_1, y2_1, CGFloat(z2_1))
                         
@@ -934,7 +922,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let y3_1 = yArr[dropIdxs[1]]
                         let i3_1 = iArr[dropIdxs[1]]
                         let j3_1 = jArr[dropIdxs[1]]
-                        //let z3_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x3_1), latitude: Int(y3_1))
                         let z3_1 = vertexInfo[i3_1][j3_1].new
                         let v3_1 = Vector3(x3_1, y3_1, CGFloat(z3_1))
                         
@@ -942,8 +929,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let y4_1 = yArr[dropIdxs[1]]
                         let i4_1 = iArr[dropIdxs[1]]
                         let j4_1 = jArr[dropIdxs[1]]
-                        //let z4_1 = gameModel.getElevation(fromMap: fireResult.detonationResult[index].bottomBuf,
-                        //                                  longitude: Int(x4_1), latitude: Int(y4_1))
                         let z4_1 = vertexInfo[i4_1][j4_1].bottom
                         let v4_1 = Vector3(x4_1, y4_1, CGFloat(z4_1))
                         
@@ -951,13 +936,9 @@ class GameViewTrigDrawer : GameViewDrawer {
                         let y5_1 = yArr[unchangedIdxs[0]]
                         let i5_1 = iArr[unchangedIdxs[0]]
                         let j5_1 = jArr[unchangedIdxs[0]]
-                        //let z5_1 = gameModel.getElevation(fromMap: fireResult.final, longitude: Int(x5_1), latitude: Int(y5_1))
                         let z5_1 = vertexInfo[i5_1][j5_1].new
                         let v5_1 = Vector3(x5_1, y5_1, CGFloat(z5_1))
                         
-//                        let normal0_1 = gameModel.getNormal(longitude: Int(x1_1), latitude: Int(y1_1))
-//                        let normal1_1 = gameModel.getNormal(longitude: Int(x3_1), latitude: Int(y3_1))
-//                        let normal2_1 = gameModel.getNormal(longitude: Int(x5_1), latitude: Int(y5_1))
                         let normal0_1 = vertexInfo[i1_1][j1_1].finalNorm
                         let normal1_1 = vertexInfo[i3_1][j3_1].finalNorm
                         let normal2_1 = vertexInfo[i5_1][j5_1].finalNorm
@@ -1040,31 +1021,22 @@ class GameViewTrigDrawer : GameViewDrawer {
                         if dropArr[k] {
                             z0 = topArr[k]
                             z1 = bottomArr[k] + (topArr[k] - middleArr[k])
-//                            norm0 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].topBuf,
-//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-//                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                             norm0 = vertexInfo[iArr[k]][jArr[k]].topNorm
                             norm1 = vertexInfo[iArr[k]][jArr[k]].finalNorm
                         } else if displaceArr[k] {
                             z0 = bottomArr[k]
                             z1 = bottomArr[k]
-                            //var norm0surf = fireResult.detonationResult[index].bottomBuf
                             if topArr[k] == bottomArr[k] {
                                 // if displacement was upwards (i.e. .generative),
                                 // norm0 should be from .top.
-                                //norm0surf = fireResult.detonationResult[index].topBuf
                                 norm0 = vertexInfo[iArr[k]][jArr[k]].topNorm
                             } else  {
                                 norm0 = vertexInfo[iArr[k]][jArr[k]].bottomNorm
                             }
-                            //norm0 = gameModel.getNormal(fromMap: norm0surf, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-                            //norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                             norm1 = vertexInfo[iArr[k]][jArr[k]].finalNorm
                         } else if unchangedArr[k] {
                             z0 = currentArr[k]
                             z1 = newArr[k]
-//                            norm0 = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-//                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                             norm0 = vertexInfo[iArr[k]][jArr[k]].oldNorm
                             norm1 = vertexInfo[iArr[k]][jArr[k]].finalNorm
                         } else {
@@ -1103,27 +1075,17 @@ class GameViewTrigDrawer : GameViewDrawer {
                         if dropArr[k] {
                             z0 = middleArr[k]
                             z1 = bottomArr[k]
-//                            norm0 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].middleBuf,
-//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-//                            norm1 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
-//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                             norm0 = vertexInfo[iArr[k]][jArr[k]].middleNorm
                             norm1 = vertexInfo[iArr[k]][jArr[k]].bottomNorm
                         } else if displaceArr[k] {
                             z0 = bottomArr[k]
                             z1 = bottomArr[k]
                             
-//                            norm0 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
-//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-//                            norm1 = gameModel.getNormal(fromMap: fireResult.detonationResult[index].bottomBuf,
-//                                                        longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                             norm0 = vertexInfo[iArr[k]][jArr[k]].bottomNorm
                             norm1 = vertexInfo[iArr[k]][jArr[k]].bottomNorm
                         } else if unchangedArr[k] {
                             z0 = currentArr[k]
                             z1 = newArr[k]
-//                            norm0 = gameModel.getNormal(fromMap: fireResult.old, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
-//                            norm1 = gameModel.getNormal(fromMap: fireResult.final, longitude: Int(xArr[k]), latitude: Int(yArr[k]))
                             norm0 = vertexInfo[iArr[k]][jArr[k]].oldNorm
                             norm1 = vertexInfo[iArr[k]][jArr[k]].finalNorm
                         } else {
@@ -1287,7 +1249,6 @@ class GameViewTrigDrawer : GameViewDrawer {
     func animateDrainPath(for puddle: PuddleInfo, from result: FireResult, using color: UIColor, at time: CFTimeInterval, index: Int = 0) -> CFTimeInterval {
         //NSLog("puddle from \(puddle.start) to \(puddle.end) has area of \(puddle.end - puddle.start), minPos = \(puddle.minPos).")
         let drainRate : Float = 5000
-        //let puddleStart = puddle.start
         let path = result.detonationResult[index].fluidPath
         let remaining = result.detonationResult[index].fluidRemaining
         var currTime = time
@@ -1310,7 +1271,6 @@ class GameViewTrigDrawer : GameViewDrawer {
                 if pipeEnd.z < pipeStart.z {
                     let pipeLength = vectorLength(vectorDiff(pipeEnd, pipeStart))
                     //NSLog("\tadding pipe from \(pipeStart) to \(pipeEnd) length \(pipeLength)")
-                    // Note: use excessive length to log additional data about the situation
                     if pipeLength > Float(10*pathStep) {
                         NSLog("\twhile adding pipe from \(pipeStart) to \(pipeEnd) length \(pipeLength)")
                         NSLog("\t\ta long pipe detected")
@@ -1397,7 +1357,6 @@ class GameViewTrigDrawer : GameViewDrawer {
         //let puddleVolume = fireResult.fluidRemaining[puddle.minPos] - fireResult.fluidRemaining[puddle.end]
         //NSLog("\tanimating puddle with volume \(puddleVolume) rising from \(puddle.minZ) to \(puddle.maxZ).")
         // build quick lookup set
-        // build dictionary for faster checking for inclusion in puddle
         for i in previousPuddleEnd...puddleEnd {
             let point = path[i]
             let coord = Int(point.y) * gameModel.board.boardSize + Int(point.x)
@@ -1466,7 +1425,6 @@ class GameViewTrigDrawer : GameViewDrawer {
         let minRise = max(fillRate / 60, 1)
         puddleNode.position = SCNVector3(0,currentZ,0)
         var fillActions: [SCNAction] = []
-        //fillActions.reserveCapacity(Int((path[puddle.end].z - minZ) / minRise)+10)
         fillActions.append(contentsOf: [.wait(duration: currTime),
                                         .unhide()])
         while risePos <= puddle.end {

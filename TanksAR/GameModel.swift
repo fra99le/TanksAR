@@ -6,8 +6,6 @@
 //  Copyright © 2018 Doing Science To Stuff. All rights reserved.
 //
 
-// Note: Game model has the origin at one corner.
-
 import Foundation
 import UIKit
 import SceneKit
@@ -212,9 +210,6 @@ struct FireResult {
     var humanLeft: Int = 0
 }
 
-// Note: For the model x,y are surface image coordinates, and z is elevation
-// In GameViewController y and z are swapped.
-
 class GameModel : Codable {
     // game board
     var board: GameBoard = GameBoard()
@@ -233,21 +228,21 @@ class GameModel : Codable {
                                      WeaponSize(name: "regular", size: 150, cost: 2000),
                                      WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .explosive),
         Weapon(name: "Dirty Bomb", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
-                                     WeaponSize(name: "regular", size: 150, cost: 2000),
-                                     WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .generative),
+                                           WeaponSize(name: "regular", size: 150, cost: 2000),
+                                           WeaponSize(name: "heavy", size: 300, cost: 3000) ], style: .generative),
         Weapon(name: "Mud", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
-                                            WeaponSize(name: "regular", size: 150, cost: 2000),
-                                            WeaponSize(name: "heavy", size: 300, cost: 3000)], style: .mud),
+                                    WeaponSize(name: "regular", size: 150, cost: 2000),
+                                    WeaponSize(name: "heavy", size: 300, cost: 3000)], style: .mud),
         Weapon(name: "Napalm", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
-                                            WeaponSize(name: "regular", size: 150, cost: 2000),
-                                            WeaponSize(name: "heavy", size: 300, cost: 3000)], style: .napalm),
+                                       WeaponSize(name: "regular", size: 150, cost: 2000),
+                                       WeaponSize(name: "heavy", size: 300, cost: 3000)], style: .napalm),
         Weapon(name: "MIRV", sizes: [WeaponSize(name: "linear", size: 5, cost: 500),
-                                     WeaponSize(name: "linear", size: 6, cost: 500),
-                                       WeaponSize(name: "cross", size: 9, cost: 900),
-                                       WeaponSize(name: "ring", size: 13, cost: 1200),
-                                       WeaponSize(name: "crosshairs", size: 17, cost: 1700),
-                                       WeaponSize(name: "wheel", size: 21, cost: 2100),
-                                       WeaponSize(name: "grid", size: 25, cost: 2500)], style: .mirv),
+                                     WeaponSize(name: "lateral", size: 6, cost: 500),
+                                     WeaponSize(name: "cross", size: 9, cost: 900),
+                                     WeaponSize(name: "ring", size: 13, cost: 1300),
+                                     WeaponSize(name: "crosshairs", size: 17, cost: 1700),
+                                     WeaponSize(name: "wheel", size: 21, cost: 2100),
+                                     WeaponSize(name: "grid", size: 25, cost: 2500)], style: .mirv),
 
         ]
     
@@ -398,7 +393,6 @@ class GameModel : Codable {
     func getElevation(fromMap: ImageBuf, longitude: Int, latitude: Int) -> Float {
         guard let pixel = fromMap.getPixel(x: longitude, y: latitude) else { return 0 }
         let elevation = Float(pixel*255)
-        //let elevation = Float(10*( (longitude+latitude)%2 ) + 50)
         
         //print("Elevation at \(longitude),\(latitude) is \(elevation).")
         return elevation * elevationScale
@@ -918,15 +912,6 @@ class GameModel : Codable {
             
             t += timeStep
             
-            //            // update position
-            //            // NOTE: the model should do all calculations in model space, not view space
-            //            p0.x += v0.x * timeStep
-            //            p0.y += v0.y * timeStep
-            //            p0.z += v0.z * timeStep + 0.5 * gravity * (timeStep*timeStep)
-            //
-            //            // update velocity
-            //            v0.z += gravity * timeStep
-            
             // check for impact
             let distAboveLand = position.z - getElevation(longitude: Int(position.x), latitude: Int(position.y))
             if position.z<0 || distAboveLand<0 {
@@ -1061,9 +1046,6 @@ class GameModel : Codable {
                             newElevation = currElevation * 1.1
                             NSLog("Unconsidered case, this is wierd! top: \(top), middle: \(middle), bottom: \(bottom), curr: \(currElevation)")
                         }
-                        //                    if( newElevation != currElevation) {
-                        //                        NSLog("generative level change: \(currElevation) -> \(newElevation) at \(i),\(j)")
-                        //                    }
                         setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
                         setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
                         setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
@@ -1492,18 +1474,5 @@ class GameModel : Codable {
         board.players[board.currentPlayer].weaponID = weaponID
         board.players[board.currentPlayer].weaponSizeID = weaponSizeID
     }
-    
-//    func getWinner() -> (name: String, score: Int64) {
-//        var maxScore = board.players[0].score - 1
-//        var winner = ""
-//        for i in 0..<board.players.count {
-//            if board.players[i].score > maxScore {
-//                maxScore = board.players[i].score
-//                winner = board.players[i].name
-//            }
-//        }
-//        
-//        return (winner, maxScore)
-//    }
     
 }

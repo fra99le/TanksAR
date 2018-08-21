@@ -401,7 +401,6 @@ class GameViewDrawer {
                     var puddleInfo = PuddleInfo(start: i, end: i-1, minPos: i,
                                                 removable: false, hideable: false)
                     
-                    // new version, (fast, but broken)
                     // get start and minPos of puddle
                     //NSLog("starting stack search, puddleStack.top.value: \(puddleStack.top!.value),  previousElevation: \(previousElevation)")
                     while puddleStack.count > 0 && puddleStack.top!.value <= previousElevation {
@@ -430,34 +429,6 @@ class GameViewDrawer {
                             puddleInfo.minPos = lastPuddle.minPos
                         }
                     }
-                    
-                    //                    // old version ('slow', but works better)
-                    //                    // scan back to previous point with same elevation
-                    //                    var searchStartPos = i - 1
-                    //                    if let lastPuddle = puddles.last,
-                    //                        previousElevation > path[lastPuddle.end].z {
-                    //                        // expanding on puddle
-                    //                        // jump to previous puddle's entry point
-                    //                        searchStartPos = lastPuddle.start + 1
-                    //                        puddleInfo.minPos = lastPuddle.minPos
-                    //                    }
-                    //                    var pos = searchStartPos - 1
-                    //                    while pos >= 0 && path[pos].z <= previousElevation {
-                    //                        //NSLog("searching for elevation \(previousElevation), path[\(pos)].z = \(path[pos].z)")
-                    //                        if path[pos].z <  path[puddleInfo.minPos].z {
-                    //                            puddleInfo.minPos = pos
-                    //                        }
-                    //
-                    //                        pos -= 1
-                    //                    }
-                    //                    puddleInfo.start = pos+1
-                    
-                    //                    if pos+1 != puddleStack.top!.key {
-                    //                        NSLog("puddleInfo.start = (pos+1: \(pos+1), puddleStack.top.key: \(puddleStack.top!.key)), elevations: (\(path[pos+1].z), \(path[puddleStack.top!.key].z)=\(puddleStack.top!.value))")
-                    //                    }
-                    //                    if minPosStack.count > 0 && puddleInfo.minPos != minPosStack.top!.key {
-                    //                        NSLog("puddleInfo.minPos = (minPos: \(puddleInfo.minPos), minPosStack.top!.key: \(minPosStack.top!.key)), elevations: (\(path[puddleInfo.minPos].z), \(path[minPosStack.top!.key].z)=\(minPosStack.top!.value))")
-                    //                    }
                     
                     puddles.append(puddleInfo)
                 }

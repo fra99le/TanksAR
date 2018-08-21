@@ -220,11 +220,8 @@ class TestGameModel : GameModel {
                         newElevation = currElevation // new chunk below old surface
                     } else {
                         newElevation = currElevation * 1.1
-                        //NSLog("Unconsidered case, this is wierd! top: \(top), middle: \(middle), bottom: \(bottom), curr: \(currElevation)")
+                        NSLog("Unconsidered case, this is wierd! top: \(top), middle: \(middle), bottom: \(bottom), curr: \(currElevation)")
                     }
-                    //                    if( newElevation != currElevation) {
-                    //                        NSLog("generative level change: \(currElevation) -> \(newElevation) at \(i),\(j)")
-                    //                    }
                     setElevation(forMap: topBuf, longitude: i, latitude: j, to: top)
                     setElevation(forMap: middleBuf, longitude: i, latitude: j, to: middle)
                     setElevation(forMap: bottomBuf, longitude: i, latitude: j, to: bottom)
