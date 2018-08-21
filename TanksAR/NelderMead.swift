@@ -87,13 +87,8 @@ class NelderMead : Codable {
     }
 
     func sortedSimplex(_ simplex: [NMSample]) -> [NMSample] {
-        let ordered = simplex.sorted(by: {
-            // areInIncreasingOrder
-            // see: https://developer.apple.com/documentation/swift/array/2296815-sorted
-            if $0.value < $1.value {
-                return true
-            }
-            return false
+        let ordered = simplex.sorted(by: {lhs, rhs in // areInIncreasingOrder
+            return lhs.value < rhs.value
         })
         //NSLog("simplex: \(simplex)")
         //NSLog("ordered: \(ordered)")
