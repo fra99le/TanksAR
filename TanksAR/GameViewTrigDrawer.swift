@@ -385,28 +385,12 @@ class GameViewTrigDrawer : GameViewDrawer {
         })
         
         // combine bottoms and create caps
-        //NSLog("\(#function): combining detonations into single combinedBottom map")
-        var minI: Int = numPerSide
-        var maxI: Int = 0
-        var minJ: Int = numPerSide
-        var maxJ: Int = 0
-        let combinedBottom = ImageBuf(fireResult.old)
-        let combinedBottomColor = ImageBuf(fireResult.oldColor)
-        let margin = 2
-        for i in 0..<sortedDetonations.count {
-            let detonation = sortedDetonations[i]
-            combinedBottom.paste(detonation.bottomBuf)
-            combinedBottomColor.paste(detonation.bottomColor)
-            //NSLog("\tadded \(detonation.bottomBuf.width)x\(detonation.bottomBuf.height) update to combinedBottom")
-            
-            // update extents
-            minI = min(minI, max(0, min(numPerSide, Int(CGFloat(detonation.minX) / edgeSize) - margin)))
-            minJ = min(minJ, max(0, min(numPerSide, Int(CGFloat(detonation.minY) / edgeSize) - margin)))
-            maxI = max(maxI, max(0, min(numPerSide, Int(CGFloat(detonation.maxX) / edgeSize) + margin)))
-            maxJ = max(maxJ, max(0, min(numPerSide, Int(CGFloat(detonation.maxY) / edgeSize) + margin)))
-        }
+        let (combinedBottom, combinedBottomColor,limits) = combineBottoms(fireResult: fireResult, from: from)
+        let minI = limits[0]
+        let maxI = limits[1]
+        let minJ = limits[2]
+        let maxJ = limits[3]
         let sideSize = maxJ - minJ
-        //NSLog("\(#function): combined detonations into single bottom")
 
         if fireResult.detonationResult.count <= 1 {
             NSLog("\(#function): No need for crater caps for only one impact.")

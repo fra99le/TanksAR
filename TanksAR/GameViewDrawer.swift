@@ -381,6 +381,38 @@ class GameViewDrawer {
         NSLog("\(#function) finished")
     }
     
+    func combineBottoms(fireResult: FireResult, from: GameViewController) -> (ImageBuf,ImageBuf,[Int]) {
+
+        // sort detonations by time
+        let sortedDetonations = fireResult.detonationResult.sorted(by: {lhs, rhs in
+            return lhs.timeIndex < rhs.timeIndex
+        })
+
+        //NSLog("\(#function): combining detonations into single combinedBottom map")
+        var minI: Int = numPerSide
+        var maxI: Int = 0
+        var minJ: Int = numPerSide
+        var maxJ: Int = 0
+        let combinedBottom = ImageBuf(fireResult.old)
+        let combinedBottomColor = ImageBuf(fireResult.oldColor)
+        let margin = 2
+        for i in 0..<sortedDetonations.count {
+            let detonation = sortedDetonations[i]
+            combinedBottom.paste(detonation.bottomBuf)
+            combinedBottomColor.paste(detonation.bottomColor)
+            //NSLog("\tadded \(detonation.bottomBuf.width)x\(detonation.bottomBuf.height) update to combinedBottom")
+            
+            // update extents
+            minI = min(minI, max(0, min(numPerSide, Int(CGFloat(detonation.minX) / edgeSize) - margin)))
+            minJ = min(minJ, max(0, min(numPerSide, Int(CGFloat(detonation.minY) / edgeSize) - margin)))
+            maxI = max(maxI, max(0, min(numPerSide, Int(CGFloat(detonation.maxX) / edgeSize) + margin)))
+            maxJ = max(maxJ, max(0, min(numPerSide, Int(CGFloat(detonation.maxY) / edgeSize) + margin)))
+        }
+        //NSLog("\(#function): combined detonations into single bottom")
+
+        return (combinedBottom, combinedBottomColor, [minI,maxI,minJ,maxJ])
+    }
+    
     func findPuddles(in path: [Vector3]) -> [PuddleInfo] {
         NSLog("\(#function) starting")
         let minPuddleSize = Int(pow(edgeSize,2))
