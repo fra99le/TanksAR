@@ -622,6 +622,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             // player is an AI
             _ = ai.recordResult(gameModel: gameModel, azimuth: tank.azimuth, altitude: tank.altitude, velocity: tank.velocity,
                               impactX: impact.x, impactY: impact.y, impactZ: impact.z)
+        } else {
+            // this is a human, remove previous trajectory from board
+            prevTraj.isHidden = true
+            prevTraj.removeFromParentNode()
         }
         humanLeft = fireResult.humanLeft
 
@@ -629,6 +633,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             boardDrawer.timeScaling = 3
         }
         
+        currTraj.isHidden = true
         currTraj.removeFromParentNode()
         boardDrawer.animateResult(fireResult: fireResult, from: self)
         roundChanged = fireResult.newRound
@@ -941,11 +946,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         updateHUD()
         
         // show previous trajectory for user
-        prevTraj.removeFromParentNode()
         if player.prevTrajectory.count > 0 {
-            prevTraj = SCNNode()
             boardDrawer.addTrajectory(trajectory: player.prevTrajectory, toNode: prevTraj, color: UIColor.yellow)
-            board.addChildNode(prevTraj)
+            if prevTraj.parent == nil {
+                board.addChildNode(prevTraj)
+                prevTraj.isHidden = false
+            }
+        } else {
+            prevTraj.isHidden = true
+            prevTraj.removeFromParentNode()
         }
         
         // update board
@@ -963,15 +972,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     }
     
     func drawCurrentTrajectory() {
-        currTraj.removeFromParentNode()
-        currTraj = SCNNode()
-        
         let (muzzlePosition, muzzleVelocity) = muzzleParameters()
         let playerTraj = gameModel.computeTrajectory(muzzlePosition: muzzlePosition,
                                                      muzzleVelocity: muzzleVelocity,
                                                      withTimeStep: 1/6.0)
         boardDrawer.addTrajectory(trajectory: playerTraj, toNode: currTraj, color: UIColor.lightGray)
-        board.addChildNode(currTraj)
+        currTraj.isHidden = false
+        if currTraj.parent == nil {
+            board.addChildNode(currTraj)
+        }
     }
 
     func updateHUD() {

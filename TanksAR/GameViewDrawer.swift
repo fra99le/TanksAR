@@ -138,28 +138,53 @@ class GameViewDrawer {
     
     func addTrajectory(trajectory: [Vector3], toNode: SCNNode, color: UIColor) {
         let segments = 20
+        NSLog("Started adding trajectory with \(segments) segments")
         if trajectory.count > 2 {
             var prevPos: Vector3 = trajectory.first!
             for i in 1..<segments {
                 let newIndex = Int(Float(i) * Float(trajectory.count) / Float(segments))
                 let newPos = trajectory[newIndex]
                 
-                let joint = SCNNode(geometry: SCNSphere(radius: CGFloat(0.25*tankScale)))
-                joint.geometry?.firstMaterial?.diffuse.contents = color
-                joint.position = fromModelSpace(newPos)
-                toNode.addChildNode(joint)
-                
-                addCylinder(from: prevPos, to: newPos, toNode: toNode, color: color)
+                let jointName = "\(i) joint"
+                if let joint = toNode.childNode(withName: jointName, recursively: false) {
+                    joint.geometry?.firstMaterial?.diffuse.contents = color
+                    joint.position = fromModelSpace(newPos)
+                } else {
+                    NSLog("\(#function): Creating \(jointName)")
+                    let joint = SCNNode(geometry: SCNSphere(radius: CGFloat(0.25*tankScale)))
+                    joint.geometry?.firstMaterial?.diffuse.contents = color
+                    joint.position = fromModelSpace(newPos)
+                    joint.name = jointName
+                    toNode.addChildNode(joint)
+                }
+                addCylinder(from: prevPos, to: newPos, toNode: toNode, color: color, named: "\(i) edge")
                 prevPos = newPos
             }
-            addCylinder(from: prevPos, to: trajectory.last!, toNode: toNode, color: color)
+            addCylinder(from: prevPos, to: trajectory.last!, toNode: toNode, color: color, named: "final edge")
         }
+        NSLog("Finished adding trajectory.")
         
     }
     
-    func addCylinder(from: Vector3, to: Vector3, toNode: SCNNode, color: UIColor) {
-        let cylinder = SCNNode()
+    func addCylinder(from: Vector3, to: Vector3, toNode: SCNNode, color: UIColor, named: String = "edge") {
+        var cylinder = SCNNode()
+        var gimble = SCNNode()
         
+        let gimbleName = "\(named) gimble"
+        if let gim = toNode.childNode(withName: gimbleName, recursively: false) {
+            gimble = gim
+        } else {
+            NSLog("\(#function): Adding \(gimbleName)")
+            gimble.name = gimbleName
+            toNode.addChildNode(gimble)
+        }
+        if let cyl = gimble.childNode(withName: named, recursively: false) {
+            cylinder = cyl
+        } else {
+            NSLog("\(#function): Adding \(named)")
+            cylinder.name = named
+            gimble.addChildNode(cylinder)
+        }
         //NSLog("Adding cylinder from \(from) to \(to).")
         
         let length = gameModel.distance(from: from, to: to)
@@ -177,16 +202,12 @@ class GameViewDrawer {
         
         cylinder.eulerAngles.z = Float.pi / 2 - angle1
         
-        let gimble = SCNNode()
-        gimble.addChildNode(cylinder)
         gimble.eulerAngles.y = Float.pi - angle2
         
         // get position of cylinder's gimble
         let sum = vectorAdd(to, from)
         let mid = vectorScale(sum, by: 0.5)
         gimble.position = fromModelSpace(mid)
-        
-        toNode.addChildNode(gimble)
     }
     
     func animateExplosion(fireResult: FireResult, at: CFTimeInterval, index: Int = 0) -> CFTimeInterval {
