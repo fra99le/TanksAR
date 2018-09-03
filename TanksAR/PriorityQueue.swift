@@ -49,6 +49,15 @@ struct PriorityQueue<T: Comparable> {
         }
     }
     
+    func first() -> T? {
+        // check for empty queue
+        if items.count == 0 {
+            return nil
+        }
+
+        return items[0]
+    }
+    
     mutating func dequeue() -> T? {
         // check for empty queue
         if items.count == 0 {
