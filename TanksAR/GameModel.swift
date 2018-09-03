@@ -14,17 +14,17 @@ import SceneKit
 
 struct OrderedElevation : Comparable {
     var elevation: Float
-    var order: Int
+    var distance: Float
     
     static func < (lhs: OrderedElevation, rhs: OrderedElevation) -> Bool {
         if lhs.elevation == rhs.elevation {
-            return lhs.order < rhs.order
+            return lhs.distance < rhs.distance
         }
         return lhs.elevation < rhs.elevation
     }
     
     static func == (lhs: OrderedElevation, rhs: OrderedElevation) -> Bool {
-        return lhs.elevation == rhs.elevation && lhs.order == rhs.order
+        return lhs.elevation == rhs.elevation && lhs.distance == rhs.distance
     }
 }
 
@@ -1135,7 +1135,7 @@ class GameModel : Codable {
         // set start point
         let startCoord = MapCoordinate(x: Int(startX), y: Int(startY))
         let startElevation = getElevation(longitude: startCoord.x, latitude: startCoord.y)
-        let initialKey = OrderedElevation(elevation: startElevation, order: 0)
+        let initialKey = OrderedElevation(elevation: startElevation, distance: 0)
         queue.enqueue(Pair(key: initialKey, value: startCoord))
         
         var previousElevation = startElevation
@@ -1164,7 +1164,8 @@ class GameModel : Codable {
                     let enqueuedAlready = fringe[fringeCoord]
                     if !enqueuedAlready {
                         let elevation = getElevation(longitude: x, latitude: y)
-                        let key = OrderedElevation(elevation: elevation, order: lowest.key.order + 1)
+                        let dist = sqrt(Float(i*i + j*j))
+                        let key = OrderedElevation(elevation: elevation, distance: lowest.key.distance + dist)
                         let coordinate = MapCoordinate(x: x, y: y)
                         queue.enqueue(Pair(key: key, value: coordinate))
                         fringe[fringeCoord] = true
