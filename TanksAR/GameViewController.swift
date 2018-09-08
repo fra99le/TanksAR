@@ -685,6 +685,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
             currentUser = playerID
         }
+        
+//        // save game after each turn
+//        if let saveStateController = saveStateController as? MenuViewController {
+//            saveStateController.saveStateFile()
+//        }
 
         NSLog("\(#function) finished")
     }
