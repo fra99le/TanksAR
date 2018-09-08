@@ -9,6 +9,9 @@
 import Foundation
 import SceneKit
 
+// Note: AIs need to be able to use more interesting weapons!
+// Note: In unlimited rounds mode, AIs should only target humans.
+
 // inputs and resulting distance to an individual opponent
 struct Sample : Codable {
     // input
