@@ -373,12 +373,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         disableUI()
         exitButton.isEnabled = false
         exitButton.isHidden = true
-        
+        hudStackView.isHidden = true
+        hudBackground.isHidden = true
+
         // see: https://www.andrewcbancroft.com/2015/12/18/working-with-unwind-segues-programmatically-in-swift/
 
         let alert = UIAlertController(title: "Quit Game?", message: "Current game will be lost if you quit.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("Resume", comment: "Default inaction"), style: .default, handler: { _ in
             NSLog("Exit canceled.")
+            self.exitButton.isEnabled = true
+            self.exitButton.isHidden = false
             self.updateUI()
         }))
         alert.addAction(UIAlertAction(title: NSLocalizedString("Quit", comment: "Default action"), style: .default, handler: { _ in
@@ -686,39 +690,43 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     }
     
     func enableUI() {
-        exitButton.isEnabled = true
         exitButton.isHidden = false
-        fireButton.isHidden = false
-        fireButton.isEnabled = true
-        skipButton.isHidden = true
-        skipButton.isEnabled = false
-        powerSlider.isHidden = false
-        powerSlider.isEnabled = true
-        screenDraggingGesture.isEnabled = true
-        manualTrainButton.isEnabled = true
-        manualTrainButton.isHidden = false
-        hudStackView.isHidden = false
-        hudBackground.isHidden = false
-        playerNameLabel.isHidden = false
-        playerScoreLabel.isHidden = false
-        roundLabel.isHidden = false
+        exitButton.isEnabled = true
+        if boardPlaced {
+            fireButton.isHidden = false
+            fireButton.isEnabled = true
+            skipButton.isHidden = true
+            skipButton.isEnabled = false
+            hudStackView.isHidden = false
+            hudBackground.isHidden = false
+            powerSlider.isHidden = false
+            powerSlider.isEnabled = true
+            manualTrainButton.isHidden = false
+            manualTrainButton.isEnabled = true
+            screenDraggingGesture.isEnabled = true
+            playerNameLabel.isHidden = false
+            playerScoreLabel.isHidden = false
+            roundLabel.isHidden = false
+        }
     }
     
     func disableUI() {
         // don't mess with exit button here!
         fireButton.isHidden = true
         fireButton.isEnabled = false
-        if humanLeft == 0 && gameModel.gameStarted {
-            skipButton.isEnabled = true
-            skipButton.isHidden = false
+        if boardPlaced {
+            if humanLeft == 0 && gameModel.gameStarted {
+                skipButton.isHidden = false
+                skipButton.isEnabled = true
+            }
+            hudStackView.isHidden = false
+            hudBackground.isHidden = false
         }
         powerSlider.isHidden = true
         powerSlider.isEnabled = false
-        screenDraggingGesture.isEnabled = false
-        manualTrainButton.isEnabled = false
         manualTrainButton.isHidden = true
-        hudStackView.isHidden = false
-        hudBackground.isHidden = false
+        manualTrainButton.isEnabled = false
+        screenDraggingGesture.isEnabled = false
         playerNameLabel.isHidden = false
         playerScoreLabel.isHidden = false
         roundLabel.isHidden = false
@@ -942,7 +950,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
         }
         
-
         updateHUD()
         
         // show previous trajectory for user
