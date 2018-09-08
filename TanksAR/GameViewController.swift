@@ -915,8 +915,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
                 }
                 let textGeometry = SCNText(string: player.name, extrusionDepth: 2)
                 playerNameNode = SCNNode(geometry: textGeometry)
-                let (min: min, max: max) = playerNameNode.boundingBox
-                playerNameNode.position = SCNVector3( -(max.x+min.x)/2, -(max.y+min.y)/2, -(max.z+min.z)/2)
+                let (minExtent, maxExtent) = playerNameNode.boundingBox
+                playerNameNode.position = SCNVector3( -(maxExtent.x+minExtent.x)/2, -(maxExtent.y+minExtent.y)/2, -(maxExtent.z+minExtent.z)/2)
                 playerNameNode.position.y = 0
                 playerNameNode.geometry?.firstMaterial?.diffuse.contents = UIColor.cyan
                 labelNode.addChildNode(playerNameNode)
@@ -942,7 +942,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
 //                labeledArrowNode.runAction(arrowAppearAction)
                 labeledArrowNode.isHidden = false
                 
-                labeledArrowNode.position = SCNVector3(tankNode.position.x,tankNode.position.y + 50,tankNode.position.z)
+                let modelTankPos = boardDrawer.toModelSpace(tankNode.position)
+                let elevation = gameModel.getElevation(longitude: Int(modelTankPos.x),
+                                                       latitude: Int(modelTankPos.y))
+                NSLog("\(#function): name: \(player.name), tankNode.position.y: \(tankNode.position.y), elevation: \(elevation)")
+                let arrowPosition = SCNVector3(tankNode.position.x,
+                                               max(tankNode.position.y, elevation) + 50,
+                                               tankNode.position.z)
+                labeledArrowNode.position = arrowPosition
                 labeledArrowNode.scale = SCNVector3(30,30,30)
                 playerArrowNode.removeFromParentNode()
                 board.addChildNode(labeledArrowNode)
