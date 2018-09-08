@@ -135,6 +135,7 @@ struct Player : Codable {
     var stats: PlayerStats = PlayerStats()
     
     // need to add shielding info
+    //var shieldHitPoints: Float = 0
 }
 
 struct GameBoard : Codable {
@@ -158,6 +159,7 @@ struct GameBoard : Codable {
 
 enum WeaponStyle : String, Codable {
     case explosive, generative, mud, napalm, mirv
+    // Note: Alex was expecting a randomized MIRV
 }
 
 struct WeaponSize : Codable {
@@ -223,6 +225,7 @@ class GameModel : Codable {
     let computerCost = 2000
     
     var weaponsList = [
+        // Note: Weapon sizes should have descriptions that can be shown in the weapon selection interface
         Weapon(name: "Standard", sizes: [WeaponSize(name: "N/A", size: 35, cost: 100)], style: .explosive),
         Weapon(name: "Nuke", sizes: [WeaponSize(name: "baby", size: 75, cost: 1000),
                                      WeaponSize(name: "regular", size: 150, cost: 2000),
