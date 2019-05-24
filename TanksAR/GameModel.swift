@@ -669,6 +669,32 @@ class GameModel : Codable {
         board.players[board.currentPlayer].tank.velocity = min(power,maxPower)
     }
 
+    func muzzleParameters(forPlayer: Int) -> (Vector3, Vector3) {
+        let tank = getTank(forPlayer: forPlayer)
+        let power = tank.velocity
+        let azi = tank.azimuth * (Float.pi/180)
+        let alt = tank.altitude * (Float.pi/180)
+        
+        // compute muzzle velocity components
+        let xVel = -power * sin(azi) * cos(alt)
+        let yVel = -power * cos(azi) * cos(alt)
+        let zVel = power * sin(alt)
+        
+        //NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
+        let velocity = Vector3(xVel, yVel, zVel)
+        let muzzleVelocity = velocity
+
+        // compute muzzle position
+        let tankHeight: Float = 14.52 // 0.625+0.827 = 1.452 * tankScale
+        let barrelLength: Float = 20
+        var muzzlePosition = tank.position
+        muzzlePosition.x += -sin(azi) * cos(alt) * barrelLength
+        muzzlePosition.y += -cos(azi) * cos(alt) * barrelLength
+        muzzlePosition.z += tankHeight + sin(alt) * barrelLength
+        
+        return (muzzlePosition, muzzleVelocity)
+    }
+
     func fire(muzzlePosition: Vector3, muzzleVelocity: Vector3) -> FireResult {
         NSLog("\(#function) started")
 

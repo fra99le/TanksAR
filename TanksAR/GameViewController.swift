@@ -31,6 +31,7 @@ struct GameConfig : Codable {
     var mode: drawerMode = .texturedTrigs
     var credit: Int64 = 5000
     var playerNames: [String] = []
+    var networked: Bool = false
 }
 
 class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDelegate {
@@ -55,6 +56,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     var roundChanged: Bool = false
     var playerNameNode = SCNNode()
     var playerArrowNode = SCNNode()
+    var viewIsLoaded = false
+    var uiEnabled = false
+    
+    var networkGameController: NetworkedGameController?
     
     @IBOutlet var tapToSelectLabel: UILabel!
     @IBOutlet var fireButton: UIButton!
@@ -91,6 +96,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         rescaleGesture.delegate = self
         screenDraggingGesture.delegate = self
         
+        viewIsLoaded = true
     }
     
     func setupDrawer() {
@@ -137,6 +143,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             updateDrawer()
             // destroy old per user info, as order may have changed
             users = []
+                        
+            if let networkController = networkGameController {
+                NSLog("\(#function): setting up network play")
+                networkController.viewController = self
+                networkController.startGame()
+                networkController.startRound()
+            } else {
+                NSLog("\(#function): networkGameController not available")
+            }
         }
         boardDrawer.updateBoard()
         NSLog("users.count = \(users.count); players.count = \(gameModel.board.players.count)")
@@ -146,7 +161,16 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             currentUser = gameModel.board.currentPlayer
         }
         addTanks()
-        
+ 
+        // set UI to requested state for networked game
+        if let _ = networkGameController {
+            if uiEnabled {
+                enableUI()
+            } else {
+                disableUI()
+            }
+        }
+
         updateUI()
 
         placeBoardGesture.require(toFail: backupPlaceBoardGesture)
@@ -263,6 +287,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     
     @IBOutlet var screenDraggingGesture: UIPanGestureRecognizer!
     @IBAction func screenDragged(_ sender: UIGestureRecognizer) {
+        NSLog("\(#function)")
         guard let gesture = sender as? UIPanGestureRecognizer else { return }
         guard boardDrawer.tankNodes.count > 0 else { return }
         
@@ -275,11 +300,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             playerArrowNode.runAction(arrowHideAction)
         }
 
-        //NSLog("Screen dragged \(gesture).")
-        //NSLog("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
+        NSLog("Screen dragged \(gesture).")
+        NSLog("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
         // determine player
         let playerID = gameModel.board.currentPlayer
-        let tankNode = boardDrawer.tankNodes[playerID]
         
         // get tank aiming values from model
         let tank = gameModel.getTank(forPlayer: playerID)
@@ -294,12 +318,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         let newAzimuth = currAzimuth + Float(translation.x) / rotationScale
         let newAltitude = currAltitude - Float(translation.y) / rotationScale
 
-        // find/adjust tank model's aiming
-        guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { return }
-        guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { return }
-        turretNode.eulerAngles.y = newAzimuth * (Float.pi/180)
-        hingeNode.eulerAngles.x = newAltitude * (Float.pi/180)
-        //NSLog("newAzimuth: \(newAzimuth), newAltitude: \(newAltitude)")
+        updateTankNode()
         
         if gesture.state == .ended {
             gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
@@ -312,6 +331,19 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         }
     }
 
+    func updateTankNode() {
+        // find/adjust tank model's aiming
+        let playerID = gameModel.board.currentPlayer
+        let tankNode = boardDrawer.tankNodes[playerID]
+        guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { return }
+        guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { return }
+        let newAzimuth = gameModel.board.players[playerID].tank.azimuth
+        let newAltitude = gameModel.board.players[playerID].tank.altitude
+        turretNode.eulerAngles.y = newAzimuth * (Float.pi/180)
+        hingeNode.eulerAngles.x = newAltitude * (Float.pi/180)
+        //NSLog("newAzimuth: \(newAzimuth), newAltitude: \(newAltitude)")
+    }
+    
     @IBOutlet var rescaleGesture: UIPinchGestureRecognizer!
     @IBAction func rescaleGesture(_ sender: UIPinchGestureRecognizer) {
         let player = currentUser
@@ -402,6 +434,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             saveStateController.gameState = nil
             saveStateController.removeStateFile()
         }
+        if let networkController = networkGameController {
+            networkController.disconnect()
+        }
         // see: https://www.andrewcbancroft.com/2015/12/18/working-with-unwind-segues-programmatically-in-swift/
         performSegue(withIdentifier: "unwindToMainMenu", sender: self)
     }
@@ -417,6 +452,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             playerArrowNode.runAction(arrowHideAction)
         }
         
+        if let networkController = networkGameController {
+            NSLog("\(#function) notifying other players via playerAiming(isFiring: true)")
+            networkController.playerAiming(isFiring: true)
+        }
+
         disableUI()
         launchProjectile()
     }
@@ -583,42 +623,49 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         }
     }
     
-    func muzzleParameters() -> (muzzlePosition: Vector3, muzzleVelocity: Vector3) {
-        // get location of muzzle
-        let playerID = gameModel.board.currentPlayer
-        let tankNode = boardDrawer.tankNodes[playerID]
-        guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true)
-            else { return (Vector3(),Vector3()) }
-        let position = muzzleNode.convertPosition(muzzleNode.position, to: board)
-        
-        // get muzzle velocity
-        let tank = gameModel.getTank(forPlayer: playerID)
-        let power = tank.velocity
-        let azi = tank.azimuth * (Float.pi/180)
-        let alt = tank.altitude * (Float.pi/180)
-        
-        let xVel = -power * sin(azi) * cos(alt)
-        let yVel = power * sin(alt)
-        let zVel = -power * cos(azi) * cos(alt)
-        
-        //NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
-        let velocity = SCNVector3(xVel, yVel, zVel)
-        
-        // convert to model coordinate space
-        let muzzlePosition = boardDrawer.toModelSpace(position)
-        let muzzleVelocity = boardDrawer.toModelScale(velocity)
-        
-        return (muzzlePosition, muzzleVelocity)
-    }
+//    func muzzleParameters() -> (muzzlePosition: Vector3, muzzleVelocity: Vector3) {
+//        // get location of muzzle
+//        let playerID = gameModel.board.currentPlayer
+//        let tankNode = boardDrawer.tankNodes[playerID]
+//        guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true)
+//            else { return (Vector3(),Vector3()) }
+//        let position = muzzleNode.convertPosition(muzzleNode.position, to: board)
+//
+//        // get muzzle velocity
+//        let tank = gameModel.getTank(forPlayer: playerID)
+//        let power = tank.velocity
+//        let azi = tank.azimuth * (Float.pi/180)
+//        let alt = tank.altitude * (Float.pi/180)
+//
+//        let xVel = -power * sin(azi) * cos(alt)
+//        let yVel = power * sin(alt)
+//        let zVel = -power * cos(azi) * cos(alt)
+//
+//        //NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
+//        let velocity = SCNVector3(xVel, yVel, zVel)
+//
+//        // convert to model coordinate space
+//        let muzzlePosition = boardDrawer.toModelSpace(position)
+//        let muzzleVelocity = boardDrawer.toModelScale(velocity)
+//
+//        //NSLog("\(#function): returning position: \(muzzlePosition), velocity: \(muzzleVelocity)")
+//        return (muzzlePosition, muzzleVelocity)
+//    }
     
     func launchProjectile() {
         NSLog("\(#function) started")
 
         // get muzzle position and velocity
-        let (muzzlePosition, muzzleVelocity) = muzzleParameters()
-        
+        let playerID = gameModel.board.currentPlayer
+        //let (muzzlePosition, muzzleVelocity) = muzzleParameters()
+        let (muzzlePosition, muzzleVelocity) = gameModel.muzzleParameters(forPlayer: playerID)
+        NSLog("tank at: \(gameModel.board.players[playerID].tank.position)")
+        NSLog("tank is: \(gameModel.board.players[playerID].tank)")
+        NSLog("\(#function): position: \(muzzlePosition), velocity: \(muzzleVelocity)")
+
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
-        
+        NSLog("\(#function): impact at \(fireResult.trajectories.first!.last!)")
+
         // record result for AIs
         let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)
         if let ai = gameModel.board.players[fireResult.playerID].ai,
@@ -663,14 +710,29 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
             // player is an AI
             disableUI()
-            let (azi, alt, vel) = ai.fireParameters(gameModel: gameModel, players: gameModel.board.players, num: 10)
-            NSLog("ai firing parameters, azi,alt,vel: (\(azi),\(alt),\(vel))")
-            gameModel.setTankAim(azimuth: azi, altitude: alt)
-            gameModel.setTankPower(power: vel)
-            let tank = gameModel.board.players[playerID].tank
-            NSLog("ai firing parameters, azi,alt,vel: (\(tank.azimuth),\(tank.altitude),\(tank.velocity)) (updated)")
-            updateUI()
-            launchProjectile()
+            
+            var doAImove = false
+            if let networkController = networkGameController {
+                doAImove = networkController.isLeader
+            } else {
+                doAImove = true
+            }
+
+            if doAImove {
+                let (azi, alt, vel) = ai.fireParameters(gameModel: gameModel, players: gameModel.board.players, num: 20)
+                NSLog("ai firing parameters, azi,alt,vel: (\(azi),\(alt),\(vel))")
+                gameModel.setTankAim(azimuth: azi, altitude: alt)
+                gameModel.setTankPower(power: vel)
+                let tank = gameModel.board.players[playerID].tank
+                NSLog("ai firing parameters, azi,alt,vel: (\(tank.azimuth),\(tank.altitude),\(tank.velocity)) (updated)")
+                if let networkController = networkGameController {
+                    NSLog("\(#function) notifying other players of AI move via playerAiming(isFiring: true)")
+                    networkController.playerAiming(isFiring: true)
+                }
+                
+                updateUI()
+                launchProjectile()
+            }
         } else {
             // return control to human player
             boardDrawer.timeScaling = 3
@@ -691,6 +753,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
 //            saveStateController.saveStateFile()
 //        }
 
+        if let networkController = networkGameController {
+            NSLog("\(#function) notifying other players via finishedTurn()")
+            networkController.finishedTurn()
+        }
+        
         NSLog("\(#function) finished")
     }
     
@@ -713,6 +780,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             playerScoreLabel.isHidden = false
             roundLabel.isHidden = false
         }
+        
+        uiEnabled = true;
     }
     
     func disableUI() {
@@ -735,9 +804,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         playerNameLabel.isHidden = false
         playerScoreLabel.isHidden = false
         roundLabel.isHidden = false
+        
+        uiEnabled = false;
     }
     
     func updateUI() {
+        guard viewIsLoaded else { return }
         guard boardPlaced else { return }
 
         //NSLog("\(#function) started")
@@ -991,7 +1063,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     }
     
     func drawCurrentTrajectory() {
-        let (muzzlePosition, muzzleVelocity) = muzzleParameters()
+        //let (muzzlePosition, muzzleVelocity) = muzzleParameters()
+        let playerID = gameModel.board.currentPlayer
+        let (muzzlePosition, muzzleVelocity) = gameModel.muzzleParameters(forPlayer: playerID)
         let playerTraj = gameModel.computeTrajectory(muzzlePosition: muzzlePosition,
                                                      muzzleVelocity: muzzleVelocity,
                                                      withTimeStep: 1/6.0)
@@ -1003,6 +1077,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     }
 
     func updateHUD() {
+        NSLog("\(#function)")
+        guard viewIsLoaded else { return }
+
         let board = gameModel.board
         let player = board.players[board.currentPlayer]
         let tank = player.tank
@@ -1025,6 +1102,20 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             currTraj.removeFromParentNode()
         }
 
+        // update on-screen tank
+        updateTankNode()
+
+        if let networkController = networkGameController {
+            NSLog("has networkGameController: \(networkController)")
+            NSLog("\(#function) notifying other players via playerAiming()")
+            networkController.playerAiming()
+            NSLog("currentPlayer: \(gameModel.board.currentPlayer), myPlayerID: \(networkGameController?.myPlayerID ?? -1)")
+            if gameModel.board.currentPlayer == networkGameController?.myPlayerID {
+                enableUI()
+            } else {
+                disableUI()
+            }
+        }
     }
     
     // MARK: - Map View
