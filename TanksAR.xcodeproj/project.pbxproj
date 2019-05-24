@@ -45,6 +45,14 @@
 		53527CE320D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		53527CE420D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		535DDCA0210F96AB0036E197 /* PriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 535DDC9F210F96AB0036E197 /* PriorityQueue.swift */; };
+		53638B4E229CBA3800B965FA /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
+		53638B4F229CBA3800B965FA /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
+		53638B50229CBA3B00B965FA /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
+		53638B51229CBA3C00B965FA /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
+		53638B52229CBA4000B965FA /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F221438270007AF6E2 /* NetworkController.swift */; };
+		53638B53229CBA4000B965FA /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F221438270007AF6E2 /* NetworkController.swift */; };
+		53638B54229CBA4300B965FA /* NetworkedGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F421439C2F007AF6E2 /* NetworkedGameController.swift */; };
+		53638B55229CBA4300B965FA /* NetworkedGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F421439C2F007AF6E2 /* NetworkedGameController.swift */; };
 		537F4A4A216A6CC700A6F810 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
 		5396120E20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
 		5396120F20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
@@ -422,6 +430,7 @@
 				533FF764229CB42B00D4B1E7 /* GameViewBlockDrawer.swift in Sources */,
 				53A633DC229887380063B339 /* GameViewDrawer.swift in Sources */,
 				53A633DE229887450063B339 /* Stack.swift in Sources */,
+				53638B4E229CBA3800B965FA /* GameState.swift in Sources */,
 				5318F3E720D38B4F00377161 /* NelderMead.swift in Sources */,
 				53A633EC229887650063B339 /* GameViewTexturedTrigDrawer.swift in Sources */,
 				53A633E4229887540063B339 /* HighScoreController.swift in Sources */,
@@ -432,6 +441,7 @@
 				5314E47D20C8C4B20070481A /* ImageBuf.swift in Sources */,
 				53A633F4229889140063B339 /* AppDelegate.swift in Sources */,
 				53A633E0229887490063B339 /* PriorityQueue.swift in Sources */,
+				53638B50229CBA3B00B965FA /* NetworkSetupViewController.swift in Sources */,
 				53A633E22298874D0063B339 /* TestGameModel.swift in Sources */,
 				533FF76C229CB44500D4B1E7 /* GameState.swift in Sources */,
 			);
@@ -454,6 +464,7 @@
 				533FF765229CB42B00D4B1E7 /* GameViewBlockDrawer.swift in Sources */,
 				53A633DD229887380063B339 /* GameViewDrawer.swift in Sources */,
 				53A633DF229887460063B339 /* Stack.swift in Sources */,
+				53638B4F229CBA3800B965FA /* GameState.swift in Sources */,
 				5318F3E820D38B4F00377161 /* NelderMead.swift in Sources */,
 				53A633ED229887660063B339 /* GameViewTexturedTrigDrawer.swift in Sources */,
 				53A633E5229887550063B339 /* HighScoreController.swift in Sources */,
@@ -464,6 +475,7 @@
 				5314E47E20C8C4B20070481A /* ImageBuf.swift in Sources */,
 				53A633F5229889140063B339 /* AppDelegate.swift in Sources */,
 				53A633E1229887490063B339 /* PriorityQueue.swift in Sources */,
+				53638B51229CBA3C00B965FA /* NetworkSetupViewController.swift in Sources */,
 				53A633E32298874D0063B339 /* TestGameModel.swift in Sources */,
 				533FF76D229CB44500D4B1E7 /* GameState.swift in Sources */,
 			);
