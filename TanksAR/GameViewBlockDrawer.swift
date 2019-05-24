@@ -266,7 +266,7 @@ class GameViewBlockDrawer : GameViewDrawer {
                     // determine location of segment
                     let xPos = CGFloat(i)*edgeSize + edgeSize/2
                     let zPos = CGFloat(j)*edgeSize + edgeSize/2
-                    let oldElevation = gameModel.getElevation(fromMap: fireResult.old, longitude: Int(xPos), latitude: Int(zPos))
+                    //let oldElevation = gameModel.getElevation(fromMap: fireResult.old, longitude: Int(xPos), latitude: Int(zPos))
                     let currElevation = gameModel.getElevation(fromMap: currentBottom, longitude: Int(xPos), latitude: Int(zPos))
                     let comboElevation = gameModel.getElevation(fromMap: combinedBottom, longitude: Int(xPos), latitude: Int(zPos))
                     
@@ -342,8 +342,7 @@ class GameViewBlockDrawer : GameViewDrawer {
                 let modelPos = toModelSpace(boardBlock.position)
                 
                 // get elevations for block
-                let current = gameModel.getElevation(fromMap: fireResult.old,
-                                                     longitude: Int(modelPos.x), latitude: Int(modelPos.y))
+                //let current = gameModel.getElevation(fromMap: fireResult.old, longitude: Int(modelPos.x), latitude: Int(modelPos.y))
                 let top = gameModel.getElevation(fromMap: fireResult.detonationResult[index].topBuf,
                                                  longitude: Int(modelPos.x), latitude: Int(modelPos.y))
                 let middle = gameModel.getElevation(fromMap: fireResult.detonationResult[index].middleBuf,
