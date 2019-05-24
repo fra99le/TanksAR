@@ -11,11 +11,6 @@
 
 import UIKit
 
-struct GameState : Codable {
-    var model : GameModel
-    var config : GameConfig
-}
-
 // Note: different difficulty settings should be added
 
 class MenuViewController: UIViewController {
@@ -109,7 +104,7 @@ class MenuViewController: UIViewController {
                 dest.gameModel = (self.gameState?.model)!
                 self.gameState = nil
             } else if segue.identifier == "startGame" {
-                NSLog("\(#function) starting \(dest.gameConfig.numRounds) round game with \(dest.gameConfig.numHumans) humans and \(dest.gameConfig.numAIs) Als.")
+                NSLog("\(#function) starting \(gameConfig.numRounds) round game with \(gameConfig.numHumans) humans and \(gameConfig.numAIs) Als.")
                 dest.gameConfig = gameConfig;
                 dest.gameModel = GameModel()
                 //dest.gameModel = TestGameModel()    // for debugging
@@ -118,6 +113,13 @@ class MenuViewController: UIViewController {
                 NSLog("Unknown segue identifier: \(segue.identifier!)")
             }
             self.gameState = nil
+        }
+        
+        if let dest = segue.destination as? NetworkSetupViewController {
+            NSLog("\(#function) starting \(gameConfig.numRounds) round networked game with \(gameConfig.numHumans) humans and \(gameConfig.numAIs) Als.")
+            dest.gameState = GameState(model: GameModel(), config: gameConfig)
+            //dest.gameState.model = TestGameModel()    // for debugging
+            dest.gameState.model.gameOver = false
         }
     }
     
@@ -131,9 +133,9 @@ class MenuViewController: UIViewController {
     @IBOutlet weak var roundsStepper: UIStepper!
 
     @IBOutlet weak var modeButton: UIButton!
+    @IBOutlet weak var networkGameSwitch: UISwitch!
     @IBOutlet weak var playGameButton: UIButton!
     @IBOutlet weak var resumeGameButton: UIButton!
-    
     
     @IBAction func humansStepperTapped(_ sender: UIStepper) {
         gameConfig.numHumans = Int(sender.value)
@@ -151,6 +153,11 @@ class MenuViewController: UIViewController {
         updateUI()
     }
     
+    @IBAction func networkGameSwitchToggled(_ sender: UISwitch) {
+        gameConfig.networked = sender.isOn
+        updateUI()
+    }
+    
     @IBAction func playGameTapped(_ sender: UIButton) {
         // check for in-progress game
         // present an alert if one is found
@@ -164,9 +171,18 @@ class MenuViewController: UIViewController {
             }))
             alert.addAction(UIAlertAction(title: NSLocalizedString("Start New Game", comment: "Default action"), style: .default, handler: { _ in
                 NSLog("Starting new game!")
-                self.performSegue(withIdentifier: "startGame", sender: nil)
+                self.startGame()
             }))
             self.present(alert, animated: true, completion: nil)
+        } else {
+            startGame()
+        }
+    }
+    
+    func startGame() {
+        NSLog("\(#function)")
+        if networkGameSwitch.isOn {
+            performSegue(withIdentifier: "startNetworkGame", sender: nil)
         } else {
             performSegue(withIdentifier: "startGame", sender: nil)
         }
@@ -214,6 +230,8 @@ class MenuViewController: UIViewController {
                 aisNumLabel.text = "1"
             }
         }
+        
+        networkGameSwitch.isOn = gameConfig.networked
         
         var modeString = "Unknown"
         switch gameConfig.mode {
