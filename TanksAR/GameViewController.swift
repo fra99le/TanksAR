@@ -663,7 +663,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
             // player is an AI
             disableUI()
-            let (azi, alt, vel) = ai.fireParameters(gameModel: gameModel, players: gameModel.board.players, num: 20)
+            let (azi, alt, vel) = ai.fireParameters(gameModel: gameModel, players: gameModel.board.players, num: 10)
             NSLog("ai firing parameters, azi,alt,vel: (\(azi),\(alt),\(vel))")
             gameModel.setTankAim(azimuth: azi, altitude: alt)
             gameModel.setTankPower(power: vel)
