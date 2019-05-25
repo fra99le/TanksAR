@@ -3,7 +3,7 @@
 //  TanksAR
 //
 //  Created by Bryan Franklin on 6/15/18.
-//  Copyright © 2018 Doing Science To Stuff. All rights reserved.
+//  Copyright © 2018-2019 Doing Science To Stuff. All rights reserved.
 //
 
 import Foundation
@@ -53,22 +53,23 @@ struct NMSample : Codable {
 
 // see: https://littlebitesofcocoa.com/318-codable-enums
 enum NMState : String, Codable {
-    case initial, reflect, expand, contract_out, contract_in, shrink
+    case initial, reflect, expand, contract_out, contract_in, shrink, shrink2
 }
 
 // see: http://www.scholarpedia.org/article/Nelder-Mead_algorithm
 class NelderMead : Codable {
     // maintain search state
     var dimensions: Int
+    var iteration: Int = 0
     var simplex: [NMSample] = []
     var seed: NMVector = []
     var state: NMState = .initial
-    var nextQueue: [[Float]] = []
-    var extendScale: Float = 1.0
-    let maxExtendScale: Float = 1e6
-    var prevR: NMSample? = nil
-    var shrinkTemp: NMSample? = nil
-    
+
+    var x_r: NMSample = NMSample(parameters: [], value: 0)
+    var x_e: NMSample = NMSample(parameters: [], value: 0)
+    var x_c: NMSample = NMSample(parameters: [], value: 0)
+    var s_shrink: NMVector = []
+
     // hyper-parameters
     var alpha: Float = 1
     var beta: Float = 0.5
@@ -77,9 +78,8 @@ class NelderMead : Codable {
 
     init(dimensions: Int) {
         self.dimensions = dimensions
-        state = .initial
     }
-    
+
     func setSeed(_ seed: NMVector) {
         guard state == .initial else { return }
         NSLog("\(#function) with seed \(seed)")
@@ -96,7 +96,7 @@ class NelderMead : Codable {
 
         return ordered
     }
-    
+
     func addResult(parameters: [Float], value: Float) {
         //NSLog("\(#function) started")
 
@@ -105,13 +105,29 @@ class NelderMead : Codable {
         //NSLog("\(#function) with parameters \(parameters) and value \(value)")
 
         // check for initialization state
-        if simplex.count < dimensions {
+        if state == .initial {
             simplex.append(newSample)
+            if simplex.count >= dimensions+1 {
+                self.state = .reflect
+            }
             return
         }
         
         // sort simplex
         var ordered = sortedSimplex(simplex)
+
+        // deal with shrink states
+        if self.state == .shrink2 {
+            ordered[self.simplex.count-2] = newSample
+            state = .reflect
+            simplex = ordered
+            return
+        } else if self.state == .shrink {
+            ordered[self.simplex.count-1] = newSample
+            state = .shrink2
+            simplex = ordered
+            return
+        }
 
         // get h, s, l
         let h = ordered.last!
@@ -123,106 +139,79 @@ class NelderMead : Codable {
         //NSLog("f(h) = \(h.value)")
         //NSLog("f(r) = \(r.value)")
 
-        // check new point and determine next step
-        if simplex.count < dimensions+1 {
-            //NSLog("state: initial (simplex.count = \(simplex.count))")
-            simplex.append(r)
-            if simplex.count >= dimensions+1 {
-                state = .reflect
-            }
-            return
-        }
-        if state == .shrink {
-            //NSLog("state: \(state), nextQueue: \(nextQueue)")
-            if nextQueue.count >= 1 {
-                // store h's replacement for later use
-                //NSLog("storing r as shrinkTemp")
-                shrinkTemp = r
-            } else {
-                // replace h&2
-                //NSLog("Replacing h&s, shrinkTemp=\(shrinkTemp!)")
+        if state == .reflect {
+            x_r = r
+            if l.value <= x_r.value && x_r.value < s.value {
+                // accept x_r and terminate iteration
                 ordered.removeLast()
-                ordered.removeLast()
-                ordered.append(r)
-                ordered.append(shrinkTemp!)
-                shrinkTemp = nil
+                ordered.append(x_r)
                 simplex = ordered
-                state = .reflect
+                return
             }
-            return
         }
-        // need to check for acceptance of contract results
-        if state == .contract_in {
-            if r.value <= (prevR?.value)! {
-                ordered.removeLast()
-                ordered.append(r)
-                simplex = ordered
-                state = .reflect
-            } else {
-                state = .shrink
-            }
-            return
-        }
-        if state == .contract_out {
-            if r.value < h.value {
-                ordered.removeLast()
-                ordered.append(r)
-                simplex = ordered
-                state = .reflect
-            } else {
-                state = .shrink
-            }
-            return
-        }
+
         if state == .expand {
-            if r.value > (prevR?.value)! {
-                ordered.removeLast()
-                ordered.append(prevR!)
-                simplex = ordered
-                state = .reflect
+            x_e = r
+            ordered.removeLast()
+            if x_e.value < x_r.value {
+                // accept x_e and terminate iteration
+                ordered.append(x_e)
+            } else {
+                // accept x_r and terminate iteration
+                ordered.append(x_r)
             }
+            state = .reflect
+            simplex = ordered
             return
         }
 
-        if l.value <= r.value && r.value < s.value {
-            // reflect condition met
-            ordered.removeLast()
-            ordered.append(newSample)
-            simplex = ordered
-            state = .reflect
-            extendScale = 1.0
-        } else if r.value < l.value {
-            // expand condition met
-            extendScale = min(extendScale * gamma, maxExtendScale)
-            state = .expand // repeat reflection, but with a larger magnitude
+        if state == .contract_out {
+            x_c = r
+            if x_c.value <= x_r.value  {
+                // accept x_c and terminate iteration
+                ordered.removeLast()
+                ordered.append(x_c)
+                state = .reflect
+                simplex = ordered
+                return
+            }
+        }
+
+        if state == .contract_in {
+            x_c = r
+            if x_c.value < h.value  {
+                // accept x_c and terminate iteration
+                ordered.removeLast()
+                ordered.append(x_c)
+                state = .reflect
+                simplex = ordered
+                return
+            }
+        }
+
+        // determine next state if new point not accepted
+        if r.value < l.value {
+            state = .expand
         } else if r.value >= s.value {
-            prevR = r
-            // contract condition met
             if s.value <= r.value && r.value < h.value {
                 state = .contract_out
-            } else if r.value >= h.value {
-                state = .contract_in
             } else {
-                //NSLog("\(#function) this should be impossible at line \(#line)")
+                state = .contract_in
             }
         } else {
-            // shrink condition met
             state = .shrink
         }
-        prevR = r
         //NSLog("\(#function) ending, state=\(state)")
-
         //NSLog("\(#function) finished")
-
     }
 
     func nextPoint() -> [Float] {
-        //NSLog("\(#function) started, nextQueue: \(nextQueue)")
+        //NSLog("\(#function) started")
 
         if state == .initial && simplex.count < dimensions+1 {
             NSLog("state: initial")
             //NSLog("simplex: \(simplex)")
-            
+
             // add new initial point
             var vector = NMVector(repeating: 0.0, count: dimensions)
             if simplex.count > 0 {
@@ -248,6 +237,7 @@ class NelderMead : Codable {
 
         // sort simplex
         let ordered = sortedSimplex(simplex)
+        NSLog("ordered simplex: \(ordered)")
         
         // get h, s, l
         let h = ordered.last!
@@ -260,62 +250,68 @@ class NelderMead : Codable {
             sumVect = nmVectorAdd(sumVect, ordered[i].parameters)
         }
         let c = nmVectorScale(sumVect, by: 1/(Float(ordered.count-1)))
-        let hToC = nmVectorSubtract(c, h.parameters)
 
-        // add apropriate new point(s)
+        // add appropriate new point(s)
         switch state {
         case .initial:
             break // initial is handled above
         case .reflect:
-            NSLog("state: reflect")
-            // produces one new point
-            let scaled = nmVectorScale(hToC, by: alpha)
-            let xr = nmVectorAdd(c, scaled)
-            nextQueue.append(xr)
+            NSLog("state: reflect (alpha: \(alpha)")
+            let tmp = nmVectorSubtract(c, h.parameters)
+            let scaled = nmVectorScale(tmp, by: alpha)
+            return nmVectorAdd(c, scaled) // x_r
         case .expand:
-            NSLog("state: expand (gamma: \(gamma), extendScale: \(extendScale))")
-            // produces one new point
-            let scaled = nmVectorScale(hToC, by: gamma * extendScale)
-            extendScale *= 2
-            extendScale = min(extendScale, maxExtendScale)
-            let xe = nmVectorAdd(c, scaled)
-            nextQueue.append(xe)
+            NSLog("state: expand (gamma: \(gamma))")
+            let tmp = nmVectorSubtract(x_r.parameters, c)
+            let scaled = nmVectorScale(tmp, by: gamma)
+            return nmVectorAdd(c, scaled) // x_e
         case .contract_out:
             NSLog("state: contract outside")
-            // produces one new point
-            let scaled = nmVectorScale(hToC, by: 1 + beta)
-            let xc = nmVectorAdd(c, scaled)
-            nextQueue.append(xc)
+            let tmp = nmVectorSubtract(x_r.parameters, c)
+            let scaled = nmVectorScale(tmp, by: beta)
+            return nmVectorAdd(c, scaled) // x_c
         case .contract_in:
             NSLog("state: contract inside")
-            // produces one new point
-            let scaled = nmVectorScale(hToC, by: 1 - beta)
-            let xc = nmVectorAdd(c, scaled)
-            nextQueue.append(xc)
+            let tmp = nmVectorSubtract(h.parameters, c)
+            let scaled = nmVectorScale(tmp, by: beta)
+            return nmVectorAdd(c, scaled) // x_c
         case .shrink:
-            NSLog("state: shrink (nextQueue: \(nextQueue))")
-            if nextQueue.count == 0 {
-                // produces two new points
-                let hDir = nmVectorSubtract(h.parameters, l.parameters)
-                let sDir = nmVectorSubtract(s.parameters, l.parameters)
-                let hScaled = nmVectorScale(hDir, by: delta)
-                let sScaled = nmVectorScale(sDir, by: delta)
-                let newH = nmVectorAdd(l.parameters, hScaled)
-                let newS = nmVectorAdd(l.parameters, sScaled)
-                nextQueue.append(newH)
-                nextQueue.append(newS)
-                //NSLog("added two to nextQueue: \(nextQueue)")
-            }
+            NSLog("state: shrink")
+            let tmp = nmVectorAdd(x_r.parameters, s.parameters)
+            s_shrink = nmVectorScale(tmp, by: 0.5)
+
+            let tmp2 = nmVectorAdd(x_r.parameters, h.parameters)
+            return nmVectorScale(tmp2, by: 0.5)
+        case .shrink2:
+            NSLog("state: shrink2")
+            return s_shrink
         }
         
-        //NSLog("\(#function) finished, nextQueue: \(nextQueue)")
-        let ret = nextQueue.remove(at: 0)
+        //NSLog("\(#function) finished")
         //NSLog("\(#function): returning \(ret)")
 
-        return ret
+        return []
     }
     
-    func done() -> Bool {
-        return nextQueue.count > 0
+    func done(maxIterations: Int = 1000, threshold: Float = 1e-5) -> Bool {
+        if iteration > maxIterations {
+            return true
+        }
+
+        // sort simplex
+        let ordered = sortedSimplex(simplex)
+
+        // get h & l
+        let h = ordered.last!
+        let l = ordered.first!
+
+        let tmp = nmVectorSubtract(h.parameters, l.parameters)
+        let dist = nmVectorLength(tmp)
+        NSLog("nelder-mead dist: \(dist) on iteration \(iteration)")
+        if( dist < threshold ) {
+            return true
+        }
+
+        return false
     }
 }
