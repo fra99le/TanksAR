@@ -98,8 +98,8 @@ class PlayerAI : Codable {
         // get dist to target
         let dist = distToTank(from: newSample, toTank: targetTank)
         //NSLog("\(#function): last round for AI was \(dist) units from target (\(targetTank.position)) -> (\(impactX),\(impactY),\(impactZ))")
-        // try to minimize distance from target and velocity needed to do so
-        nelderMead.addResult(parameters:[xVel,yVel,zVel], value: dist+velocity)
+        // try to minimize distance from target
+        nelderMead.addResult(parameters:[xVel,yVel,zVel], value: dist)
         
         return dist
     }
@@ -174,7 +174,7 @@ class PlayerAI : Codable {
             let velocity = Vector3(xVel, yVel, zVel)
             let muzzleVelocity = velocity
 
-            let tankHeight: Float = 14.52 // 0.625+0.827 = 1.452 * tankScale
+            let tankHeight: Float = 14.52 // (0.625+0.827 -> 1.452) * tankScale
             let barrelLength: Float = 20
             var muzzlePosition = tank.position
             muzzlePosition.x += -sin(azi) * cos(alt) * barrelLength
