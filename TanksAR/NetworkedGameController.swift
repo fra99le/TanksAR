@@ -2,7 +2,7 @@
 //  NetworkedGameController.swift
 //  TanksAR
 //
-//  Created by Fraggle on 9/8/18.
+//  Created by Bryan Franklin on 9/8/18.
 //  Copyright © 2018 Doing Science To Stuff. All rights reserved.
 //
 

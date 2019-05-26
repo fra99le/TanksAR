@@ -2,7 +2,7 @@
 //  GameState.swift
 //  TanksAR
 //
-//  Created by Fraggle on 10/7/18.
+//  Created by Bryan Franklin on 10/7/18.
 //  Copyright © 2018 Doing Science To Stuff. All rights reserved.
 //
 
