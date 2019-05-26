@@ -2,7 +2,7 @@
 //  Stack.swift
 //  TanksAR
 //
-//  Created by Fraggle on 8/6/18.
+//  Created by Bryan Franklin on 8/6/18.
 //  Copyright © 2018 Doing Science To Stuff. All rights reserved.
 //
 

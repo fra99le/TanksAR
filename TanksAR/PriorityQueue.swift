@@ -2,7 +2,7 @@
 //  PriorityQueue.swift
 //  TanksAR
 //
-//  Created by Fraggle on 7/30/18.
+//  Created by Bryan Franklin on 7/30/18.
 //  Copyright © 2018 Doing Science To Stuff. All rights reserved.
 //
 

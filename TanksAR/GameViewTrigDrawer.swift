@@ -2,7 +2,7 @@
 //  GameViewTrigDrawer.swift
 //  TanksAR
 //
-//  Created by Fraggle on 6/21/18.
+//  Created by Bryan Franklin on 6/21/18.
 //  Copyright © 2018 Doing Science To Stuff. All rights reserved.
 //
 

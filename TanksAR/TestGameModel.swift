@@ -2,7 +2,7 @@
 //  TestGameModel.swift
 //  TanksAR
 //
-//  Created by Fraggle on 7/16/18.
+//  Created by Bryan Franklin on 7/16/18.
 //  Copyright © 2018 Doing Science To Stuff. All rights reserved.
 //
 
