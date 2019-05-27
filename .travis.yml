@@ -1,8 +1,9 @@
 language: swift
 
 os: osx
+osx_image: xcode10.2
 
 xcode_project: TanksAR.xcodeproj # path to your xcodeproj folder
-xcode_scheme: TanksARTests
+xcode_scheme: TanksAR
 xcode_destination: platform=iOS Simulator,OS=11.3,name=iPhone SE
 
