@@ -112,6 +112,9 @@ class NetworkSetupViewController: UIViewController {
             NSLog("state is 'connecting'")
         case .connected:
             NSLog("state is 'connected'")
+        @unknown default:
+            NSLog("Unknown connection state \(networkedGameController.connectionState)")
+            fatalError()
         }
         NSLog("\(networkedGameController.networkController.mcSession.connectedPeers.count) peers connected")
        

@@ -154,7 +154,7 @@ class GameViewController: UIViewController {
         NSLog("\(#function): position: \(muzzlePosition), velocity: \(muzzleVelocity)")
 
         let fireResult = gameModel.fire(muzzlePosition: muzzlePosition, muzzleVelocity: muzzleVelocity)
-        NSLog("\(#function): impact at \(fireResult.trajectories.first?.last!)")
+        NSLog("\(#function): impact at \(String(describing: fireResult.trajectories.first?.last!))")
         
         // record result for AIs
         let tank = gameModel.getTank(forPlayer: gameModel.board.currentPlayer)

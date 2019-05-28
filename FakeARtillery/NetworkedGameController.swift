@@ -71,6 +71,9 @@ class NetworkedGameController : NetworkClient {
             return "Disconnected"
         case .connecting:
             return "Connecting..."
+        @unknown default:
+            NSLog("Unknown connection state \(connectionState)")
+            fatalError()
         }
     }
     var numConnected: Int {
