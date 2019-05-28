@@ -3,7 +3,7 @@
 //  TanksAR
 //
 //  Created by Bryan Franklin on 6/13/18.
-//  Copyright © 2018 Doing Science To Stuff. All rights reserved.
+//  Copyright © 2018-2019 Doing Science To Stuff. All rights reserved.
 //
 //   This Source Code Form is subject to the terms of the Mozilla Public
 //   License, v. 2.0. If a copy of the MPL was not distributed with this
