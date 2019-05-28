@@ -454,7 +454,7 @@ class ImageBuf : Codable {
 
     
     func asPNG() -> Data? {
-        return UIImagePNGRepresentation(asUIImage())
+        return asUIImage().pngData()
     }
     
     func compress() {

@@ -56,11 +56,24 @@
 		53A18578229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
 		53A18579229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
 		53A1857A229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
-		53A18582229DCBAA00EDF32B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18581229DCBAA00EDF32B /* AppDelegate.swift */; };
-		53A18584229DCBAA00EDF32B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18583229DCBAA00EDF32B /* ViewController.swift */; };
-		53A18587229DCBAA00EDF32B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53A18585229DCBAA00EDF32B /* Main.storyboard */; };
 		53A18589229DCBAA00EDF32B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 53A18588229DCBAA00EDF32B /* Assets.xcassets */; };
-		53A1858C229DCBAA00EDF32B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53A1858A229DCBAA00EDF32B /* LaunchScreen.storyboard */; };
+		53A1859B229DCCA500EDF32B /* MultipeerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18591229DCCA500EDF32B /* MultipeerController.swift */; };
+		53A1859D229DCCA500EDF32B /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18593229DCCA500EDF32B /* NetworkController.swift */; };
+		53A1859E229DCCA500EDF32B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18594229DCCA500EDF32B /* AppDelegate.swift */; };
+		53A1859F229DCCA500EDF32B /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18595229DCCA500EDF32B /* NetworkSetupViewController.swift */; };
+		53A185A0229DCCA500EDF32B /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18596229DCCA500EDF32B /* GameViewController.swift */; };
+		53A185A1229DCCA500EDF32B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53A18597229DCCA500EDF32B /* Main.storyboard */; };
+		53A185A2229DCCA500EDF32B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53A18598229DCCA500EDF32B /* LaunchScreen.storyboard */; };
+		53A185A3229DCCA500EDF32B /* ActivityViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18599229DCCA500EDF32B /* ActivityViewController.swift */; };
+		53A185A4229DCCA500EDF32B /* NetworkedGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A1859A229DCCA500EDF32B /* NetworkedGameController.swift */; };
+		53A185A5229DCCEF00EDF32B /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
+		53A185A6229DCCEF00EDF32B /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9D20C84A3E00B8B71D /* GameModel.swift */; };
+		53A185A7229DCCEF00EDF32B /* PriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 535DDC9F210F96AB0036E197 /* PriorityQueue.swift */; };
+		53A185A8229DCCEF00EDF32B /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533868582118E701002C61E1 /* Stack.swift */; };
+		53A185A9229DCCEF00EDF32B /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
+		53A185AA229DCCEF00EDF32B /* NelderMead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5318F3E520D38B4F00377161 /* NelderMead.swift */; };
+		53A185AB229DCCEF00EDF32B /* ImageBuf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5314E47B20C8BFA00070481A /* ImageBuf.swift */; };
+		53A185AC229DCD0200EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
 		53A633DA2298871F0063B339 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		53A633DB2298871F0063B339 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		53A633DC229887380063B339 /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
@@ -137,12 +150,17 @@
 		5396120D20D0CAB7006D0E6C /* PlayerAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAI.swift; sourceTree = "<group>"; };
 		53A18577229DCA7A00EDF32B /* GameConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
 		53A1857F229DCBAA00EDF32B /* FakeARtillery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FakeARtillery.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		53A18581229DCBAA00EDF32B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		53A18583229DCBAA00EDF32B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		53A18586229DCBAA00EDF32B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		53A18588229DCBAA00EDF32B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		53A1858B229DCBAA00EDF32B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		53A1858D229DCBAA00EDF32B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		53A18591229DCCA500EDF32B /* MultipeerController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultipeerController.swift; sourceTree = "<group>"; };
+		53A18592229DCCA500EDF32B /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		53A18593229DCCA500EDF32B /* NetworkController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkController.swift; sourceTree = "<group>"; };
+		53A18594229DCCA500EDF32B /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		53A18595229DCCA500EDF32B /* NetworkSetupViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkSetupViewController.swift; sourceTree = "<group>"; };
+		53A18596229DCCA500EDF32B /* GameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		53A18597229DCCA500EDF32B /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		53A18598229DCCA500EDF32B /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		53A18599229DCCA500EDF32B /* ActivityViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityViewController.swift; sourceTree = "<group>"; };
+		53A1859A229DCCA500EDF32B /* NetworkedGameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkedGameController.swift; sourceTree = "<group>"; };
 		53DE0AA420FC80AB00F5077B /* TestGameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGameModel.swift; sourceTree = "<group>"; };
 		53DE0AA6210306CB00F5077B /* HighScoreController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighScoreController.swift; sourceTree = "<group>"; };
 		53EEDB6420C83C3E00B8B71D /* TanksAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TanksAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -200,12 +218,17 @@
 		53A18580229DCBAA00EDF32B /* FakeARtillery */ = {
 			isa = PBXGroup;
 			children = (
-				53A18581229DCBAA00EDF32B /* AppDelegate.swift */,
-				53A18583229DCBAA00EDF32B /* ViewController.swift */,
-				53A18585229DCBAA00EDF32B /* Main.storyboard */,
+				53A18599229DCCA500EDF32B /* ActivityViewController.swift */,
+				53A18594229DCCA500EDF32B /* AppDelegate.swift */,
+				53A18596229DCCA500EDF32B /* GameViewController.swift */,
+				53A18591229DCCA500EDF32B /* MultipeerController.swift */,
+				53A18593229DCCA500EDF32B /* NetworkController.swift */,
+				53A1859A229DCCA500EDF32B /* NetworkedGameController.swift */,
+				53A18595229DCCA500EDF32B /* NetworkSetupViewController.swift */,
+				53A18597229DCCA500EDF32B /* Main.storyboard */,
+				53A18592229DCCA500EDF32B /* Info.plist */,
 				53A18588229DCBAA00EDF32B /* Assets.xcassets */,
-				53A1858A229DCBAA00EDF32B /* LaunchScreen.storyboard */,
-				53A1858D229DCBAA00EDF32B /* Info.plist */,
+				53A18598229DCCA500EDF32B /* LaunchScreen.storyboard */,
 			);
 			path = FakeARtillery;
 			sourceTree = "<group>";
@@ -372,6 +395,7 @@
 				TargetAttributes = {
 					53A1857E229DCBAA00EDF32B = {
 						CreatedOnToolsVersion = 10.2.1;
+						LastSwiftMigration = 1020;
 					};
 					53EEDB6320C83C3E00B8B71D = {
 						CreatedOnToolsVersion = 9.4;
@@ -412,9 +436,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				53A1858C229DCBAA00EDF32B /* LaunchScreen.storyboard in Resources */,
+				53A185A1229DCCA500EDF32B /* Main.storyboard in Resources */,
+				53A185A2229DCCA500EDF32B /* LaunchScreen.storyboard in Resources */,
 				53A18589229DCBAA00EDF32B /* Assets.xcassets in Resources */,
-				53A18587229DCBAA00EDF32B /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,8 +476,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				53A18584229DCBAA00EDF32B /* ViewController.swift in Sources */,
-				53A18582229DCBAA00EDF32B /* AppDelegate.swift in Sources */,
+				53A185A9229DCCEF00EDF32B /* PlayerAI.swift in Sources */,
+				53A185AC229DCD0200EDF32B /* GameConfig.swift in Sources */,
+				53A185A0229DCCA500EDF32B /* GameViewController.swift in Sources */,
+				53A185A3229DCCA500EDF32B /* ActivityViewController.swift in Sources */,
+				53A185AB229DCCEF00EDF32B /* ImageBuf.swift in Sources */,
+				53A185A6229DCCEF00EDF32B /* GameModel.swift in Sources */,
+				53A1859E229DCCA500EDF32B /* AppDelegate.swift in Sources */,
+				53A1859D229DCCA500EDF32B /* NetworkController.swift in Sources */,
+				53A185AA229DCCEF00EDF32B /* NelderMead.swift in Sources */,
+				53A185A8229DCCEF00EDF32B /* Stack.swift in Sources */,
+				53A1859F229DCCA500EDF32B /* NetworkSetupViewController.swift in Sources */,
+				53A185A5229DCCEF00EDF32B /* GameState.swift in Sources */,
+				53A185A7229DCCEF00EDF32B /* PriorityQueue.swift in Sources */,
+				53A1859B229DCCA500EDF32B /* MultipeerController.swift in Sources */,
+				53A185A4229DCCA500EDF32B /* NetworkedGameController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -575,22 +612,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		53A18585229DCBAA00EDF32B /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				53A18586229DCBAA00EDF32B /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		53A1858A229DCBAA00EDF32B /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				53A1858B229DCBAA00EDF32B /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
 		53EEDB6D20C83C3F00B8B71D /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -614,6 +635,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N988N5HFV9;
 				INFOPLIST_FILE = FakeARtillery/Info.plist;
@@ -626,6 +648,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.DoingScienceToStuff.FakeARtillery;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -635,6 +658,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N988N5HFV9;
 				INFOPLIST_FILE = FakeARtillery/Info.plist;
