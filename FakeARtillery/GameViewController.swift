@@ -112,37 +112,6 @@ class GameViewController: UIViewController {
         updateHUD()
     }
     
-//    func muzzleParameters() -> (muzzlePosition: Vector3, muzzleVelocity: Vector3) {
-//        // get location of muzzle
-//        let playerID = gameModel.board.currentPlayer
-//
-//        // get tank's parameters
-//        let tank = gameModel.getTank(forPlayer: playerID)
-//        let power = tank.velocity
-//        let azi = tank.azimuth * (Float.pi/180)
-//        let alt = tank.altitude * (Float.pi/180)
-//        
-//        // find muzzle of barrel
-//        let tankHeight: Float = 14.52 // 0.625+0.827 = 1.452 * tankScale
-//        let barrelLength: Float = 20
-//        var position = tank.position
-//        position.x += -barrelLength * sin(azi) * cos(alt)
-//        position.y += -barrelLength * cos(azi) * cos(alt)
-//        position.z += tankHeight + barrelLength * sin(alt)
-//
-//        // get muzzle velocity
-//        let xVel = -power * sin(azi) * cos(alt)
-//        let yVel = power * sin(alt)
-//        let zVel = -power * cos(azi) * cos(alt)
-//
-//        // convert to model coordinate space
-//        let muzzlePosition = Vector3(position.x, position.z, position.y)
-//        let muzzleVelocity = Vector3(xVel, zVel, yVel)
-//        
-//        //NSLog("\(#function): returning position: \(muzzlePosition), velocity: \(muzzleVelocity)")
-//        return (muzzlePosition, muzzleVelocity)
-//    }
-
     func launchProjectile() {
         NSLog("\(#function) started")
         

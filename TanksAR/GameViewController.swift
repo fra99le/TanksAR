@@ -612,41 +612,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         }
     }
     
-//    func muzzleParameters() -> (muzzlePosition: Vector3, muzzleVelocity: Vector3) {
-//        // get location of muzzle
-//        let playerID = gameModel.board.currentPlayer
-//        let tankNode = boardDrawer.tankNodes[playerID]
-//        guard let muzzleNode = tankNode.childNode(withName: "muzzle", recursively: true)
-//            else { return (Vector3(),Vector3()) }
-//        let position = muzzleNode.convertPosition(muzzleNode.position, to: board)
-//
-//        // get muzzle velocity
-//        let tank = gameModel.getTank(forPlayer: playerID)
-//        let power = tank.velocity
-//        let azi = tank.azimuth * (Float.pi/180)
-//        let alt = tank.altitude * (Float.pi/180)
-//
-//        let xVel = -power * sin(azi) * cos(alt)
-//        let yVel = power * sin(alt)
-//        let zVel = -power * cos(azi) * cos(alt)
-//
-//        //NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
-//        let velocity = SCNVector3(xVel, yVel, zVel)
-//
-//        // convert to model coordinate space
-//        let muzzlePosition = boardDrawer.toModelSpace(position)
-//        let muzzleVelocity = boardDrawer.toModelScale(velocity)
-//
-//        //NSLog("\(#function): returning position: \(muzzlePosition), velocity: \(muzzleVelocity)")
-//        return (muzzlePosition, muzzleVelocity)
-//    }
-    
     func launchProjectile() {
         NSLog("\(#function) started")
 
         // get muzzle position and velocity
         let playerID = gameModel.board.currentPlayer
-        //let (muzzlePosition, muzzleVelocity) = muzzleParameters()
         let (muzzlePosition, muzzleVelocity) = gameModel.muzzleParameters(forPlayer: playerID)
         NSLog("tank at: \(gameModel.board.players[playerID].tank.position)")
         NSLog("tank is: \(gameModel.board.players[playerID].tank)")
@@ -1052,7 +1022,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     }
     
     func drawCurrentTrajectory() {
-        //let (muzzlePosition, muzzleVelocity) = muzzleParameters()
         let playerID = gameModel.board.currentPlayer
         let (muzzlePosition, muzzleVelocity) = gameModel.muzzleParameters(forPlayer: playerID)
         let playerTraj = gameModel.computeTrajectory(muzzlePosition: muzzlePosition,
