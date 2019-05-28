@@ -23,20 +23,6 @@ struct UserConfig {
     var tank: SCNNode?
 }
 
-enum drawerMode : String, Codable {
-    case blocks, plainTrigs, coloredTrigs, texturedTrigs
-}
-
-struct GameConfig : Codable {
-    var numHumans: Int = 1
-    var numAIs: Int = 1
-    var numRounds: Int = 3
-    var mode: drawerMode = .texturedTrigs
-    var credit: Int64 = 5000
-    var playerNames: [String] = []
-    var networked: Bool = false
-}
-
 class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDelegate {
 
     @IBOutlet var sceneView: ARSCNView!

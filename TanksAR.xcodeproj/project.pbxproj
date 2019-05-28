@@ -49,14 +49,13 @@
 		53638B4F229CBA3800B965FA /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
 		53638B50229CBA3B00B965FA /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
 		53638B51229CBA3C00B965FA /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
-		53638B52229CBA4000B965FA /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F221438270007AF6E2 /* NetworkController.swift */; };
-		53638B53229CBA4000B965FA /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F221438270007AF6E2 /* NetworkController.swift */; };
-		53638B54229CBA4300B965FA /* NetworkedGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F421439C2F007AF6E2 /* NetworkedGameController.swift */; };
-		53638B55229CBA4300B965FA /* NetworkedGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F421439C2F007AF6E2 /* NetworkedGameController.swift */; };
 		537F4A4A216A6CC700A6F810 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
 		5396120E20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
 		5396120F20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
 		5396121020D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
+		53A18578229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
+		53A18579229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
+		53A1857A229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
 		53A633DA2298871F0063B339 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		53A633DB2298871F0063B339 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		53A633DC229887380063B339 /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
@@ -131,6 +130,7 @@
 		535DDC9F210F96AB0036E197 /* PriorityQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityQueue.swift; sourceTree = "<group>"; };
 		537F4A49216A6CC700A6F810 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		5396120D20D0CAB7006D0E6C /* PlayerAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAI.swift; sourceTree = "<group>"; };
+		53A18577229DCA7A00EDF32B /* GameConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
 		53DE0AA420FC80AB00F5077B /* TestGameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGameModel.swift; sourceTree = "<group>"; };
 		53DE0AA6210306CB00F5077B /* HighScoreController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighScoreController.swift; sourceTree = "<group>"; };
 		53EEDB6420C83C3E00B8B71D /* TanksAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TanksAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -203,6 +203,8 @@
 			children = (
 				53EEDB6720C83C3E00B8B71D /* AppDelegate.swift */,
 				53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */,
+				53A18577229DCA7A00EDF32B /* GameConfig.swift */,
+				537F4A49216A6CC700A6F810 /* GameState.swift */,
 				53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */,
 				53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */,
 				53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */,
@@ -222,7 +224,6 @@
 				5396120D20D0CAB7006D0E6C /* PlayerAI.swift */,
 				5318F3E520D38B4F00377161 /* NelderMead.swift */,
 				5314E47B20C8BFA00070481A /* ImageBuf.swift */,
-				537F4A49216A6CC700A6F810 /* GameState.swift */,
 				533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */,
 				533482F221438270007AF6E2 /* NetworkController.swift */,
 				533482F421439C2F007AF6E2 /* NetworkedGameController.swift */,
@@ -397,6 +398,7 @@
 				533032A320CF00990014A16D /* WeaponsViewController.swift in Sources */,
 				531E9F0720F7169800BCF617 /* GameViewColoredTrigDrawer.swift in Sources */,
 				5396120E20D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
+				53A18578229DCA7A00EDF32B /* GameConfig.swift in Sources */,
 				53527CE220D1DB36005F5FFF /* GameOverViewController.swift in Sources */,
 				53EEDB9C20C8421900B8B71D /* ScoresViewController.swift in Sources */,
 				53522CAC20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
@@ -440,6 +442,7 @@
 				533032A420CF822F0014A16D /* WeaponsViewController.swift in Sources */,
 				5314E47D20C8C4B20070481A /* ImageBuf.swift in Sources */,
 				53A633F4229889140063B339 /* AppDelegate.swift in Sources */,
+				53A18579229DCA7A00EDF32B /* GameConfig.swift in Sources */,
 				53A633E0229887490063B339 /* PriorityQueue.swift in Sources */,
 				53638B50229CBA3B00B965FA /* NetworkSetupViewController.swift in Sources */,
 				53A633E22298874D0063B339 /* TestGameModel.swift in Sources */,
@@ -474,6 +477,7 @@
 				533032A520CF822F0014A16D /* WeaponsViewController.swift in Sources */,
 				5314E47E20C8C4B20070481A /* ImageBuf.swift in Sources */,
 				53A633F5229889140063B339 /* AppDelegate.swift in Sources */,
+				53A1857A229DCA7A00EDF32B /* GameConfig.swift in Sources */,
 				53A633E1229887490063B339 /* PriorityQueue.swift in Sources */,
 				53638B51229CBA3C00B965FA /* NetworkSetupViewController.swift in Sources */,
 				53A633E32298874D0063B339 /* TestGameModel.swift in Sources */,
