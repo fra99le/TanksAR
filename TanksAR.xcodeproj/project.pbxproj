@@ -30,8 +30,6 @@
 		533FF769229CB43800D4B1E7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53EEDB6D20C83C3F00B8B71D /* Main.storyboard */; };
 		533FF76A229CB43D00D4B1E7 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9D20C84A3E00B8B71D /* GameModel.swift */; };
 		533FF76B229CB43D00D4B1E7 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9D20C84A3E00B8B71D /* GameModel.swift */; };
-		533FF76C229CB44500D4B1E7 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
-		533FF76D229CB44500D4B1E7 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
 		533FF76E229CB44800D4B1E7 /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
 		533FF76F229CB44800D4B1E7 /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
 		533FF770229CB44B00D4B1E7 /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F221438270007AF6E2 /* NetworkController.swift */; };
@@ -47,8 +45,6 @@
 		535DDCA0210F96AB0036E197 /* PriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 535DDC9F210F96AB0036E197 /* PriorityQueue.swift */; };
 		53638B4E229CBA3800B965FA /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
 		53638B4F229CBA3800B965FA /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
-		53638B50229CBA3B00B965FA /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
-		53638B51229CBA3C00B965FA /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
 		537F4A4A216A6CC700A6F810 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
 		5396120E20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
 		5396120F20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
@@ -386,7 +382,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1020;
-				LastUpgradeCheck = 0940;
+				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = "Doing Science To Stuff";
 				TargetAttributes = {
 					53A1857E229DCBAA00EDF32B = {
@@ -551,9 +547,7 @@
 				53A633F4229889140063B339 /* AppDelegate.swift in Sources */,
 				53A18579229DCA7A00EDF32B /* GameConfig.swift in Sources */,
 				53A633E0229887490063B339 /* PriorityQueue.swift in Sources */,
-				53638B50229CBA3B00B965FA /* NetworkSetupViewController.swift in Sources */,
 				53A633E22298874D0063B339 /* TestGameModel.swift in Sources */,
-				533FF76C229CB44500D4B1E7 /* GameState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -586,9 +580,7 @@
 				53A633F5229889140063B339 /* AppDelegate.swift in Sources */,
 				53A1857A229DCA7A00EDF32B /* GameConfig.swift in Sources */,
 				53A633E1229887490063B339 /* PriorityQueue.swift in Sources */,
-				53638B51229CBA3C00B965FA /* NetworkSetupViewController.swift in Sources */,
 				53A633E32298874D0063B339 /* TestGameModel.swift in Sources */,
-				533FF76D229CB44500D4B1E7 /* GameState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
