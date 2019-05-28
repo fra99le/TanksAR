@@ -21,11 +21,12 @@ ARtillery is an augmented reality (AR) ballistic projectile game with destructib
 0. If the project if not open, use finder to navigate to the project file
 (e.g.,&nbsp;`~/Documents/TanksAR/TanksAR.xcodeproj`) and
 double click on it.<br/>This should open the project in Xcode.
-1. If "no scheme" is shown near the left end of the top of the Xcode window:
-    1. Click on "no schemes".
-    2. Select "New Scheme..."
-    3. Select "TanksAR" for Target and "TanksAR" for the Name.
-    4. Click OK.
+1. Enable signing.
+    1. If it is not already open, open the Navigator by clicking the "Hide or Show Navigator" button in the top-right corner of the Xcode window.
+    2. Click on "TanksAR" project at the top of the Navigator.
+    3. Select the "General" tab for the project.
+    4. Uncheck and recheck the "Automatically manange signing" checkbox int the "Signing" section.
+    5. Sign in and select a Team.
 2. Attach an ARKIt capable iOS device via USB.
 3. If the iOS device asks "Trust This Computer?", select "Trust".
 4. At the top of the Xcode, to the right of "TanksAR", click and select the
