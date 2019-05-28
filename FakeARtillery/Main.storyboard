@@ -85,116 +85,12 @@
                         <outlet property="peersStack" destination="UEt-8n-5f2" id="aux-Kh-NY2"/>
                         <outlet property="peersStepper" destination="tQX-ow-se6" id="O2Q-5s-3hM"/>
                         <outlet property="startButton" destination="7rS-W2-U5d" id="LCa-ui-Swt"/>
-                        <segue destination="3V2-AE-HgQ" kind="show" identifier="startSegue" id="ZNS-Lq-bRL"/>
                         <segue destination="zJq-3P-Sm8" kind="show" identifier="startFakeClient" id="Rbs-eH-A6R"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1608.8" y="32.833583208395808"/>
-        </scene>
-        <!--Activity View Controller-->
-        <scene sceneID="3dF-m0-73T">
-            <objects>
-                <viewController id="3V2-AE-HgQ" customClass="ActivityViewController" customModule="FakeARtillery" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="S1l-vu-0lH">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="wTW-fC-RDU">
-                                <rect key="frame" x="20" y="244" width="280" height="80"/>
-                                <subviews>
-                                    <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Dt8-J3-FdO">
-                                        <rect key="frame" x="0.0" y="0.0" width="280" height="30"/>
-                                        <nil key="textColor"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits"/>
-                                    </textField>
-                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minValue="0.0" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="OtC-0L-aDr">
-                                        <rect key="frame" x="-2" y="50" width="284" height="31"/>
-                                        <connections>
-                                            <action selector="sliderChanged:" destination="3V2-AE-HgQ" eventType="valueChanged" id="18Z-lw-MO7"/>
-                                        </connections>
-                                    </slider>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstItem="OtC-0L-aDr" firstAttribute="leading" secondItem="wTW-fC-RDU" secondAttribute="leading" id="N6G-rk-XMZ"/>
-                                    <constraint firstItem="Dt8-J3-FdO" firstAttribute="leading" secondItem="wTW-fC-RDU" secondAttribute="leading" id="Qny-oP-pWt"/>
-                                    <constraint firstAttribute="trailing" secondItem="Dt8-J3-FdO" secondAttribute="trailing" id="iy9-7U-EU4"/>
-                                    <constraint firstAttribute="trailing" secondItem="OtC-0L-aDr" secondAttribute="trailing" id="vmR-Io-7Mv"/>
-                                </constraints>
-                            </stackView>
-                            <stackView opaque="NO" contentMode="scaleToFill" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="Xzi-RI-UN3">
-                                <rect key="frame" x="5" y="84" width="310" height="75"/>
-                                <subviews>
-                                    <button opaque="NO" contentMode="scaleAspectFit" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Z7U-wP-gfK">
-                                        <rect key="frame" x="0.0" y="0.0" width="100" height="75"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="100" id="0YD-cJ-M8e"/>
-                                            <constraint firstAttribute="height" constant="75" id="m8G-zn-MI8"/>
-                                        </constraints>
-                                        <state key="normal" title="Button" image="purple"/>
-                                        <connections>
-                                            <action selector="leftButtonTapped:" destination="3V2-AE-HgQ" eventType="touchUpInside" id="Ldh-Pp-irk"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lM5-lq-sEY">
-                                        <rect key="frame" x="105" y="0.0" width="100" height="75"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="100" id="Mjb-XA-hB8"/>
-                                            <constraint firstAttribute="height" constant="75" id="eEz-bw-j75"/>
-                                        </constraints>
-                                        <state key="normal" title="Button" image="white"/>
-                                        <connections>
-                                            <action selector="middleButtonTapped:" destination="3V2-AE-HgQ" eventType="touchUpInside" id="Gqn-YG-oda"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="80F-n5-Gjc">
-                                        <rect key="frame" x="210" y="0.0" width="100" height="75"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="100" id="2H1-CC-PMt"/>
-                                            <constraint firstAttribute="height" constant="75" id="Q2x-NH-z7H"/>
-                                        </constraints>
-                                        <state key="normal" title="Button" image="orange"/>
-                                        <connections>
-                                            <action selector="rightButtonTapped:" destination="3V2-AE-HgQ" eventType="touchUpInside" id="Kdx-vW-CUp"/>
-                                        </connections>
-                                    </button>
-                                </subviews>
-                            </stackView>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="AX4-gg-z9z">
-                                <rect key="frame" x="67" y="344" width="186" height="204"/>
-                            </imageView>
-                        </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <constraints>
-                            <constraint firstItem="Xzi-RI-UN3" firstAttribute="centerX" secondItem="S1l-vu-0lH" secondAttribute="centerX" id="B61-C4-li9"/>
-                            <constraint firstItem="hch-xG-P98" firstAttribute="trailing" secondItem="wTW-fC-RDU" secondAttribute="trailing" constant="20" id="BJK-Lw-Ffg"/>
-                            <constraint firstItem="AX4-gg-z9z" firstAttribute="leading" secondItem="hch-xG-P98" secondAttribute="leading" constant="67" id="IJl-a8-Epu"/>
-                            <constraint firstItem="wTW-fC-RDU" firstAttribute="leading" secondItem="hch-xG-P98" secondAttribute="leading" constant="20" id="KpL-ph-ULx"/>
-                            <constraint firstItem="AX4-gg-z9z" firstAttribute="top" secondItem="wTW-fC-RDU" secondAttribute="bottom" constant="20" id="QtH-pO-mnb"/>
-                            <constraint firstItem="wTW-fC-RDU" firstAttribute="centerX" secondItem="S1l-vu-0lH" secondAttribute="centerX" id="Weh-fH-eav"/>
-                            <constraint firstItem="AX4-gg-z9z" firstAttribute="centerX" secondItem="S1l-vu-0lH" secondAttribute="centerX" id="Wgb-HE-bYb"/>
-                            <constraint firstItem="Xzi-RI-UN3" firstAttribute="top" secondItem="hch-xG-P98" secondAttribute="top" constant="20" id="dV3-kK-G4V"/>
-                            <constraint firstItem="wTW-fC-RDU" firstAttribute="centerY" secondItem="S1l-vu-0lH" secondAttribute="centerY" id="gwC-zF-CJU"/>
-                            <constraint firstItem="hch-xG-P98" firstAttribute="bottom" secondItem="AX4-gg-z9z" secondAttribute="bottom" constant="20" id="oWX-Qz-3WG"/>
-                        </constraints>
-                        <viewLayoutGuide key="safeArea" id="hch-xG-P98"/>
-                    </view>
-                    <connections>
-                        <outlet property="imageView" destination="AX4-gg-z9z" id="G4m-NQ-qHU"/>
-                        <outlet property="leftButton" destination="Z7U-wP-gfK" id="yCu-ei-0m8"/>
-                        <outlet property="middleButton" destination="lM5-lq-sEY" id="Ug6-YW-iAu"/>
-                        <outlet property="rightButton" destination="80F-n5-Gjc" id="5pW-yd-ceQ"/>
-                        <outlet property="slider" destination="OtC-0L-aDr" id="eB2-R2-eY5"/>
-                        <outlet property="textField" destination="Dt8-J3-FdO" id="IUH-ER-5M0"/>
-                        <segue destination="kcb-Ie-Z5l" kind="unwind" identifier="unwindToMainMenu" unwindAction="unwindToMainMenuWithUnwindSegue:" id="x82-sQ-GM5"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="fOc-o1-uZY" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <exit id="kcb-Ie-Z5l" userLabel="Exit" sceneMemberID="exit"/>
-            </objects>
-            <point key="canvasLocation" x="2417" y="-326"/>
         </scene>
         <!--Game View Controller-->
         <scene sceneID="f2X-dw-vnf">
@@ -207,12 +103,12 @@
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="ZSv-dI-gvZ">
                                 <rect key="frame" x="0.0" y="64" width="320" height="504"/>
                                 <subviews>
-                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="746" image="white" translatesAutoresizingMaskIntoConstraints="NO" id="Fae-Vt-zuq">
-                                        <rect key="frame" x="0.0" y="0.0" width="320" height="16"/>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="746" image="blank" translatesAutoresizingMaskIntoConstraints="NO" id="Fae-Vt-zuq">
+                                        <rect key="frame" x="0.0" y="0.0" width="320" height="345.5"/>
                                         <gestureRecognizers/>
                                     </imageView>
                                     <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minValue="0.0" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="iPy-bO-y10">
-                                        <rect key="frame" x="-2" y="36" width="324" height="360.5"/>
+                                        <rect key="frame" x="-2" y="365.5" width="324" height="31"/>
                                         <connections>
                                             <action selector="powerSliderChanged:" destination="zJq-3P-Sm8" eventType="valueChanged" id="KZf-wc-WrC"/>
                                         </connections>
@@ -261,7 +157,7 @@
                     </connections>
                 </panGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="2417" y="391"/>
+            <point key="canvasLocation" x="2580" y="33"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="ayB-Qh-xzg">
@@ -283,8 +179,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="orange" width="5184" height="3456"/>
-        <image name="purple" width="5184" height="3456"/>
-        <image name="white" width="1980" height="1289"/>
+        <image name="blank" width="1024" height="1024"/>
     </resources>
 </document>

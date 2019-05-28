@@ -79,17 +79,6 @@ class MultipeerController : NSObject, MCSessionDelegate, MCBrowserViewController
                 viewController.updateUI()
             }
         }
-        if let viewController = currentViewController as? ActivityViewController {
-            DispatchQueue.main.async {
-                if let decodeData = data {
-                    viewController.decodeMessage(decodeData)
-                }
-                
-                if self.state != .connected {
-                    viewController.disconnect()
-                }
-            }
-        }
     }
     
     func sendData(_ data: Data) {
