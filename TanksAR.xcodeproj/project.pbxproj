@@ -56,6 +56,11 @@
 		53A18578229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
 		53A18579229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
 		53A1857A229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
+		53A18582229DCBAA00EDF32B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18581229DCBAA00EDF32B /* AppDelegate.swift */; };
+		53A18584229DCBAA00EDF32B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18583229DCBAA00EDF32B /* ViewController.swift */; };
+		53A18587229DCBAA00EDF32B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53A18585229DCBAA00EDF32B /* Main.storyboard */; };
+		53A18589229DCBAA00EDF32B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 53A18588229DCBAA00EDF32B /* Assets.xcassets */; };
+		53A1858C229DCBAA00EDF32B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53A1858A229DCBAA00EDF32B /* LaunchScreen.storyboard */; };
 		53A633DA2298871F0063B339 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		53A633DB2298871F0063B339 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		53A633DC229887380063B339 /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
@@ -131,6 +136,13 @@
 		537F4A49216A6CC700A6F810 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		5396120D20D0CAB7006D0E6C /* PlayerAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAI.swift; sourceTree = "<group>"; };
 		53A18577229DCA7A00EDF32B /* GameConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
+		53A1857F229DCBAA00EDF32B /* FakeARtillery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FakeARtillery.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		53A18581229DCBAA00EDF32B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		53A18583229DCBAA00EDF32B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		53A18586229DCBAA00EDF32B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		53A18588229DCBAA00EDF32B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		53A1858B229DCBAA00EDF32B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		53A1858D229DCBAA00EDF32B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		53DE0AA420FC80AB00F5077B /* TestGameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGameModel.swift; sourceTree = "<group>"; };
 		53DE0AA6210306CB00F5077B /* HighScoreController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighScoreController.swift; sourceTree = "<group>"; };
 		53EEDB6420C83C3E00B8B71D /* TanksAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TanksAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -154,6 +166,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		53A1857C229DCBAA00EDF32B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		53EEDB6120C83C3E00B8B71D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -178,12 +197,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		53A18580229DCBAA00EDF32B /* FakeARtillery */ = {
+			isa = PBXGroup;
+			children = (
+				53A18581229DCBAA00EDF32B /* AppDelegate.swift */,
+				53A18583229DCBAA00EDF32B /* ViewController.swift */,
+				53A18585229DCBAA00EDF32B /* Main.storyboard */,
+				53A18588229DCBAA00EDF32B /* Assets.xcassets */,
+				53A1858A229DCBAA00EDF32B /* LaunchScreen.storyboard */,
+				53A1858D229DCBAA00EDF32B /* Info.plist */,
+			);
+			path = FakeARtillery;
+			sourceTree = "<group>";
+		};
 		53EEDB5B20C83C3E00B8B71D = {
 			isa = PBXGroup;
 			children = (
 				53EEDB6620C83C3E00B8B71D /* TanksAR */,
 				53EEDB7D20C83C4700B8B71D /* TanksARTests */,
 				53EEDB8820C83C4700B8B71D /* TanksARUITests */,
+				53A18580229DCBAA00EDF32B /* FakeARtillery */,
 				53EEDB6520C83C3E00B8B71D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -194,6 +227,7 @@
 				53EEDB6420C83C3E00B8B71D /* TanksAR.app */,
 				53EEDB7A20C83C4700B8B71D /* TanksARTests.xctest */,
 				53EEDB8520C83C4700B8B71D /* TanksARUITests.xctest */,
+				53A1857F229DCBAA00EDF32B /* FakeARtillery.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -256,6 +290,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		53A1857E229DCBAA00EDF32B /* FakeARtillery */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 53A1858E229DCBAA00EDF32B /* Build configuration list for PBXNativeTarget "FakeARtillery" */;
+			buildPhases = (
+				53A1857B229DCBAA00EDF32B /* Sources */,
+				53A1857C229DCBAA00EDF32B /* Frameworks */,
+				53A1857D229DCBAA00EDF32B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FakeARtillery;
+			productName = FakeARtillery;
+			productReference = 53A1857F229DCBAA00EDF32B /* FakeARtillery.app */;
+			productType = "com.apple.product-type.application";
+		};
 		53EEDB6320C83C3E00B8B71D /* TanksAR */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 53EEDB8E20C83C4800B8B71D /* Build configuration list for PBXNativeTarget "TanksAR" */;
@@ -315,10 +366,13 @@
 		53EEDB5C20C83C3E00B8B71D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0940;
+				LastSwiftUpdateCheck = 1020;
 				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = "Doing Science To Stuff";
 				TargetAttributes = {
+					53A1857E229DCBAA00EDF32B = {
+						CreatedOnToolsVersion = 10.2.1;
+					};
 					53EEDB6320C83C3E00B8B71D = {
 						CreatedOnToolsVersion = 9.4;
 					};
@@ -348,11 +402,22 @@
 				53EEDB6320C83C3E00B8B71D /* TanksAR */,
 				53EEDB7920C83C4700B8B71D /* TanksARTests */,
 				53EEDB8420C83C4700B8B71D /* TanksARUITests */,
+				53A1857E229DCBAA00EDF32B /* FakeARtillery */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		53A1857D229DCBAA00EDF32B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				53A1858C229DCBAA00EDF32B /* LaunchScreen.storyboard in Resources */,
+				53A18589229DCBAA00EDF32B /* Assets.xcassets in Resources */,
+				53A18587229DCBAA00EDF32B /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		53EEDB6220C83C3E00B8B71D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -383,6 +448,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		53A1857B229DCBAA00EDF32B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				53A18584229DCBAA00EDF32B /* ViewController.swift in Sources */,
+				53A18582229DCBAA00EDF32B /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		53EEDB6020C83C3E00B8B71D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -501,6 +575,22 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		53A18585229DCBAA00EDF32B /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				53A18586229DCBAA00EDF32B /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		53A1858A229DCBAA00EDF32B /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				53A1858B229DCBAA00EDF32B /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
 		53EEDB6D20C83C3F00B8B71D /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -520,6 +610,47 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		53A1858F229DCBAA00EDF32B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = N988N5HFV9;
+				INFOPLIST_FILE = FakeARtillery/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.DoingScienceToStuff.FakeARtillery;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		53A18590229DCBAA00EDF32B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = N988N5HFV9;
+				INFOPLIST_FILE = FakeARtillery/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.DoingScienceToStuff.FakeARtillery;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		53EEDB8C20C83C4800B8B71D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -755,6 +886,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		53A1858E229DCBAA00EDF32B /* Build configuration list for PBXNativeTarget "FakeARtillery" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				53A1858F229DCBAA00EDF32B /* Debug */,
+				53A18590229DCBAA00EDF32B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		53EEDB5F20C83C3E00B8B71D /* Build configuration list for PBXProject "TanksAR" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
