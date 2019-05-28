@@ -87,7 +87,7 @@ class ActivityViewController: UIViewController {
         guard let image = image else { return }
         
         // see: https://gist.github.com/trilliwon/5af1abe1a113148c23ecde8c08e181a6
-        let imageData = image.pngData()
+        let imageData = UIImagePNGRepresentation(image)
         
         let message = PeerMessage(slider: slider.value, image: imageData)
         let encoder = PropertyListEncoder()
