@@ -29,6 +29,7 @@ class NetworkSetupViewController: UIViewController {
         NSLog("\(#file) \(#function)")
         super.viewWillAppear(animated)
         networkedGameController.viewController = self
+        clientStarted = false
         updateUI()
     }
     
@@ -36,7 +37,8 @@ class NetworkSetupViewController: UIViewController {
     var gameModel = GameModel()
     var playerNames: [String] = []
     var gameState: GameState!
-
+    var clientStarted = false
+    
     @IBAction func browseButtonTapped(_ sender: UIButton) {
         NSLog("\(#file) \(#function)")
         networkedGameController.browseHosts(from: self)
@@ -71,9 +73,9 @@ class NetworkSetupViewController: UIViewController {
         NSLog("\(#file) \(#function)")
         networkedGameController.stopAdvertising()
         
-        if networkedGameController.connectionState == .connected {
-            //performSegue(withIdentifier: "startSegue", sender: nil)
+        if networkedGameController.connectionState == .connected && !clientStarted {
             performSegue(withIdentifier: "startFakeClient", sender: nil)
+            clientStarted = true
         }
     }
     
@@ -102,20 +104,24 @@ class NetworkSetupViewController: UIViewController {
     }
     
     @IBOutlet weak var numConnectedLabel: UILabel!
+    @IBOutlet weak var connectionStatusLabel: UILabel!
     func updateUI() {
         NSLog("\(#file) \(#function)")
         
+        var statusString = "State: unknown"
         switch networkedGameController.connectionState {
         case .notConnected:
-            NSLog("state is 'not connected'")
+            statusString = "State: not connected"
         case .connecting:
-            NSLog("state is 'connecting'")
+            statusString = "State: connecting"
         case .connected:
-            NSLog("state is 'connected'")
+            statusString = "State: connected"
         @unknown default:
             NSLog("Unknown connection state \(networkedGameController.connectionState)")
             fatalError()
         }
+        NSLog("\(statusString)")
+        connectionStatusLabel.text = statusString
         NSLog("\(networkedGameController.networkController.mcSession.connectedPeers.count) peers connected")
        
         if !isAdvertising {
@@ -128,9 +134,10 @@ class NetworkSetupViewController: UIViewController {
         expectedPeersLabel.text = " \(networkedGameController.numConnected) of \(networkedGameController.totalPlayers) "
         
         NSLog("\(networkedGameController.numConnected) of \(networkedGameController.totalPlayers) players connected.")
-        if networkedGameController.numConnected == networkedGameController.totalPlayers {
+        if networkedGameController.numConnected == networkedGameController.totalPlayers  && !clientStarted  {
             startButton.isEnabled = true
             performSegue(withIdentifier: "startFakeClient", sender: nil)
+            clientStarted = true
         } else {
             startButton.isEnabled = false
         }

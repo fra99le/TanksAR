@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="GGQ-Df-nxk">
-                                <rect key="frame" x="40.5" y="149" width="239.5" height="270"/>
+                                <rect key="frame" x="40.5" y="129" width="239.5" height="310.5"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iRV-g4-CBY">
                                         <rect key="frame" x="0.0" y="0.0" width="239.5" height="60"/>
@@ -68,6 +68,12 @@
                                             <action selector="startButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yzF-ee-ht1"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Connection State" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uwl-KK-U5x">
+                                        <rect key="frame" x="0.0" y="290" width="239.5" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                             </stackView>
                         </subviews>
@@ -81,6 +87,7 @@
                     <navigationItem key="navigationItem" id="tkc-tV-J5U"/>
                     <connections>
                         <outlet property="advertiseButton" destination="oUl-yI-yPT" id="Smc-5n-652"/>
+                        <outlet property="connectionStatusLabel" destination="uwl-KK-U5x" id="6e6-u7-42l"/>
                         <outlet property="expectedPeersLabel" destination="Lk8-na-FnJ" id="5SX-0t-qBX"/>
                         <outlet property="peersStack" destination="UEt-8n-5f2" id="aux-Kh-NY2"/>
                         <outlet property="peersStepper" destination="tQX-ow-se6" id="O2Q-5s-3hM"/>
