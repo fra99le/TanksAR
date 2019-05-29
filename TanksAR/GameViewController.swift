@@ -754,15 +754,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
             hudStackView.isHidden = false
             hudBackground.isHidden = false
+            playerNameLabel.isHidden = false
+            playerScoreLabel.isHidden = false
+            roundLabel.isHidden = false
         }
         powerSlider.isHidden = true
         powerSlider.isEnabled = false
         manualTrainButton.isHidden = true
         manualTrainButton.isEnabled = false
         screenDraggingGesture.isEnabled = false
-        playerNameLabel.isHidden = false
-        playerScoreLabel.isHidden = false
-        roundLabel.isHidden = false
         
         uiEnabled = false;
     }
