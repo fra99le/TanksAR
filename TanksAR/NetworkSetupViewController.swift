@@ -49,9 +49,18 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
 
     override func viewDidAppear(_ animated: Bool) {
         NSLog("\(#function) \(#file)")
+        viewVisible = true
         // since updateUI might call performSegue, calling it from viewWillAppear is a bad idea.
         // see: https://stackoverflow.com/questions/32292600/swift-performseguewithidentifier-not-working/48864629#48864629
         updateUI()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        viewVisible = false
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        viewVisible = false
     }
     
     // MARK: - Navigation
@@ -86,6 +95,7 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
     var playerNames: [String] = []
     var gameState: GameState?
     var gameLaunched = false
+    var viewVisible = false
     
     @IBOutlet weak var hostGameSwitch: UISwitch!
     @IBOutlet weak var nameField: UITextField!
@@ -184,8 +194,10 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
         if let state = gameState {
             playerCountLabel.text = "\(networkedGameController.numConnected) of \(state.config.numHumans)"
 
-            if networkedGameController.numConnected == state.config.numHumans && !gameLaunched {
-                //networkedGameController.stopAdvertising()
+            if networkedGameController.numConnected == state.config.numHumans
+                && !gameLaunched
+                && viewVisible {
+                networkedGameController.stopAdvertising()
                 if networkedGameController.isLeader {
                     networkedGameController.broadcastPlayerCount()
                 }
