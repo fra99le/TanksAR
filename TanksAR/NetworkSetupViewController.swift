@@ -26,6 +26,9 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
         gameName = "\(appName) on \(UIDevice.current.name)"
         nameField.text = gameName
         nameField.delegate = self
+        if let state = gameState {
+            networkedGameController.setExpectedPlayers(numPlayers: state.config.numHumans)
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -42,10 +45,12 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
         
         startingActivityStackView.isHidden = true
         setupScrollView.isHidden = false
-        if gameState != nil {
-            networkedGameController.setExpectedPlayers(numPlayers: gameState.config.numHumans)
-        }
-        
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        NSLog("\(#function) \(#file)")
+        // since updateUI might call performSegue, calling it from viewWillAppear is a bad idea.
+        // see: https://stackoverflow.com/questions/32292600/swift-performseguewithidentifier-not-working/48864629#48864629
         updateUI()
     }
     
@@ -60,8 +65,13 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
             NSLog("Switching to game via \(segue.identifier!) segue.")
             
             if segue.identifier == "launchNetworkGame" {
-                dest.gameConfig = self.gameState.config
-                dest.gameModel = self.gameState.model
+                if let state = gameState {
+                    dest.gameConfig = state.config
+                    dest.gameModel = state.model
+                } else {
+                    NSLog("No game state available.")
+                    fatalError()
+                }
                 dest.networkGameController = networkedGameController
                 networkedGameController.viewController = dest
             } else {
@@ -74,7 +84,8 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
     var networkedGameController: NetworkedGameController!
     var gameName: String = "ARtillery Game"
     var playerNames: [String] = []
-    var gameState: GameState!
+    var gameState: GameState?
+    var gameLaunched = false
     
     @IBOutlet weak var hostGameSwitch: UISwitch!
     @IBOutlet weak var nameField: UITextField!
@@ -135,9 +146,13 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
             playerNames.append(displayName)
         }
         
-        NSLog("\(networkedGameController.numConnected) players connected, need \(gameState.config.numHumans) to launch game.")
+        if let state = gameState {
+            NSLog("\(networkedGameController.numConnected) players connected, need \(state.config.numHumans) to launch game.")
+        }
    
-        updateUI()
+        DispatchQueue.main.async {
+            self.updateUI()
+        }
     }
     
     func updateUI() {
@@ -166,10 +181,10 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
         }
         joinGameButton.setNeedsLayout()
         
-        if gameState != nil {
-            playerCountLabel.text = "\(networkedGameController.numConnected) of \(gameState.config.numHumans)"
+        if let state = gameState {
+            playerCountLabel.text = "\(networkedGameController.numConnected) of \(state.config.numHumans)"
 
-            if networkedGameController.numConnected == gameState.config.numHumans {
+            if networkedGameController.numConnected == state.config.numHumans && !gameLaunched {
                 //networkedGameController.stopAdvertising()
                 if networkedGameController.isLeader {
                     networkedGameController.broadcastPlayerCount()
@@ -178,6 +193,7 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
                 NSLog("\(#function) trying to start game via launchNetworkGame segue")
                 startingActivityStackView.isHidden = false
                 setupScrollView.isHidden = true
+                gameLaunched = true
                 performSegue(withIdentifier: "launchNetworkGame", sender: nil)
             }
         }

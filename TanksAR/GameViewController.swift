@@ -739,6 +739,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     }
     
     func enableUI() {
+        guard viewIsLoaded else { return }
+
         exitButton.isHidden = false
         exitButton.isEnabled = true
         if boardPlaced {
@@ -762,6 +764,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
     }
     
     func disableUI() {
+        guard viewIsLoaded else { return }
+        
         // don't mess with exit button here!
         fireButton.isHidden = true
         fireButton.isEnabled = false

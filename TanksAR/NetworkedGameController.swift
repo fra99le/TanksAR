@@ -163,7 +163,9 @@ class NetworkedGameController : NetworkClient {
     func browseHosts(from: UIViewController) {
         NSLog("\(#function)")
 
-        networkController.browse(currentViewController: from)
+        DispatchQueue.main.async {
+            self.networkController.browse(currentViewController: from)
+        }
     }
     
     func setExpectedPlayers(numPlayers: Int) {

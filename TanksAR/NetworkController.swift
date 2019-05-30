@@ -50,7 +50,10 @@ class NetworkController : NSObject, MCSessionDelegate, MCBrowserViewControllerDe
         let mcNearbyServiceBrowser = MCNearbyServiceBrowser(peer: mcSession.myPeerID, serviceType: serviceType)
         mcBrowserViewController = MCBrowserViewController(browser: mcNearbyServiceBrowser, session: mcSession)
         mcBrowserViewController?.delegate = self
-        currentViewController.present(mcBrowserViewController!, animated: true)
+        DispatchQueue.main.async {
+            currentViewController.present(self.mcBrowserViewController!, animated: true)
+        }
+        
     }
     
     func setDisplayName(to: String) {
@@ -180,7 +183,9 @@ class NetworkController : NSObject, MCSessionDelegate, MCBrowserViewControllerDe
         if state == .connected {
             NSLog("\(#function): dismissing browserViewController")
             if let browserViewController = mcBrowserViewController {
-                browserViewController.dismiss(animated: true, completion: {})
+                DispatchQueue.main.async {
+                    browserViewController.dismiss(animated: true, completion: {})
+                }
             }
         }
         if peerID.isEqual(mcSession.myPeerID) {
