@@ -60,6 +60,7 @@ class NetworkedGameController : NetworkClient {
     var myPlayerID: Int = -1
     var totalPlayers: Int = 10
     var playersReady: [Bool] = []
+    var sequence: Int = 0
     
     // wrappers for network controller state
     var connectionState: MCSessionState = .notConnected
@@ -88,22 +89,24 @@ class NetworkedGameController : NetworkClient {
     // MARK -- Basic communication and game setup
     
     func sendMessage(_ message: GameNetworkMessage, to: MCPeerID) {
-        NSLog("\(#function)")
+        NSLog("\(#function): message: \(message), to: \(to)")
 
+        sequence += 1
         let encoder = PropertyListEncoder()
         let encodedValue = try? encoder.encode(message)
-        NSLog("\(#function) encodedValue: \(String(describing: encodedValue))")
+        NSLog("\(#function) sequence: \(sequence) encodedValue: \(String(describing: encodedValue))")
         if let data = encodedValue {
             networkController.sendData(data, to: to)
         }
     }
 
     func broadcastMessage(_ message: GameNetworkMessage, includeSelf: Bool = false) {
-        NSLog("\(#function)")
+        NSLog("\(#function): message: \(message), includeSelf: \(includeSelf)")
 
+        sequence += 1
         let encoder = PropertyListEncoder()
         let encodedValue = try? encoder.encode(message)
-        NSLog("\(#function) encodedValue: \(String(describing: encodedValue))")
+        NSLog("\(#function) sequence: \(sequence) encodedValue: \(String(describing: encodedValue))")
         if let data = encodedValue {
             networkController.broadcastData(data, includeSelf: includeSelf)
         }
@@ -254,28 +257,22 @@ class NetworkedGameController : NetworkClient {
         guard let viewController = viewController as? GameViewController else { return }
         let gameModel = viewController.gameModel
 
-        // get current player
-        let currentPlayer = gameModel.board.currentPlayer
-        guard currentPlayer == myPlayerID else { return }
-        let player = gameModel.board.players[currentPlayer]
+        // get client's player
+        let player = gameModel.board.players[myPlayerID]
         
         // setup turn info struct
         var message = GameNetworkMessage()
         message.turnInfo = TurnInfo(round: gameModel.board.currentRound,
-                                    playerID: currentPlayer,
+                                    playerID: myPlayerID,
                                     tank: player.tank,
                                     weaponID: player.weaponID,
                                     weaponSizeID: player.weaponSizeID,
                                     usingComputer: player.useTargetingComputer,
                                     isFire: isFiring)
         
-        if isFiring {
-            NSLog("sending firing message: \(message)")
-            unreadyAll()
-        }
-        
-        // broadcast message
-        broadcastMessage(message)
+        // send message
+        NSLog("\(#function) sending message to leader \(leaderPeerID!).")
+        sendMessage(message, to: leaderPeerID)
     }
     
     func finishedTurn() {
@@ -289,7 +286,7 @@ class NetworkedGameController : NetworkClient {
     }
     
     func handleMessage(_ data: Data, from: MCPeerID) {
-        NSLog("\(#function)")
+        NSLog("\(#function): data: \(data), from: \(from)")
         
         let decoder = PropertyListDecoder()
         guard let message = try? decoder.decode(GameNetworkMessage.self, from: data) else { return }
@@ -317,7 +314,8 @@ class NetworkedGameController : NetworkClient {
         // All setup messages need to be processed above this line
         
         guard let viewController = viewController as? GameViewController else { return }
-        
+
+        // handle full game state updates
         if let gameModel = message.gameModel {
             viewController.gameModel = gameModel
             updateViewController()
@@ -364,22 +362,38 @@ class NetworkedGameController : NetworkClient {
             }
         }
         
+        // handle aim/fire message
         if let turnInfo = message.turnInfo {
             let gameModel = viewController.gameModel
             
-            gameModel.setTankAim(azimuth: turnInfo.tank.azimuth, altitude: turnInfo.tank.altitude)
-            gameModel.setTankPower(power: turnInfo.tank.velocity)
-            let currentPlayer = gameModel.board.currentPlayer
-            gameModel.board.players[currentPlayer].weaponID = turnInfo.weaponID
-            gameModel.board.players[currentPlayer].weaponSizeID = turnInfo.weaponSizeID
-            gameModel.board.players[currentPlayer].useTargetingComputer = turnInfo.usingComputer
+            let playerID = turnInfo.playerID
+            if playerID != myPlayerID {
+                gameModel.setTankAim(azimuth: turnInfo.tank.azimuth, altitude: turnInfo.tank.altitude, for: playerID)
+                gameModel.setTankPower(power: turnInfo.tank.velocity, for: playerID)
+                gameModel.board.players[playerID].weaponID = turnInfo.weaponID
+                gameModel.board.players[playerID].weaponSizeID = turnInfo.weaponSizeID
+                gameModel.board.players[playerID].useTargetingComputer = turnInfo.usingComputer
+            }
 
+            if isLeader && !(message.fromLeader ?? false) {
+                // sanitize and broadcact message
+                var cleanMessage = GameNetworkMessage()
+                cleanMessage.turnInfo = turnInfo
+                if playerID != gameModel.board.currentPlayer {
+                    // disable fire command for non-active players
+                    cleanMessage.turnInfo?.isFire = false
+                }
+                cleanMessage.fromLeader = true
+                NSLog("leader is broadcasting turnInfo: \(cleanMessage)")
+                broadcastMessage(cleanMessage, includeSelf: false)
+            }
+            
             DispatchQueue.main.async {
                 // trigger view updates
                 viewController.updateHUD()
                 
-                if turnInfo.isFire {
-                    NSLog("got firing message: \(message)")
+                if turnInfo.isFire && playerID == gameModel.board.currentPlayer {
+                    NSLog("got valid firing message: \(message)")
                     viewController.launchProjectile()
                 }
             }

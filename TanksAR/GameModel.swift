@@ -654,22 +654,31 @@ class GameModel : Codable {
         return board.players[forPlayer].tank
     }
     
-    func setTankAim(azimuth: Float, altitude: Float) {
+    func setTankAim(azimuth: Float, altitude: Float, for playerID: Int = -1) {
         let rad = azimuth * (Float.pi / 180)
         var cleanAzimuth = atan2(sin(rad),cos(rad)) * (180 / Float.pi)
         if cleanAzimuth < 0 {
             cleanAzimuth = 360 + cleanAzimuth
         }
         cleanAzimuth = Float(Int(cleanAzimuth * 100 + 0.5)) / Float(100)
-        board.players[board.currentPlayer].tank.azimuth = cleanAzimuth
-        board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
+        if playerID >= 0 {
+            board.players[playerID].tank.azimuth = cleanAzimuth
+            board.players[playerID].tank.altitude = max(0,min(altitude,180))
+        } else {
+            board.players[board.currentPlayer].tank.azimuth = cleanAzimuth
+            board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
+        }
         //NSLog("tank for player \(board.currentPlayer) set to \(board.players[board.currentPlayer].tank.azimuth)º,\(board.players[board.currentPlayer].tank.altitude)º")
     }
 
-    func setTankPower(power: Float) {
+    func setTankPower(power: Float, for playerID: Int = -1) {
         guard power >= 0 else { return }
 
-        board.players[board.currentPlayer].tank.velocity = min(power,maxPower)
+        if playerID >= 0 {
+            board.players[playerID].tank.velocity = min(power,maxPower)
+        } else {
+            board.players[board.currentPlayer].tank.velocity = min(power,maxPower)
+        }
     }
 
     func muzzleParameters(forPlayer: Int) -> (Vector3, Vector3) {

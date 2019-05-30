@@ -46,6 +46,7 @@ class GameViewController: UIViewController {
     var uiEnabled = false
     
     @IBOutlet weak var mapImageView: UIImageView!
+    @IBOutlet weak var stateLabel: UILabel!
     @IBOutlet weak var infoLabel: UILabel!
     @IBOutlet weak var fireButton: UIButton!
     
@@ -69,7 +70,7 @@ class GameViewController: UIViewController {
         NSLog("Screen dragged \(gesture).")
         NSLog("velocity: \(gesture.velocity(in: nil)), translation: \(gesture.translation(in: nil))")
         // determine player
-        let playerID = gameModel.board.currentPlayer
+        let playerID = networkGameController.myPlayerID
         //let tankNode = boardDrawer.tankNodes[playerID]
         
         // get tank aiming values from model
@@ -93,13 +94,19 @@ class GameViewController: UIViewController {
         //NSLog("newAzimuth: \(newAzimuth), newAltitude: \(newAltitude)")
         
         if gesture.state == .ended {
-            gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
+            gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude, for: playerID)
+            if let networkController = networkGameController {
+                networkController.playerAiming()
+            }
             updateHUD()
         } else {
             // hack to allow realtime updating of HUD
-            gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude)
+            gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude, for: playerID)
+            if let networkController = networkGameController {
+                networkController.playerAiming()
+            }
             updateHUD()
-            gameModel.setTankAim(azimuth: currAzimuth, altitude: currAltitude)
+            gameModel.setTankAim(azimuth: currAzimuth, altitude: currAltitude, for: playerID)
         }
     }
 
@@ -107,8 +114,12 @@ class GameViewController: UIViewController {
     @IBAction func powerSliderChanged(_ sender: UISlider) {
         guard gameModel.gameStarted else { return }
 
-        gameModel.setTankPower(power: sender.value)
+        let playerID = networkGameController.myPlayerID
+        gameModel.setTankPower(power: sender.value, for: playerID)
         updateInfo("Power Changed")
+        if let networkController = networkGameController {
+            networkController.playerAiming()
+        }
         updateHUD()
     }
     
@@ -180,6 +191,7 @@ class GameViewController: UIViewController {
         
         NSLog("\(#function) uiEnabled=\(uiEnabled)")
         let model = gameModel
+        powerSlider.maximumValue = model.maxPower
         if mapImageView != nil {
             let image = model.board.surface.asUIImage()
             DispatchQueue.main.async {
@@ -195,21 +207,22 @@ class GameViewController: UIViewController {
         guard viewIsLoaded else { return }
         guard gameModel.gameStarted else { return }
 
-        NSLog("\(#function) uiEnabled=\(uiEnabled)")
         if let networkController = networkGameController {
-            networkController.playerAiming()
+            let myPlayerID = networkController.myPlayerID
+            let myPlayer = gameModel.board.players[myPlayerID].name
+            let myTank = gameModel.board.players[myPlayerID].tank
             let playerID = gameModel.board.currentPlayer
             let player = gameModel.board.players[playerID].name
             let tank = gameModel.board.players[playerID].tank
-            updateInfo("Enabled: \(uiEnabled), Player: \(player), Traversal: \(tank.azimuth)º, Elevation: \(tank.altitude)º, Power: \(tank.velocity) m/s")
-            
-            DispatchQueue.main.async {
-                NSLog("\(#file) \(#function) currentPlayer: \(self.gameModel.board.currentPlayer), myPlayerID: \(networkController.myPlayerID)")
+            updateInfo("Enabled: \(uiEnabled)\nMe:\t\(myPlayer), Traversal: \(myTank.azimuth)º, Elevation: \(myTank.altitude)º, Power: \(myTank.velocity) m/s\nPlayer:\t\(player), Traversal: \(tank.azimuth)º, Elevation: \(tank.altitude)º, Power: \(tank.velocity) m/s")
+            NSLog("\(#file) \(#function) currentPlayer: \(self.gameModel.board.currentPlayer), myPlayerID: \(networkController.myPlayerID)")
 
+            DispatchQueue.main.async {
+                self.uiEnabled = myPlayerID == playerID
                 self.powerSlider.isEnabled = self.uiEnabled
                 self.fireButton.isEnabled = self.uiEnabled
-                self.screenDraggingGesture.isEnabled = self.uiEnabled
             }
+            NSLog("\(#function) uiEnabled=\(uiEnabled)")
         }
     }
 }
