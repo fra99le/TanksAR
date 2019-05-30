@@ -118,8 +118,8 @@ class MenuViewController: UIViewController {
         if let dest = segue.destination as? NetworkSetupViewController {
             NSLog("\(#function) starting \(gameConfig.numRounds) round networked game with \(gameConfig.numHumans) humans and \(gameConfig.numAIs) Als.")
             dest.gameState = GameState(model: GameModel(), config: gameConfig)
-            //dest.gameState.model = TestGameModel()    // for debugging
-            dest.gameState.model.gameOver = false
+            //dest.gameState!.model = TestGameModel()    // for debugging
+            dest.gameState!.model.gameOver = false
         }
     }
     
@@ -206,13 +206,12 @@ class MenuViewController: UIViewController {
     func updateUI() {
         saveMenu()
 
+        //read value from UI elements
         humansStepper.value = Double(gameConfig.numHumans)
         aisStepper.value = Double(gameConfig.numAIs)
         roundsStepper.value = Double(gameConfig.numRounds)
         
-        humansNumLabel.text = "\(gameConfig.numHumans)"
-        aisNumLabel.text = "\(gameConfig.numAIs)"
-        roundsNumLabel.text = "\(gameConfig.numRounds)"
+        // apply sanity checks
         eliminationLabel.isHidden = true
         humansStepper.minimumValue = 0
         aisStepper.minimumValue = 0
@@ -223,15 +222,28 @@ class MenuViewController: UIViewController {
             aisStepper.minimumValue = 1
             if gameConfig.numHumans < 1 {
                 gameConfig.numHumans = 1
-                humansNumLabel.text = "1"
             }
             if gameConfig.numAIs < 1 {
                 gameConfig.numAIs = 1
-                aisNumLabel.text = "1"
             }
         }
+        if gameConfig.numHumans + gameConfig.numAIs <= 2 {
+            humansStepper.minimumValue = Double(gameConfig.numHumans)
+            aisStepper.minimumValue = Double(gameConfig.numAIs)
+        }
         
-        networkGameSwitch.isOn = gameConfig.networked
+        // update labels
+        humansNumLabel.text = "\(gameConfig.numHumans)"
+        aisNumLabel.text = "\(gameConfig.numAIs)"
+        roundsNumLabel.text = "\(gameConfig.numRounds)"
+
+        if gameConfig.numHumans < 2 {
+            networkGameSwitch.isOn = false
+            networkGameSwitch.isEnabled = false
+        } else {
+            networkGameSwitch.isOn = gameConfig.networked
+            networkGameSwitch.isEnabled = true
+        }
         
         var modeString = "Unknown"
         switch gameConfig.mode {
