@@ -651,7 +651,10 @@ class GameModel : Codable {
     }
     
     func getTank(forPlayer: Int) -> Tank {
-        return board.players[forPlayer].tank
+        if forPlayer >= 0 {
+            return board.players[forPlayer].tank
+        }
+        return board.players[board.currentPlayer].tank
     }
     
     func setTankAim(azimuth: Float, altitude: Float, for playerID: Int = -1) {

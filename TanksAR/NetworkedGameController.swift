@@ -55,7 +55,7 @@ class NetworkedGameController : NetworkClient {
     // local state
     var name: String = "Unamed"
     var isLeader = false
-    var leaderPeerID: MCPeerID!
+    var leaderPeerID: MCPeerID?
     var playerPeerIDs: [MCPeerID] = []
     var myPlayerID: Int = -1
     var totalPlayers: Int = 10
@@ -250,7 +250,9 @@ class NetworkedGameController : NetworkClient {
         message.playerID = myPlayerID
         message.playerReady = true
         
-        sendMessage(message, to: leaderPeerID)
+        if let leaderID = leaderPeerID {
+            sendMessage(message, to: leaderID)
+        }
     }
         
     func playerAiming(isFiring: Bool = false) {
@@ -273,8 +275,10 @@ class NetworkedGameController : NetworkClient {
                                     isFire: isFiring)
         
         // send message
-        NSLog("\(#function) sending message to leader \(leaderPeerID!).")
-        sendMessage(message, to: leaderPeerID)
+        if let leaderID = leaderPeerID {
+            NSLog("\(#function) sending message to leader \(leaderID).")
+            sendMessage(message, to: leaderID)
+        }
     }
     
     func finishedTurn() {
@@ -283,7 +287,9 @@ class NetworkedGameController : NetworkClient {
         var message = GameNetworkMessage()
         message.finishedTurn = true
 
-        sendMessage(message, to: leaderPeerID)
+        if let leaderID = leaderPeerID {
+            sendMessage(message, to: leaderID)
+        }
         playerReady()
     }
     
@@ -320,6 +326,7 @@ class NetworkedGameController : NetworkClient {
         // handle full game state updates
         if let gameModel = message.gameModel {
             viewController.gameModel = gameModel
+            viewController.setupDrawer()
             updateViewController()
             playerReady()
         }

@@ -81,6 +81,7 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
                     NSLog("No game state available.")
                     fatalError()
                 }
+                networkedGameController.isLeader = hostGameSwitch.isOn
                 dest.networkGameController = networkedGameController
                 networkedGameController.viewController = dest
             } else {
@@ -115,6 +116,7 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
         } else {
             networkedGameController.stopAdvertising()
         }
+        networkedGameController.isLeader = sender.isOn
         
         updateUI()
     }
@@ -176,6 +178,7 @@ class NetworkSetupViewController: UIViewController, UITextFieldDelegate {
             nameField.isEnabled = false
             joinGameButton.isHidden = false
         }
+        networkedGameController.isLeader = hostGameSwitch.isOn
         
         connectionStatusLabel.text = networkedGameController.connectionStateString
         if networkedGameController.connectionState == .notConnected {

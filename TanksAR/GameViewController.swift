@@ -101,6 +101,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             boardDrawer = GameViewTexturedTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 200, tankScale: tankScale)
         }
         boardDrawer.setupLighting()
+        
+        removeTanks()
+        addTanks()
     }
     
     func updateDrawer() {
@@ -823,7 +826,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         humanLeft = gameConfig.numHumans
         
         // make sure power slider matches player
-        let playerID = gameModel.board.currentPlayer
+        var playerID = gameModel.board.currentPlayer
+        if let networkController = networkGameController {
+            playerID = networkController.myPlayerID
+        }
         let player = gameModel.board.players[playerID]
         let currentPower = gameModel.board.players[playerID].tank.velocity
         powerSlider.minimumValue = 0
@@ -872,7 +878,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             //NSLog("scaling to \(rescaleAnimation.toValue!) for user \(playerID)")
         }
         
-        playerNameLabel.text = "\(player.name)"
+        playerNameLabel.text = "\(player.name)" // + " \(gameBoard.currentPlayer)"
         playerScoreLabel.text = "Score:\n\(player.score)"
         if gameBoard.totalRounds > 0 {
             roundLabel.text = "Round:\n\(gameBoard.currentRound) of \(gameBoard.totalRounds)"
@@ -1065,7 +1071,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         guard viewIsLoaded else { return }
 
         let board = gameModel.board
-        let player = board.players[board.currentPlayer]
+        var playerID = board.currentPlayer
+        if let networkController = networkGameController {
+            playerID = networkController.myPlayerID
+        }
+        let player = board.players[playerID]
         let tank = player.tank
         
         azimuthLabel.text = String(format: "%.02fº", tank.azimuth)
@@ -1091,8 +1101,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
 
         if let networkController = networkGameController {
             NSLog("has networkGameController: \(networkController)")
-            NSLog("currentPlayer: \(gameModel.board.currentPlayer), myPlayerID: \(networkGameController?.myPlayerID ?? -1)")
-            if gameModel.board.currentPlayer == networkGameController?.myPlayerID {
+            NSLog("currentPlayer: \(gameModel.board.currentPlayer), myPlayerID: \(networkController.myPlayerID)")
+            if gameModel.board.currentPlayer == networkController.myPlayerID {
                 enableUI()
             } else {
                 disableUI()
