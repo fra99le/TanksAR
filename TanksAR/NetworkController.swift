@@ -97,7 +97,7 @@ class NetworkController : NSObject, MCSessionDelegate, MCBrowserViewControllerDe
             // short circuit sending of local messages
             delegate?.handleMessage(data, from: mcSession.myPeerID)
         } else {
-            // send message to remove recipient
+            // send message to remote recipient
             try? mcSession.send(data, toPeers: [to], with: .reliable)
         }
         NSLog("\(#function) finished")
