@@ -227,6 +227,7 @@ class NetworkedGameController : NetworkClient {
         if isLeader {
             NSLog("\(#function): as leader")
             var message = GameNetworkMessage()
+            message.fromLeader = isLeader
             message.gameModel = gameModel
             broadcastMessage(message)
             playerReady()
@@ -353,15 +354,18 @@ class NetworkedGameController : NetworkClient {
             }
             
             // enable current player if all are ready
-            if allReady {
-                let playerID = viewController.gameModel.board.currentPlayer
-                let playerName = viewController.gameModel.board.players[playerID].name
-                NSLog("enabling \(playerName)")
+            if allReady && isLeader {
+                let enabledID = viewController.gameModel.board.currentPlayer
                 
-                var message = GameNetworkMessage()
-                message.enableUI = true
-                
-                sendMessage(message, to: playerPeerIDs[playerID])
+                for playerID in 0..<viewController.gameModel.board.players.count {
+                    var message = GameNetworkMessage()
+                    message.fromLeader = true
+                    message.enableUI = (playerID == enabledID)
+                    let playerName = viewController.gameModel.board.players[playerID].name
+                    NSLog("leader setting enabled to \(message.enableUI ?? false) for \(playerName)")
+
+                    sendMessage(message, to: playerPeerIDs[playerID])
+                }
             }
         }
         
