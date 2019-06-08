@@ -326,8 +326,10 @@ class NetworkedGameController : NetworkClient {
 
         // handle full game state updates
         if let gameModel = message.gameModel {
-            viewController.gameModel = gameModel
-            viewController.setupDrawer()
+            DispatchQueue.main.async {
+                viewController.gameModel = gameModel
+                viewController.updateDrawer()
+            }
             updateViewController()
             playerReady()
         }
@@ -372,6 +374,7 @@ class NetworkedGameController : NetworkClient {
         if let checkSum = message.checkSum {
             if !isLeader {
                 NSLog("\(#function): client got a checksum \(checkSum), need to verify it!")
+                // see: https://stackoverflow.com/questions/25388747/sha256-in-swift
             }
         }
         
@@ -381,11 +384,13 @@ class NetworkedGameController : NetworkClient {
             
             let playerID = turnInfo.playerID
             if playerID != myPlayerID {
-                gameModel.setTankAim(azimuth: turnInfo.tank.azimuth, altitude: turnInfo.tank.altitude, for: playerID)
-                gameModel.setTankPower(power: turnInfo.tank.velocity, for: playerID)
-                gameModel.board.players[playerID].weaponID = turnInfo.weaponID
-                gameModel.board.players[playerID].weaponSizeID = turnInfo.weaponSizeID
-                gameModel.board.players[playerID].useTargetingComputer = turnInfo.usingComputer
+                DispatchQueue.main.async {
+                    gameModel.setTankAim(azimuth: turnInfo.tank.azimuth, altitude: turnInfo.tank.altitude, for: playerID)
+                    gameModel.setTankPower(power: turnInfo.tank.velocity, for: playerID)
+                    gameModel.board.players[playerID].weaponID = turnInfo.weaponID
+                    gameModel.board.players[playerID].weaponSizeID = turnInfo.weaponSizeID
+                    gameModel.board.players[playerID].useTargetingComputer = turnInfo.usingComputer
+                }
             }
 
             if isLeader && !(message.fromLeader ?? false) {

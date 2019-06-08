@@ -32,6 +32,7 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
     
     var players: [Player] = []
     var nameAccepted: [Bool] = []
+    var playerLocal: [Bool] = []
     var gameConfig: GameConfig = GameConfig()
     
     override func viewDidLoad() {
@@ -142,6 +143,11 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
         for playerID in 0..<players.count {
             let player = players[playerID]
             
+            // Skip non-local players in networked mode
+            if playerLocal[playerID] == false {
+                continue
+            }
+            
             if player.score > minScore && player.ai == nil {
                 // human player got a high score
                 playerNameStack.isHidden = false
@@ -172,7 +178,14 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
         NSLog("Recording scores.")
         var winnerName: String = ""
         var winnerScore: Int64 = Int64.min
-        for player in players {
+        for playerID in 0..<players.count {
+            let player = players[playerID]
+            
+            // Skip non-local players in networked mode
+            if playerLocal[playerID] == false {
+                continue
+            }
+            
             let score = HighScore(name: player.name,
                                   score: player.score,
                                   date: Date(),

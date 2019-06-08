@@ -101,13 +101,18 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             boardDrawer = GameViewTexturedTrigDrawer(sceneView: sceneView, model: gameModel, node: board, numPerSide: 200, tankScale: tankScale)
         }
         boardDrawer.setupLighting()
-        
-        removeTanks()
-        addTanks()
     }
     
     func updateDrawer() {
+        removeTanks()
         boardDrawer.gameModel = gameModel
+        //NSLog("users.count = \(users.count); players.count = \(gameModel.board.players.count)")
+        if users.count != gameModel.board.players.count {
+            users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0, tank: nil),
+                                 count: gameModel.board.players.count)
+            currentUser = gameModel.board.currentPlayer
+        }
+        addTanks()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -128,7 +133,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         }
         
         // start a game
-        removeTanks()
         if !gameModel.gameStarted && !gameModel.gameOver {
             NSLog("\(#function) starting \(gameConfig.numRounds) round game. (gameStarted=\(gameModel.gameStarted))")
             gameModel.startGame(withConfig: gameConfig)
@@ -146,13 +150,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
         }
         boardDrawer.updateBoard()
-        NSLog("users.count = \(users.count); players.count = \(gameModel.board.players.count)")
-        if users.count != gameModel.board.players.count {
-            users = [UserConfig](repeating: UserConfig(scaleFactor: 1.0, rotation: 0.0, tank: nil),
-                                 count: gameModel.board.players.count)
-            currentUser = gameModel.board.currentPlayer
-        }
-        addTanks()
+        updateDrawer()
  
         // set UI to requested state for networked game
         if let _ = networkGameController {
@@ -163,7 +161,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
         }
 
-        updateUI()
+        if let _ = networkGameController {
+            NSLog("Need to wait for board data.")
+            boardDrawer.showMessage("Loading Game...", at: 0, map: gameModel.board.surface)
+        }   else {
+            updateUI()
+        }
 
         placeBoardGesture.require(toFail: backupPlaceBoardGesture)
         
@@ -321,7 +324,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude, for: playerID)
             updateHUD()
             if let networkController = networkGameController {
-                NSLog("\(#function) notifying other players of move via playerAiming()")
+                //NSLog("\(#function) notifying other players of aiming via playerAiming()")
                 networkController.playerAiming()
             }
         } else {
@@ -329,7 +332,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             gameModel.setTankAim(azimuth: newAzimuth, altitude: newAltitude, for: playerID)
             updateHUD()
             if let networkController = networkGameController {
-                NSLog("\(#function) notifying other players of move via playerAiming()")
+                //NSLog("\(#function) notifying other players of in-progress aiming via playerAiming()")
                 networkController.playerAiming()
             }
             gameModel.setTankAim(azimuth: currAzimuth, altitude: currAltitude, for: playerID)
@@ -340,8 +343,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         // find/adjust tank model's aiming
         for playerID in 0..<gameModel.board.players.count {
             let tankNode = boardDrawer.tankNodes[playerID]
-            guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { return }
-            guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { return }
+            guard let turretNode = tankNode.childNode(withName: "turret", recursively: true) else { continue }
+            guard let hingeNode = tankNode.childNode(withName: "barrelHinge", recursively: true) else { continue }
             let newAzimuth = gameModel.board.players[playerID].tank.azimuth
             let newAltitude = gameModel.board.players[playerID].tank.altitude
             turretNode.eulerAngles.y = newAzimuth * (Float.pi/180)
@@ -491,6 +494,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             }
             dest.players = gameModel.board.players
             dest.gameConfig = gameConfig
+            dest.playerLocal = [Bool].init(repeating: true, count: dest.players.count)
+            if let networkController = networkGameController {
+                // set all players to non-local except local one
+                dest.playerLocal = [Bool].init(repeating: false, count: dest.players.count)
+                dest.playerLocal[networkController.myPlayerID] = true
+            }
         }
     }
     
@@ -804,7 +813,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         if roundChanged || gameModel.gameOver {
             NSLog("round change detected, \(humanLeft) humans left")
             roundChanged = false
-            removeTanks()
             if gameModel.gameOver {
                 NSLog("round \(gameModel.board.currentRound) > \(gameModel.board.totalRounds), game over!")
                 gameModel.gameStarted = false
@@ -815,7 +823,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
             currentUser = gameModel.board.currentPlayer
             
             NSLog("Starting round \(gameModel.board.currentRound) of \(gameModel.board.currentRound).")
-            addTanks()
+            updateDrawer()
             
             // save game at start of each new round
             if let saveStateController = saveStateController as? MenuViewController {
