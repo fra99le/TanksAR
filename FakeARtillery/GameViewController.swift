@@ -225,4 +225,8 @@ class GameViewController: UIViewController {
             NSLog("\(#function) uiEnabled=\(uiEnabled)")
         }
     }
+    
+    func updateDrawer() {
+        // does nothing
+    }
 }
