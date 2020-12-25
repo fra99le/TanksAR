@@ -19,6 +19,12 @@ class InstructionsViewController: UIViewController {
         // Do any additional setup after loading the view.
         
         // should load a text file to display in the text area
+        
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .light
+        } else {
+            // Fallback on earlier versions
+        }
     }
 
     override func didReceiveMemoryWarning() {

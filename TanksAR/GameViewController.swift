@@ -86,6 +86,12 @@ class GameViewController: UIViewController, ARSCNViewDelegate, UIGestureRecogniz
         screenDraggingGesture.delegate = self
         
         viewIsLoaded = true
+        
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .light
+        } else {
+            // Fallback on earlier versions
+        }
     }
     
     func setupDrawer() {

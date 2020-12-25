@@ -22,6 +22,12 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         altitudeTextField.delegate = self
         velocityTextField.delegate = self
 
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .light
+        } else {
+            // Fallback on earlier versions
+        }
+        
         updateUI()
     }
 

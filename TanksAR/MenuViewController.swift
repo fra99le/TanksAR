@@ -59,6 +59,12 @@ class MenuViewController: UIViewController {
         gameConfig = loadMenu()
         
         resumeGameButton.isHidden = true
+        
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .light
+        } else {
+            // Fallback on earlier versions
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {

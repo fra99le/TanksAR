@@ -47,6 +47,12 @@ class GameOverViewController: UIViewController, UITextFieldDelegate {
         highScores = HighScoreController()
         playerNameField.delegate = self
         nameAccepted = [Bool](repeating: false, count: players.count)
+        
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .light
+        } else {
+            // Fallback on earlier versions
+        }
     }
 
     override func didReceiveMemoryWarning() {
