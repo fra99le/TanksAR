@@ -61,6 +61,7 @@ class NetworkedGameController : NetworkClient {
     var totalPlayers: Int = 10
     var playersReady: [Bool] = []
     var sequence: Int = 0
+    var myCheckSum: String = "not set yet"
     
     // wrappers for network controller state
     var connectionState: MCSessionState = .notConnected
@@ -229,6 +230,7 @@ class NetworkedGameController : NetworkClient {
             var message = GameNetworkMessage()
             message.fromLeader = isLeader
             message.gameModel = gameModel
+            myCheckSum = gameModel.board.checksum
             broadcastMessage(message)
             playerReady()
         }
@@ -324,12 +326,19 @@ class NetworkedGameController : NetworkClient {
         
         guard let viewController = viewController as? GameViewController else { return }
 
+        // fix number of players, if differant from host
+        if totalPlayers != viewController.gameModel.board.players.count {
+            NSLog("Updating number of players from \(viewController.gameModel.board.players.count) to \(totalPlayers).")
+            viewController.gameModel.board.players = [Player].init(repeating: Player(), count: totalPlayers)
+        }
+        
         // handle full game state updates
         if let gameModel = message.gameModel {
             DispatchQueue.main.async {
                 viewController.gameModel = gameModel
                 viewController.updateDrawer()
             }
+            myCheckSum = gameModel.board.checksum
             updateViewController()
             playerReady()
         }
@@ -372,9 +381,19 @@ class NetworkedGameController : NetworkClient {
         }
         
         if let checkSum = message.checkSum {
-            if !isLeader {
-                NSLog("\(#function): client got a checksum \(checkSum), need to verify it!")
-                // see: https://stackoverflow.com/questions/25388747/sha256-in-swift
+            if isLeader {
+                NSLog("\(#function): client got a checksum \(checkSum), need to verify it against \(myCheckSum)!")
+                if checkSum != myCheckSum {
+                    if let playerID = message.playerID {
+                        NSLog("Player ID \(playerID) is out of sync (\(checkSum) != \(myCheckSum))")
+                        var message = GameNetworkMessage()
+                        message.fromLeader = true
+                        message.gameModel = viewController.gameModel
+                        sendMessage(message, to: playerPeerIDs[playerID])
+                    } else {
+                        NSLog("Checksum message from \(from) missing player ID.")
+                    }
+                }
             }
         }
         
@@ -413,6 +432,13 @@ class NetworkedGameController : NetworkClient {
                 if turnInfo.isFire && playerID == gameModel.board.currentPlayer {
                     NSLog("got valid firing message: \(message)")
                     viewController.launchProjectile()
+                    
+                    // compute checksum of new board state
+                    // see: https://stackoverflow.com/questions/25388747/sha256-in-swift
+                    var checksumMessage = GameNetworkMessage()
+                    checksumMessage.playerID = self.myPlayerID
+                    checksumMessage.checkSum = viewController.gameModel.board.checksum
+                    self.sendMessage(checksumMessage, to: self.leaderPeerID!)
                 }
             }
         }

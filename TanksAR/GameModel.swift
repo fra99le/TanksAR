@@ -12,6 +12,7 @@
 import Foundation
 import UIKit
 import SceneKit
+import CommonCrypto
 
 // Note: when fluid weapons are fired by buried tanks, they jump to the surface, this seems wrong.
 
@@ -158,6 +159,37 @@ struct GameBoard : Codable {
     // game progress
     var totalRounds = 1
     var currentRound = 1
+    
+    var asData: Data {
+        
+        let data = NSMutableData()
+        do {
+            let encoder = PropertyListEncoder()
+            data.append(try encoder.encode(surface.asPNG()))
+            //data.append(try encoder.encode(bedrock.asPNG()))
+            //data.append(try encoder.encode(colors.asPNG()))
+            data.append(Data("\(boardSize)".utf8))
+            data.append(Data("\(windSpeed)".utf8))
+            data.append(Data("\(windDir)".utf8))
+            data.append(Data("\(currentPlayer)".utf8))
+            data.append(Data("\(totalRounds)".utf8))
+            data.append(Data("\(currentRound)".utf8))
+        } catch  {
+            NSLog("Unexpected error: \(error), data is: \(data).")
+        }
+        return Data(data)
+    }
+    
+    var checksum: String {
+        // see: https://stackoverflow.com/questions/25388747/sha256-in-swift
+        // and: https://stackoverflow.com/questions/6228092/how-can-i-compute-a-sha-2-ideally-sha-256-or-sha-512-hash-in-ios
+        var hash = [UInt8](repeating: 0,  count: Int(CC_SHA256_DIGEST_LENGTH))
+        let data = self.asData
+        data.withUnsafeBytes {
+            _ = CC_SHA256($0, CC_LONG(data.count), &hash)
+        }
+        return Data(bytes: hash).base64EncodedString(options: [])
+    }
 }
 
 enum WeaponStyle : String, Codable {
