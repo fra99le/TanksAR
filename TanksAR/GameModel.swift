@@ -12,6 +12,7 @@
 import Foundation
 import UIKit
 import SceneKit
+import CommonCrypto
 
 // Note: when fluid weapons are fired by buried tanks, they jump to the surface, this seems wrong.
 
@@ -158,6 +159,37 @@ struct GameBoard : Codable {
     // game progress
     var totalRounds = 1
     var currentRound = 1
+    
+    var asData: Data {
+        
+        let data = NSMutableData()
+        do {
+            let encoder = PropertyListEncoder()
+            data.append(try encoder.encode(surface.asPNG()))
+            //data.append(try encoder.encode(bedrock.asPNG()))
+            //data.append(try encoder.encode(colors.asPNG()))
+            data.append(Data("\(boardSize)".utf8))
+            data.append(Data("\(windSpeed)".utf8))
+            data.append(Data("\(windDir)".utf8))
+            data.append(Data("\(currentPlayer)".utf8))
+            data.append(Data("\(totalRounds)".utf8))
+            data.append(Data("\(currentRound)".utf8))
+        } catch  {
+            NSLog("Unexpected error: \(error), data is: \(data).")
+        }
+        return Data(data)
+    }
+    
+    var checksum: String {
+        // see: https://stackoverflow.com/questions/25388747/sha256-in-swift
+        // and: https://stackoverflow.com/questions/6228092/how-can-i-compute-a-sha-2-ideally-sha-256-or-sha-512-hash-in-ios
+        var hash = [UInt8](repeating: 0,  count: Int(CC_SHA256_DIGEST_LENGTH))
+        let data = self.asData
+        data.withUnsafeBytes {
+            _ = CC_SHA256($0, CC_LONG(data.count), &hash)
+        }
+        return Data(bytes: hash).base64EncodedString(options: [])
+    }
 }
 
 enum WeaponStyle : String, Codable {
@@ -651,25 +683,63 @@ class GameModel : Codable {
     }
     
     func getTank(forPlayer: Int) -> Tank {
-        return board.players[forPlayer].tank
+        if forPlayer >= 0 {
+            return board.players[forPlayer].tank
+        }
+        return board.players[board.currentPlayer].tank
     }
     
-    func setTankAim(azimuth: Float, altitude: Float) {
+    func setTankAim(azimuth: Float, altitude: Float, for playerID: Int = -1) {
         let rad = azimuth * (Float.pi / 180)
         var cleanAzimuth = atan2(sin(rad),cos(rad)) * (180 / Float.pi)
         if cleanAzimuth < 0 {
             cleanAzimuth = 360 + cleanAzimuth
         }
         cleanAzimuth = Float(Int(cleanAzimuth * 100 + 0.5)) / Float(100)
-        board.players[board.currentPlayer].tank.azimuth = cleanAzimuth
-        board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
+        if playerID >= 0 {
+            board.players[playerID].tank.azimuth = cleanAzimuth
+            board.players[playerID].tank.altitude = max(0,min(altitude,180))
+        } else {
+            board.players[board.currentPlayer].tank.azimuth = cleanAzimuth
+            board.players[board.currentPlayer].tank.altitude = max(0,min(altitude,180))
+        }
         //NSLog("tank for player \(board.currentPlayer) set to \(board.players[board.currentPlayer].tank.azimuth)º,\(board.players[board.currentPlayer].tank.altitude)º")
     }
 
-    func setTankPower(power: Float) {
+    func setTankPower(power: Float, for playerID: Int = -1) {
         guard power >= 0 else { return }
 
-        board.players[board.currentPlayer].tank.velocity = min(power,maxPower)
+        if playerID >= 0 {
+            board.players[playerID].tank.velocity = min(power,maxPower)
+        } else {
+            board.players[board.currentPlayer].tank.velocity = min(power,maxPower)
+        }
+    }
+
+    func muzzleParameters(forPlayer: Int) -> (Vector3, Vector3) {
+        let tank = getTank(forPlayer: forPlayer)
+        let power = tank.velocity
+        let azi = tank.azimuth * (Float.pi/180)
+        let alt = tank.altitude * (Float.pi/180)
+        
+        // compute muzzle velocity components
+        let xVel = -power * sin(azi) * cos(alt)
+        let yVel = -power * cos(azi) * cos(alt)
+        let zVel = power * sin(alt)
+        
+        //NSLog("tank angles: \(tank.azimuth),\(tank.altitude)")
+        let velocity = Vector3(xVel, yVel, zVel)
+        let muzzleVelocity = velocity
+
+        // compute muzzle position
+        let tankHeight: Float = 14.52 // 0.625+0.827 = 1.452 * tankScale
+        let barrelLength: Float = 20
+        var muzzlePosition = tank.position
+        muzzlePosition.x += -sin(azi) * cos(alt) * barrelLength
+        muzzlePosition.y += -cos(azi) * cos(alt) * barrelLength
+        muzzlePosition.z += tankHeight + sin(alt) * barrelLength
+        
+        return (muzzlePosition, muzzleVelocity)
     }
 
     func fire(muzzlePosition: Vector3, muzzleVelocity: Vector3) -> FireResult {

@@ -18,21 +18,56 @@
 		533032A320CF00990014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
 		533032A420CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
 		533032A520CF822F0014A16D /* WeaponsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533032A220CF00990014A16D /* WeaponsViewController.swift */; };
+		533482F321438270007AF6E2 /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F221438270007AF6E2 /* NetworkController.swift */; };
+		533482F521439C2F007AF6E2 /* NetworkedGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F421439C2F007AF6E2 /* NetworkedGameController.swift */; };
+		533482F72144765F007AF6E2 /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
 		533868592118E701002C61E1 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533868582118E701002C61E1 /* Stack.swift */; };
+		533FF764229CB42B00D4B1E7 /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
+		533FF765229CB42B00D4B1E7 /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
+		533FF766229CB42E00D4B1E7 /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
+		533FF767229CB42E00D4B1E7 /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
+		533FF768229CB43800D4B1E7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53EEDB6D20C83C3F00B8B71D /* Main.storyboard */; };
+		533FF769229CB43800D4B1E7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53EEDB6D20C83C3F00B8B71D /* Main.storyboard */; };
+		533FF76A229CB43D00D4B1E7 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9D20C84A3E00B8B71D /* GameModel.swift */; };
+		533FF76B229CB43D00D4B1E7 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9D20C84A3E00B8B71D /* GameModel.swift */; };
+		533FF76E229CB44800D4B1E7 /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
+		533FF76F229CB44800D4B1E7 /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */; };
+		533FF770229CB44B00D4B1E7 /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F221438270007AF6E2 /* NetworkController.swift */; };
+		533FF771229CB44B00D4B1E7 /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F221438270007AF6E2 /* NetworkController.swift */; };
+		533FF773229CB44F00D4B1E7 /* NetworkedGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F421439C2F007AF6E2 /* NetworkedGameController.swift */; };
+		533FF774229CB44F00D4B1E7 /* NetworkedGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F421439C2F007AF6E2 /* NetworkedGameController.swift */; };
 		53522CA820DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
-		53522CA920DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
-		53522CAA20DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */; };
 		53522CAC20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
-		53522CAD20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
-		53522CAE20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */; };
 		53522CB020DCC41B00DDB71B /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
 		53527CE220D1DB36005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		53527CE320D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		53527CE420D1DDAD005F5FFF /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53527CE120D1DB36005F5FFF /* GameOverViewController.swift */; };
 		535DDCA0210F96AB0036E197 /* PriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 535DDC9F210F96AB0036E197 /* PriorityQueue.swift */; };
+		53638B4E229CBA3800B965FA /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
+		53638B4F229CBA3800B965FA /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
+		537F4A4A216A6CC700A6F810 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
 		5396120E20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
 		5396120F20D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
 		5396121020D0CAB7006D0E6C /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
+		53A18578229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
+		53A18579229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
+		53A1857A229DCA7A00EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
+		53A18589229DCBAA00EDF32B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 53A18588229DCBAA00EDF32B /* Assets.xcassets */; };
+		53A1859E229DCCA500EDF32B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18594229DCCA500EDF32B /* AppDelegate.swift */; };
+		53A1859F229DCCA500EDF32B /* NetworkSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18595229DCCA500EDF32B /* NetworkSetupViewController.swift */; };
+		53A185A0229DCCA500EDF32B /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18596229DCCA500EDF32B /* GameViewController.swift */; };
+		53A185A1229DCCA500EDF32B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53A18597229DCCA500EDF32B /* Main.storyboard */; };
+		53A185A2229DCCA500EDF32B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 53A18598229DCCA500EDF32B /* LaunchScreen.storyboard */; };
+		53A185A5229DCCEF00EDF32B /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 537F4A49216A6CC700A6F810 /* GameState.swift */; };
+		53A185A6229DCCEF00EDF32B /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9D20C84A3E00B8B71D /* GameModel.swift */; };
+		53A185A7229DCCEF00EDF32B /* PriorityQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 535DDC9F210F96AB0036E197 /* PriorityQueue.swift */; };
+		53A185A8229DCCEF00EDF32B /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533868582118E701002C61E1 /* Stack.swift */; };
+		53A185A9229DCCEF00EDF32B /* PlayerAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5396120D20D0CAB7006D0E6C /* PlayerAI.swift */; };
+		53A185AA229DCCEF00EDF32B /* NelderMead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5318F3E520D38B4F00377161 /* NelderMead.swift */; };
+		53A185AB229DCCEF00EDF32B /* ImageBuf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5314E47B20C8BFA00070481A /* ImageBuf.swift */; };
+		53A185AC229DCD0200EDF32B /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53A18577229DCA7A00EDF32B /* GameConfig.swift */; };
+		53A185AD229DE10600EDF32B /* NetworkController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F221438270007AF6E2 /* NetworkController.swift */; };
+		53A185AE229DE10900EDF32B /* NetworkedGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533482F421439C2F007AF6E2 /* NetworkedGameController.swift */; };
 		53A633DA2298871F0063B339 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		53A633DB2298871F0063B339 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */; };
 		53A633DC229887380063B339 /* GameViewDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */; };
@@ -79,8 +114,6 @@
 		53EEDB9A20C8420500B8B71D /* InstructionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9920C8420500B8B71D /* InstructionsViewController.swift */; };
 		53EEDB9C20C8421900B8B71D /* ScoresViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9B20C8421900B8B71D /* ScoresViewController.swift */; };
 		53EEDB9E20C84A3E00B8B71D /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9D20C84A3E00B8B71D /* GameModel.swift */; };
-		53EEDB9F20C84A3E00B8B71D /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9D20C84A3E00B8B71D /* GameModel.swift */; };
-		53EEDBA020C84A3E00B8B71D /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53EEDB9D20C84A3E00B8B71D /* GameModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,13 +139,26 @@
 		531E9F0620F7169800BCF617 /* GameViewColoredTrigDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewColoredTrigDrawer.swift; sourceTree = "<group>"; };
 		531E9F0820F716B600BCF617 /* GameViewTexturedTrigDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewTexturedTrigDrawer.swift; sourceTree = "<group>"; };
 		533032A220CF00990014A16D /* WeaponsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponsViewController.swift; sourceTree = "<group>"; };
+		533482F221438270007AF6E2 /* NetworkController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkController.swift; sourceTree = "<group>"; };
+		533482F421439C2F007AF6E2 /* NetworkedGameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkedGameController.swift; sourceTree = "<group>"; };
+		533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSetupViewController.swift; sourceTree = "<group>"; };
 		533868582118E701002C61E1 /* Stack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
 		53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewTrigDrawer.swift; sourceTree = "<group>"; };
 		53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewBlockDrawer.swift; sourceTree = "<group>"; };
 		53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewDrawer.swift; sourceTree = "<group>"; };
 		53527CE120D1DB36005F5FFF /* GameOverViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverViewController.swift; sourceTree = "<group>"; };
 		535DDC9F210F96AB0036E197 /* PriorityQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityQueue.swift; sourceTree = "<group>"; };
+		537F4A49216A6CC700A6F810 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		5396120D20D0CAB7006D0E6C /* PlayerAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerAI.swift; sourceTree = "<group>"; };
+		53A18577229DCA7A00EDF32B /* GameConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
+		53A1857F229DCBAA00EDF32B /* FakeARtillery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FakeARtillery.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		53A18588229DCBAA00EDF32B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		53A18592229DCCA500EDF32B /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		53A18594229DCCA500EDF32B /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		53A18595229DCCA500EDF32B /* NetworkSetupViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkSetupViewController.swift; sourceTree = "<group>"; };
+		53A18596229DCCA500EDF32B /* GameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		53A18597229DCCA500EDF32B /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		53A18598229DCCA500EDF32B /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		53DE0AA420FC80AB00F5077B /* TestGameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestGameModel.swift; sourceTree = "<group>"; };
 		53DE0AA6210306CB00F5077B /* HighScoreController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighScoreController.swift; sourceTree = "<group>"; };
 		53EEDB6420C83C3E00B8B71D /* TanksAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TanksAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -136,6 +182,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		53A1857C229DCBAA00EDF32B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		53EEDB6120C83C3E00B8B71D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -160,12 +213,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		53A18580229DCBAA00EDF32B /* FakeARtillery */ = {
+			isa = PBXGroup;
+			children = (
+				53A18594229DCCA500EDF32B /* AppDelegate.swift */,
+				53A18596229DCCA500EDF32B /* GameViewController.swift */,
+				53A18595229DCCA500EDF32B /* NetworkSetupViewController.swift */,
+				53A18597229DCCA500EDF32B /* Main.storyboard */,
+				53A18592229DCCA500EDF32B /* Info.plist */,
+				53A18588229DCBAA00EDF32B /* Assets.xcassets */,
+				53A18598229DCCA500EDF32B /* LaunchScreen.storyboard */,
+			);
+			path = FakeARtillery;
+			sourceTree = "<group>";
+		};
 		53EEDB5B20C83C3E00B8B71D = {
 			isa = PBXGroup;
 			children = (
 				53EEDB6620C83C3E00B8B71D /* TanksAR */,
 				53EEDB7D20C83C4700B8B71D /* TanksARTests */,
 				53EEDB8820C83C4700B8B71D /* TanksARUITests */,
+				53A18580229DCBAA00EDF32B /* FakeARtillery */,
 				53EEDB6520C83C3E00B8B71D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -176,6 +244,7 @@
 				53EEDB6420C83C3E00B8B71D /* TanksAR.app */,
 				53EEDB7A20C83C4700B8B71D /* TanksARTests.xctest */,
 				53EEDB8520C83C4700B8B71D /* TanksARUITests.xctest */,
+				53A1857F229DCBAA00EDF32B /* FakeARtillery.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -185,6 +254,8 @@
 			children = (
 				53EEDB6720C83C3E00B8B71D /* AppDelegate.swift */,
 				53EEDB6B20C83C3F00B8B71D /* GameViewController.swift */,
+				53A18577229DCA7A00EDF32B /* GameConfig.swift */,
+				537F4A49216A6CC700A6F810 /* GameState.swift */,
 				53522CAF20DCC41B00DDB71B /* GameViewDrawer.swift */,
 				53522CAB20DCC24900DDB71B /* GameViewBlockDrawer.swift */,
 				53522CA720DCA67800DDB71B /* GameViewTrigDrawer.swift */,
@@ -204,6 +275,9 @@
 				5396120D20D0CAB7006D0E6C /* PlayerAI.swift */,
 				5318F3E520D38B4F00377161 /* NelderMead.swift */,
 				5314E47B20C8BFA00070481A /* ImageBuf.swift */,
+				533482F62144765F007AF6E2 /* NetworkSetupViewController.swift */,
+				533482F221438270007AF6E2 /* NetworkController.swift */,
+				533482F421439C2F007AF6E2 /* NetworkedGameController.swift */,
 				53EEDB6920C83C3F00B8B71D /* art.scnassets */,
 				53EEDB7020C83C4600B8B71D /* Assets.xcassets */,
 				53EEDB7220C83C4700B8B71D /* LaunchScreen.storyboard */,
@@ -233,6 +307,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		53A1857E229DCBAA00EDF32B /* FakeARtillery */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 53A1858E229DCBAA00EDF32B /* Build configuration list for PBXNativeTarget "FakeARtillery" */;
+			buildPhases = (
+				53A1857B229DCBAA00EDF32B /* Sources */,
+				53A1857C229DCBAA00EDF32B /* Frameworks */,
+				53A1857D229DCBAA00EDF32B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FakeARtillery;
+			productName = FakeARtillery;
+			productReference = 53A1857F229DCBAA00EDF32B /* FakeARtillery.app */;
+			productType = "com.apple.product-type.application";
+		};
 		53EEDB6320C83C3E00B8B71D /* TanksAR */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 53EEDB8E20C83C4800B8B71D /* Build configuration list for PBXNativeTarget "TanksAR" */;
@@ -292,10 +383,14 @@
 		53EEDB5C20C83C3E00B8B71D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0940;
-				LastUpgradeCheck = 0940;
+				LastSwiftUpdateCheck = 1020;
+				LastUpgradeCheck = 1230;
 				ORGANIZATIONNAME = "Doing Science To Stuff";
 				TargetAttributes = {
+					53A1857E229DCBAA00EDF32B = {
+						CreatedOnToolsVersion = 10.2.1;
+						LastSwiftMigration = 1020;
+					};
 					53EEDB6320C83C3E00B8B71D = {
 						CreatedOnToolsVersion = 9.4;
 					};
@@ -325,11 +420,22 @@
 				53EEDB6320C83C3E00B8B71D /* TanksAR */,
 				53EEDB7920C83C4700B8B71D /* TanksARTests */,
 				53EEDB8420C83C4700B8B71D /* TanksARUITests */,
+				53A1857E229DCBAA00EDF32B /* FakeARtillery */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		53A1857D229DCBAA00EDF32B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				53A185A1229DCCA500EDF32B /* Main.storyboard in Resources */,
+				53A185A2229DCCA500EDF32B /* LaunchScreen.storyboard in Resources */,
+				53A18589229DCBAA00EDF32B /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		53EEDB6220C83C3E00B8B71D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -345,10 +451,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				53E761C6229CF0D80053FBE8 /* Main.storyboard in Resources */,
-				53E761CC229CF0F40053FBE8 /* LaunchScreen.storyboard in Resources */,
-				53E761CA229CF0EF0053FBE8 /* Assets.xcassets in Resources */,
-				53E761C8229CF0EA0053FBE8 /* art.scnassets in Resources */,
+				533FF768229CB43800D4B1E7 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,16 +459,33 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				53E761C7229CF0D90053FBE8 /* Main.storyboard in Resources */,
-				53E761CD229CF0F40053FBE8 /* LaunchScreen.storyboard in Resources */,
-				53E761CB229CF0EF0053FBE8 /* Assets.xcassets in Resources */,
-				53E761C9229CF0EB0053FBE8 /* art.scnassets in Resources */,
+				533FF769229CB43800D4B1E7 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		53A1857B229DCBAA00EDF32B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				53A185AD229DE10600EDF32B /* NetworkController.swift in Sources */,
+				53A185A9229DCCEF00EDF32B /* PlayerAI.swift in Sources */,
+				53A185AC229DCD0200EDF32B /* GameConfig.swift in Sources */,
+				53A185A0229DCCA500EDF32B /* GameViewController.swift in Sources */,
+				53A185AE229DE10900EDF32B /* NetworkedGameController.swift in Sources */,
+				53A185AB229DCCEF00EDF32B /* ImageBuf.swift in Sources */,
+				53A185A6229DCCEF00EDF32B /* GameModel.swift in Sources */,
+				53A1859E229DCCA500EDF32B /* AppDelegate.swift in Sources */,
+				53A185AA229DCCEF00EDF32B /* NelderMead.swift in Sources */,
+				53A185A8229DCCEF00EDF32B /* Stack.swift in Sources */,
+				53A1859F229DCCA500EDF32B /* NetworkSetupViewController.swift in Sources */,
+				53A185A5229DCCEF00EDF32B /* GameState.swift in Sources */,
+				53A185A7229DCCEF00EDF32B /* PriorityQueue.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		53EEDB6020C83C3E00B8B71D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -373,11 +493,15 @@
 				531E9F0920F716B600BCF617 /* GameViewTexturedTrigDrawer.swift in Sources */,
 				5314E47C20C8BFA00070481A /* ImageBuf.swift in Sources */,
 				53EEDB6C20C83C3F00B8B71D /* GameViewController.swift in Sources */,
+				533482F521439C2F007AF6E2 /* NetworkedGameController.swift in Sources */,
+				533482F72144765F007AF6E2 /* NetworkSetupViewController.swift in Sources */,
 				53522CA820DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */,
 				535DDCA0210F96AB0036E197 /* PriorityQueue.swift in Sources */,
+				533482F321438270007AF6E2 /* NetworkController.swift in Sources */,
 				533032A320CF00990014A16D /* WeaponsViewController.swift in Sources */,
 				531E9F0720F7169800BCF617 /* GameViewColoredTrigDrawer.swift in Sources */,
 				5396120E20D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
+				53A18578229DCA7A00EDF32B /* GameConfig.swift in Sources */,
 				53527CE220D1DB36005F5FFF /* GameOverViewController.swift in Sources */,
 				53EEDB9C20C8421900B8B71D /* ScoresViewController.swift in Sources */,
 				53522CAC20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
@@ -388,6 +512,7 @@
 				53EEDB6820C83C3E00B8B71D /* AppDelegate.swift in Sources */,
 				533868592118E701002C61E1 /* Stack.swift in Sources */,
 				53EEDB9E20C84A3E00B8B71D /* GameModel.swift in Sources */,
+				537F4A4A216A6CC700A6F810 /* GameState.swift in Sources */,
 				5318F3E620D38B4F00377161 /* NelderMead.swift in Sources */,
 				53522CB020DCC41B00DDB71B /* GameViewDrawer.swift in Sources */,
 			);
@@ -400,14 +525,18 @@
 				53A633DA2298871F0063B339 /* GameViewController.swift in Sources */,
 				53A633E82298875B0063B339 /* InstructionsViewController.swift in Sources */,
 				5396120F20D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
+				533FF766229CB42E00D4B1E7 /* GameViewTrigDrawer.swift in Sources */,
+				533FF76E229CB44800D4B1E7 /* NetworkSetupViewController.swift in Sources */,
 				53EEDB7F20C83C4700B8B71D /* TanksARTests.swift in Sources */,
+				533FF76A229CB43D00D4B1E7 /* GameModel.swift in Sources */,
+				533FF773229CB44F00D4B1E7 /* NetworkedGameController.swift in Sources */,
 				53A633E6229887570063B339 /* ScoresViewController.swift in Sources */,
+				533FF770229CB44B00D4B1E7 /* NetworkController.swift in Sources */,
+				533FF764229CB42B00D4B1E7 /* GameViewBlockDrawer.swift in Sources */,
 				53A633DC229887380063B339 /* GameViewDrawer.swift in Sources */,
 				53A633DE229887450063B339 /* Stack.swift in Sources */,
-				53522CAD20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
-				53EEDB9F20C84A3E00B8B71D /* GameModel.swift in Sources */,
+				53638B4E229CBA3800B965FA /* GameState.swift in Sources */,
 				5318F3E720D38B4F00377161 /* NelderMead.swift in Sources */,
-				53522CA920DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */,
 				53A633EC229887650063B339 /* GameViewTexturedTrigDrawer.swift in Sources */,
 				53A633E4229887540063B339 /* HighScoreController.swift in Sources */,
 				53527CE320D1DDAD005F5FFF /* GameOverViewController.swift in Sources */,
@@ -416,6 +545,7 @@
 				533032A420CF822F0014A16D /* WeaponsViewController.swift in Sources */,
 				5314E47D20C8C4B20070481A /* ImageBuf.swift in Sources */,
 				53A633F4229889140063B339 /* AppDelegate.swift in Sources */,
+				53A18579229DCA7A00EDF32B /* GameConfig.swift in Sources */,
 				53A633E0229887490063B339 /* PriorityQueue.swift in Sources */,
 				53A633E22298874D0063B339 /* TestGameModel.swift in Sources */,
 			);
@@ -428,14 +558,18 @@
 				53A633DB2298871F0063B339 /* GameViewController.swift in Sources */,
 				53A633E92298875C0063B339 /* InstructionsViewController.swift in Sources */,
 				5396121020D0CAB7006D0E6C /* PlayerAI.swift in Sources */,
+				533FF767229CB42E00D4B1E7 /* GameViewTrigDrawer.swift in Sources */,
+				533FF76F229CB44800D4B1E7 /* NetworkSetupViewController.swift in Sources */,
 				53EEDB8A20C83C4700B8B71D /* TanksARUITests.swift in Sources */,
+				533FF76B229CB43D00D4B1E7 /* GameModel.swift in Sources */,
+				533FF774229CB44F00D4B1E7 /* NetworkedGameController.swift in Sources */,
 				53A633E7229887580063B339 /* ScoresViewController.swift in Sources */,
+				533FF771229CB44B00D4B1E7 /* NetworkController.swift in Sources */,
+				533FF765229CB42B00D4B1E7 /* GameViewBlockDrawer.swift in Sources */,
 				53A633DD229887380063B339 /* GameViewDrawer.swift in Sources */,
 				53A633DF229887460063B339 /* Stack.swift in Sources */,
-				53522CAE20DCC24900DDB71B /* GameViewBlockDrawer.swift in Sources */,
-				53EEDBA020C84A3E00B8B71D /* GameModel.swift in Sources */,
+				53638B4F229CBA3800B965FA /* GameState.swift in Sources */,
 				5318F3E820D38B4F00377161 /* NelderMead.swift in Sources */,
-				53522CAA20DCA67800DDB71B /* GameViewTrigDrawer.swift in Sources */,
 				53A633ED229887660063B339 /* GameViewTexturedTrigDrawer.swift in Sources */,
 				53A633E5229887550063B339 /* HighScoreController.swift in Sources */,
 				53527CE420D1DDAD005F5FFF /* GameOverViewController.swift in Sources */,
@@ -444,6 +578,7 @@
 				533032A520CF822F0014A16D /* WeaponsViewController.swift in Sources */,
 				5314E47E20C8C4B20070481A /* ImageBuf.swift in Sources */,
 				53A633F5229889140063B339 /* AppDelegate.swift in Sources */,
+				53A1857A229DCA7A00EDF32B /* GameConfig.swift in Sources */,
 				53A633E1229887490063B339 /* PriorityQueue.swift in Sources */,
 				53A633E32298874D0063B339 /* TestGameModel.swift in Sources */,
 			);
@@ -484,6 +619,50 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		53A1858F229DCBAA00EDF32B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = N988N5HFV9;
+				INFOPLIST_FILE = FakeARtillery/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.DoingScienceToStuff.FakeARtillery;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		53A18590229DCBAA00EDF32B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = N988N5HFV9;
+				INFOPLIST_FILE = FakeARtillery/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.DoingScienceToStuff.FakeARtillery;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		53EEDB8C20C83C4800B8B71D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -510,6 +689,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -535,7 +715,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -570,6 +750,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -589,7 +770,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -606,6 +787,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N988N5HFV9;
 				INFOPLIST_FILE = TanksAR/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -626,6 +808,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N988N5HFV9;
 				INFOPLIST_FILE = TanksAR/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -731,6 +914,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		53A1858E229DCBAA00EDF32B /* Build configuration list for PBXNativeTarget "FakeARtillery" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				53A1858F229DCBAA00EDF32B /* Debug */,
+				53A18590229DCBAA00EDF32B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		53EEDB5F20C83C3E00B8B71D /* Build configuration list for PBXProject "TanksAR" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

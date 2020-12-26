@@ -14,37 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "53EEDB6320C83C3E00B8B71D"
-               BuildableName = "TanksAR.app"
-               BlueprintName = "TanksAR"
-               ReferencedContainer = "container:TanksAR.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "53EEDB7920C83C4700B8B71D"
-               BuildableName = "TanksARTests.xctest"
-               BlueprintName = "TanksARTests"
-               ReferencedContainer = "container:TanksAR.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "53EEDB8420C83C4700B8B71D"
-               BuildableName = "TanksARUITests.xctest"
-               BlueprintName = "TanksARUITests"
+               BlueprintIdentifier = "53A1857E229DCBAA00EDF32B"
+               BuildableName = "FakeARtillery.app"
+               BlueprintName = "FakeARtillery"
                ReferencedContainer = "container:TanksAR.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -58,33 +30,13 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "53EEDB6320C83C3E00B8B71D"
-            BuildableName = "TanksAR.app"
-            BlueprintName = "TanksAR"
+            BlueprintIdentifier = "53A1857E229DCBAA00EDF32B"
+            BuildableName = "FakeARtillery.app"
+            BlueprintName = "FakeARtillery"
             ReferencedContainer = "container:TanksAR.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "53EEDB7920C83C4700B8B71D"
-               BuildableName = "TanksARTests.xctest"
-               BlueprintName = "TanksARTests"
-               ReferencedContainer = "container:TanksAR.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "53EEDB8420C83C4700B8B71D"
-               BuildableName = "TanksARUITests.xctest"
-               BlueprintName = "TanksARUITests"
-               ReferencedContainer = "container:TanksAR.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -101,9 +53,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "53EEDB6320C83C3E00B8B71D"
-            BuildableName = "TanksAR.app"
-            BlueprintName = "TanksAR"
+            BlueprintIdentifier = "53A1857E229DCBAA00EDF32B"
+            BuildableName = "FakeARtillery.app"
+            BlueprintName = "FakeARtillery"
             ReferencedContainer = "container:TanksAR.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -118,9 +70,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "53EEDB6320C83C3E00B8B71D"
-            BuildableName = "TanksAR.app"
-            BlueprintName = "TanksAR"
+            BlueprintIdentifier = "53A1857E229DCBAA00EDF32B"
+            BuildableName = "FakeARtillery.app"
+            BlueprintName = "FakeARtillery"
             ReferencedContainer = "container:TanksAR.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

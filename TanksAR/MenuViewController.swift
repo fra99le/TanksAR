@@ -11,11 +11,6 @@
 
 import UIKit
 
-struct GameState : Codable {
-    var model : GameModel
-    var config : GameConfig
-}
-
 // Note: different difficulty settings should be added
 
 class MenuViewController: UIViewController {
@@ -64,6 +59,12 @@ class MenuViewController: UIViewController {
         gameConfig = loadMenu()
         
         resumeGameButton.isHidden = true
+        
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .light
+        } else {
+            // Fallback on earlier versions
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -109,7 +110,7 @@ class MenuViewController: UIViewController {
                 dest.gameModel = (self.gameState?.model)!
                 self.gameState = nil
             } else if segue.identifier == "startGame" {
-                NSLog("\(#function) starting \(dest.gameConfig.numRounds) round game with \(dest.gameConfig.numHumans) humans and \(dest.gameConfig.numAIs) Als.")
+                NSLog("\(#function) starting \(gameConfig.numRounds) round game with \(gameConfig.numHumans) humans and \(gameConfig.numAIs) Als.")
                 dest.gameConfig = gameConfig;
                 dest.gameModel = GameModel()
                 //dest.gameModel = TestGameModel()    // for debugging
@@ -118,6 +119,13 @@ class MenuViewController: UIViewController {
                 NSLog("Unknown segue identifier: \(segue.identifier!)")
             }
             self.gameState = nil
+        }
+        
+        if let dest = segue.destination as? NetworkSetupViewController {
+            NSLog("\(#function) starting \(gameConfig.numRounds) round networked game with \(gameConfig.numHumans) humans and \(gameConfig.numAIs) Als.")
+            dest.gameState = GameState(model: GameModel(), config: gameConfig)
+            //dest.gameState!.model = TestGameModel()    // for debugging
+            dest.gameState!.model.gameOver = false
         }
     }
     
@@ -131,9 +139,9 @@ class MenuViewController: UIViewController {
     @IBOutlet weak var roundsStepper: UIStepper!
 
     @IBOutlet weak var modeButton: UIButton!
+    @IBOutlet weak var networkGameSwitch: UISwitch!
     @IBOutlet weak var playGameButton: UIButton!
     @IBOutlet weak var resumeGameButton: UIButton!
-    
     
     @IBAction func humansStepperTapped(_ sender: UIStepper) {
         gameConfig.numHumans = Int(sender.value)
@@ -151,6 +159,11 @@ class MenuViewController: UIViewController {
         updateUI()
     }
     
+    @IBAction func networkGameSwitchToggled(_ sender: UISwitch) {
+        gameConfig.networked = sender.isOn
+        updateUI()
+    }
+    
     @IBAction func playGameTapped(_ sender: UIButton) {
         // check for in-progress game
         // present an alert if one is found
@@ -164,9 +177,18 @@ class MenuViewController: UIViewController {
             }))
             alert.addAction(UIAlertAction(title: NSLocalizedString("Start New Game", comment: "Default action"), style: .default, handler: { _ in
                 NSLog("Starting new game!")
-                self.performSegue(withIdentifier: "startGame", sender: nil)
+                self.startGame()
             }))
             self.present(alert, animated: true, completion: nil)
+        } else {
+            startGame()
+        }
+    }
+    
+    func startGame() {
+        NSLog("\(#function)")
+        if networkGameSwitch.isOn {
+            performSegue(withIdentifier: "startNetworkGame", sender: nil)
         } else {
             performSegue(withIdentifier: "startGame", sender: nil)
         }
@@ -190,13 +212,12 @@ class MenuViewController: UIViewController {
     func updateUI() {
         saveMenu()
 
+        //read value from UI elements
         humansStepper.value = Double(gameConfig.numHumans)
         aisStepper.value = Double(gameConfig.numAIs)
         roundsStepper.value = Double(gameConfig.numRounds)
         
-        humansNumLabel.text = "\(gameConfig.numHumans)"
-        aisNumLabel.text = "\(gameConfig.numAIs)"
-        roundsNumLabel.text = "\(gameConfig.numRounds)"
+        // apply sanity checks
         eliminationLabel.isHidden = true
         humansStepper.minimumValue = 0
         aisStepper.minimumValue = 0
@@ -207,12 +228,27 @@ class MenuViewController: UIViewController {
             aisStepper.minimumValue = 1
             if gameConfig.numHumans < 1 {
                 gameConfig.numHumans = 1
-                humansNumLabel.text = "1"
             }
             if gameConfig.numAIs < 1 {
                 gameConfig.numAIs = 1
-                aisNumLabel.text = "1"
             }
+        }
+        if gameConfig.numHumans + gameConfig.numAIs <= 2 {
+            humansStepper.minimumValue = Double(gameConfig.numHumans)
+            aisStepper.minimumValue = Double(gameConfig.numAIs)
+        }
+        
+        // update labels
+        humansNumLabel.text = "\(gameConfig.numHumans)"
+        aisNumLabel.text = "\(gameConfig.numAIs)"
+        roundsNumLabel.text = "\(gameConfig.numRounds)"
+
+        if gameConfig.numHumans < 2 {
+            networkGameSwitch.isOn = false
+            networkGameSwitch.isEnabled = false
+        } else {
+            networkGameSwitch.isOn = gameConfig.networked
+            networkGameSwitch.isEnabled = true
         }
         
         var modeString = "Unknown"

@@ -250,12 +250,56 @@ class GameViewDrawer {
         return currTime
     }
     
+    func showMessage(_ message: String, at: CFTimeInterval, map: ImageBuf) {
+        // create message and add it to board
+        let textGeometry = SCNText(string: message, extrusionDepth: 2)
+        textGeometry.alignmentMode = kCAAlignmentCenter
+        let msgNode = SCNNode(geometry: textGeometry)
+        let (min: boundingMin, max: boundingMax) = msgNode.boundingBox
+        NSLog("bounding box: \(boundingMin) -> \(boundingMax)")
+        msgNode.position = SCNVector3( -(boundingMax.x+boundingMin.x)/2,
+                                       0,
+                                       -(boundingMax.z+boundingMin.z)/2 )
+        msgNode.geometry?.firstMaterial?.diffuse.contents = UIColor.cyan
+        
+        // find highest point on map
+        var maxElevation: Float = -1
+        for j in 0..<map.height {
+            for i in 0..<map.width {
+                let elevation = gameModel.getElevation(fromMap: map, longitude: i, latitude: j)
+                maxElevation = max(elevation, maxElevation)
+            }
+        }
+        
+        let spinNode = SCNNode()
+        spinNode.position = fromModelSpace( Vector3(Float(gameModel.board.boardSize)/2,
+                                                    Float(gameModel.board.boardSize)/2,
+                                                    maxElevation+10) )
+        spinNode.scale = SCNVector3(8,8,8)
+        spinNode.isHidden = true
+
+        spinNode.addChildNode(msgNode)
+        board.addChildNode(spinNode)
+        
+        // animate message
+        let actions = SCNAction.sequence([.wait(duration: at),
+                                          .scale(to: 0, duration: 0),
+                                          .unhide(),
+                                          .scale(to: 8, duration: 1),
+                                          .rotateBy(x: 0, y: -CGFloat(Float.pi * 4), z: 0, duration: roundResultTime-2),
+                                          .scale(to: 0, duration: 1),
+                                          .hide(),
+                                          .removeFromParentNode()])
+        spinNode.runAction(actions)
+    }
+    
     func animateRoundResult(fireResult: FireResult, at: CFTimeInterval) -> CFTimeInterval {
         if !fireResult.newRound {
             // nothing to animate
             return at
         }
         
+        // Message dispaying code should be moved to a separate function.
         var currTime = at
         var message = "Round Ended"
         var winner = "Unknown"
@@ -292,45 +336,7 @@ class GameViewDrawer {
         }
         NSLog("round transition messages is: \(message)")
         
-        // create message and add it to board
-        let textGeometry = SCNText(string: message, extrusionDepth: 2)
-        textGeometry.alignmentMode = kCAAlignmentCenter
-        let msgNode = SCNNode(geometry: textGeometry)
-        let (min: boundingMin, max: boundingMax) = msgNode.boundingBox
-        NSLog("bounding box: \(boundingMin) -> \(boundingMax)")
-        msgNode.position = SCNVector3( -(boundingMax.x+boundingMin.x)/2,
-                                       0,
-                                       -(boundingMax.z+boundingMin.z)/2 )
-        msgNode.geometry?.firstMaterial?.diffuse.contents = UIColor.cyan
-        
-        // find highest point on map
-        var maxElevation: Float = -1
-        for j in 0..<1025 {
-            for i in 0..<1025 {
-                let elevation = gameModel.getElevation(fromMap: fireResult.final, longitude: i, latitude: j)
-                maxElevation = max(elevation, maxElevation)
-            }
-        }
-        
-        let spinNode = SCNNode()
-        spinNode.position = fromModelSpace( Vector3(Float(gameModel.board.boardSize)/2,
-                                                    Float(gameModel.board.boardSize)/2,
-                                                    maxElevation+10) )
-        spinNode.scale = SCNVector3(8,8,8)
-        spinNode.isHidden = true
-
-        spinNode.addChildNode(msgNode)
-        board.addChildNode(spinNode)
-        
-        // animate message
-        let actions = SCNAction.sequence([.wait(duration: currTime),
-                                          .scale(to: 0, duration: 0),
-                                          .unhide(),
-                                          .scale(to: 8, duration: 1),
-                                          .rotateBy(x: 0, y: -CGFloat(Float.pi * 4), z: 0, duration: roundResultTime-2),
-                                          .scale(to: 0, duration: 1),
-                                          .hide()])
-        spinNode.runAction(actions)
+        showMessage(message, at: currTime, map: fireResult.final)
         
         currTime += roundResultTime
         NSLog("round transition ends at time \(currTime).")

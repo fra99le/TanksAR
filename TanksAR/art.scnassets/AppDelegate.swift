@@ -3,11 +3,8 @@
 //  TanksAR
 //
 //  Created by Bryan Franklin on 6/6/18.
-//  Copyright © 2018-2019 Doing Science To Stuff. All rights reserved.
+//  Copyright © 2018 Doing Science To Stuff. All rights reserved.
 //
-//   This Source Code Form is subject to the terms of the Mozilla Public
-//   License, v. 2.0. If a copy of the MPL was not distributed with this
-//   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import UIKit
 
@@ -16,9 +13,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var saveController: UIViewController? = nil
-    var gameController: UIViewController? = nil
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         return true
     }
@@ -26,10 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
-        NSLog("\(#function)")
-        if let gameController = gameController as? GameViewController {
-            gameController.unplaceBoard()
-        }
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -37,9 +29,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
         
         NSLog("\(#function)")
-        if let gameController = gameController as? GameViewController {
-            gameController.unplaceBoard()
-        }
         if let saveController = saveController as? MenuViewController {
             saveController.saveStateFile()
         }
