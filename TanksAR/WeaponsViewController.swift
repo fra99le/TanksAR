@@ -185,7 +185,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
         NSLog("\(#function) called")
         guard let model = gameModel else { return }
         let board = model.board
-        var players = board.players
+        let players = board.players
 
         // update weapon id for player
         let weaponID = Int(sender.value)
@@ -219,7 +219,7 @@ class WeaponsViewController: UIViewController, UITextFieldDelegate {
     func updateUI() {
         guard let model = gameModel else { return }
         let board = model.board
-        var players = board.players
+        let players = board.players
         let playerID = board.currentPlayer
         let player = players[playerID]
         let tank = player.tank
