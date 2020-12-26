@@ -20,8 +20,8 @@ struct HighScore : Codable {
 }
 
 class HighScoreController : Codable {
-    let maxScores = 1000
-    let maxShown = 10
+    var maxScores = 1000
+    var maxShown = 10
     var scores: [HighScore] = []
     
     init() {

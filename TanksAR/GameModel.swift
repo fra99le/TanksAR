@@ -250,14 +250,14 @@ struct FireResult {
 class GameModel : Codable {
     // game board
     var board: GameBoard = GameBoard()
-    let tankSize: Float = 25
-    let maxPower: Float = 250
-    let maxWindSpeed: Float = 20  // up to ~45 mph
-    let elevationScale: Float = 2.0
+    var tankSize: Float = 25
+    var maxPower: Float = 250
+    var maxWindSpeed: Float = 20  // up to ~45 mph
+    var elevationScale: Float = 2.0
     var gameStarted: Bool = false
     var gameOver: Bool = false
-    let gravity = Float(-9.80665)
-    let computerCost = 2000
+    var gravity = Float(-9.80665)
+    var computerCost = 2000
     
     var weaponsList = [
         // Note: Weapon sizes should have descriptions that can be shown in the weapon selection interface
@@ -1536,7 +1536,7 @@ class GameModel : Codable {
 
         var weaponID = player.weaponID
         var weaponSizeID = player.weaponSizeID
-        var weapon = weaponsList[weaponID]
+        let weapon = weaponsList[weaponID]
         
         while weaponSizeID > 0 && weapon.sizes[weaponSizeID].cost > (score + credit) {
             NSLog("Player can no longer afford current weapon size.")
